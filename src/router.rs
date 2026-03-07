@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::{navbar::Navbar, views::about::About};
+use crate::{
+    navbar::Navbar,
+    views::{about::About, people::listing::*},
+};
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
@@ -8,4 +11,12 @@ pub enum Route {
     #[route("/")]
     About {},
 
+    #[route("/liked")]
+    ListOfLikedProfiles {},
+
+    #[route("/disliked")]
+    ListOfDislikedProfiles {},
+
+    #[route("/swipe")]
+    ListOfUncheckedProfiles {},
 }
