@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --background: #eee;
+  --foreground: #111;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --breakpoint-3xl: 120rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111;
+    --foreground: #eee;
+  }
+}
+
+body {
+  @apply text-foreground bg-background;
+}
+
+h1 {
+  @apply text-3xl m-2 mr-0;
+}
+
+html,
+body,
+body > div {
+  @apply h-full overflow-scroll;
+}
+
+body > div {
+  @apply flex flex-col;
+}

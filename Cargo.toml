@@ -1,0 +1,18 @@
+[package]
+name = "cringe"
+version = "0.1.0"
+authors = ["Tamás Tóth <tomjtoth@gmail.com>"]
+edition = "2021"
+
+# See more keys and their definit^ions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = { version = "0.4.44", features = ["serde"] }
+dioxus = { version = "0.7.1", features = ["router", "fullstack"] }
+serde = { version = "1.0", features = ["derive"], optional = false }
+serde_yaml = "0.9"
+
+[features]
+default = ["web", "server"]
+web = ["dioxus/web"]
+server = ["dioxus/server"]
