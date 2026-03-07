@@ -9,10 +9,19 @@ edition = "2021"
 [dependencies]
 chrono = { version = "0.4.44", features = ["serde"] }
 dioxus = { version = "0.7.1", features = ["router", "fullstack"] }
-serde = { version = "1.0", features = ["derive"], optional = false }
-serde_yaml = "0.9"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = { version = "0.9", optional = true }
+wasm-bindgen = { version = "0.2.114", optional = true }
+web-sys = { version = "0.3.91", optional = true, features = [
+    "Geolocation",
+    "GeolocationCoordinates",
+    "GeolocationPosition",
+    "GeolocationPositionError",
+    "Navigator",
+    "Window",
+] }
 
 [features]
-default = ["web", "server"]
-web = ["dioxus/web"]
-server = ["dioxus/server"]
+default = ["web"]
+web = ["dioxus/web", "dep:web-sys", "dep:wasm-bindgen"]
+server = ["dioxus/server", "dep:serde_yaml"]

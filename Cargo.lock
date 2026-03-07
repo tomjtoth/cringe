@@ -498,6 +498,8 @@ dependencies = [
  "dioxus",
  "serde",
  "serde_yaml",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
