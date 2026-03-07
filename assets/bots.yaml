@@ -1,15 +1,23 @@
 - id: sw_vader
   name: Darth Vader
   gender: male
-  born: 1950-12-24
+  born: 1935-07-01
   height: 198
   occupation: Sith Lord
+  current_city: Coruscant
+  from_city: Mos Espa, Tatooine 🪐
+  location:
+    # some Picnic near city center
+    long: 60.16939565786756
+    lat: 24.937965044432058
+
   children:
     has: 2
     wants: 0
 
   bio: >
-    I'm into choking and black leathery stuff. 
+    I used to do modeling as a side business, but my accident ruined that career.
+    I'm into choking 🫶 and black leathery stuff. 
     Will you join me (and the dark side)?
     My lightsaber is long and red.
 
@@ -18,13 +26,24 @@
       prompt: this could be you
     - https://cdn.artphotolimited.com/images/6718bf5f258c849397f6133d/1000x1000/star-wars-darth-vader-close-up.jpg
     - https://static.wikia.nocookie.net/star-wars-canon-extended/images/e/ed/Vader_Max.jpg/revision/latest/scale-to-width-down/376?cb=20181119183701
+    - url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
+      prompt: without my helmet
 
 - id: sw_solo
   name: Han Solo
   gender: male
-  born: 1950-12-24
+  born: 1942-07-13
   height: 185
   occupation: Smuggler
+
+  # ~ Tikkurin Hesburger
+  location:
+    lon: 60.2922284791505
+    lat: 25.041045406539975
+
+  city: Coruscant
+  from: Mos Espa, Tatooine 🪐
+
   children:
     wants: 0
 
@@ -41,9 +60,15 @@
 - id: sw_leia
   name: Leia
   gender: female
-  born: 1950-12-24
+  born: 1956-10-21
   height: 155
   occupation: Princess
+
+  # Mall of Tripla
+  location:
+    lon: 60.19836313262283
+    lat: 24.930237843971767
+
   children:
     has: 0
     wants: -1
@@ -56,7 +81,20 @@
     - https://static.wikia.nocookie.net/fictupedia/images/1/1d/Leia-princess-leia-organa-solo-skywalker-9301321-576-1010.jpg/revision/latest?cb=20170120065805
     - https://images.photowall.com/products/62286/princess-leia-carrie-fisher.jpg?h=699&q=85
     - https://i.guim.co.uk/img/media/35b5b0444e45c050e7247d3950b81f4e01d3a0a1/0_0_2062_1237/master/2062.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=658c66facb1b40eb5abd91a84226d144
-# - id: santa
-#   name: Santa
-#   gender: male
-#   occupation:
+
+- id: santa
+  name: Santa 🎅
+  gender: male
+  occupation: Burglar
+  city: Santa Claus Village
+  # Santa Claus village
+  location:
+    lon: 66.54402909844879
+    lat: 25.84736393256391
+
+  bio: |
+    If loving this is wrong, I don't wanna be right: lapset, piparit & maito.
+
+  pictures:
+    - https://parade.com/.image/c_fill,w_1200,h_1200,g_faces:center/MTkwNTgxMDYyNDUyNTIwODI4/santa-facts-jpg.jpg
+    - https://www.hollywoodreporter.com/wp-content/uploads/2022/11/163413_4279r_9caf121d-copy.jpg?w=1000&h=667&crop=1
