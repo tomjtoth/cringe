@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 mod models;
+mod navbar;
 mod router;
+mod views;
+
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 fn main() {
     dioxus::launch(App);
