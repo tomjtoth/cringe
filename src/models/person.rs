@@ -48,10 +48,3 @@ impl Person {
         today.years_since(self.born).unwrap()
     }
 }
-
-#[cfg(any(feature = "server"))]
-pub fn load_people_from_yaml() -> Result<Vec<Person>, Box<dyn std::error::Error>> {
-    let yaml_content = std::fs::read_to_string("assets/bots.yaml")?;
-    let people = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
-    Ok(people)
-}
