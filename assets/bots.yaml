@@ -1,0 +1,62 @@
+- id: sw_vader
+  name: Darth Vader
+  gender: male
+  born: 1950-12-24
+  height: 198
+  occupation: Sith Lord
+  children:
+    has: 2
+    wants: 0
+
+  bio: >
+    I'm into choking and black leathery stuff. 
+    Will you join me (and the dark side)?
+    My lightsaber is long and red.
+
+  pictures:
+    - url: vader/this-could-be-you.jpg
+      prompt: this could be you
+    - https://cdn.artphotolimited.com/images/6718bf5f258c849397f6133d/1000x1000/star-wars-darth-vader-close-up.jpg
+    - https://static.wikia.nocookie.net/star-wars-canon-extended/images/e/ed/Vader_Max.jpg/revision/latest/scale-to-width-down/376?cb=20181119183701
+
+- id: sw_solo
+  name: Han Solo
+  gender: male
+  born: 1950-12-24
+  height: 185
+  occupation: Smuggler
+  children:
+    wants: 0
+
+  bio: |
+    I'm more handsome, but shorter and less hairy than my bro (228cm) 🐵 Double date us? 😎
+
+    Just a few emojis I can relate to: 🔫🚀🌚🕺
+
+  pictures:
+    - https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/86573/86126/lifesize_cardboard_cutout_of_Han_Solo_buy_Star_Wars_cutouts_at_starstills__25679__84175.1394515397.jpg?c=2
+    - https://lumiere-a.akamaihd.net/v1/images/han-solo-main_a4c8ff79.jpeg?region=0%2C0%2C1920%2C960
+    - https://i.etsystatic.com/17350622/r/il/e2f58e/5552510342/il_fullxfull.5552510342_of11.jpg
+
+- id: sw_leia
+  name: Leia
+  gender: female
+  born: 1950-12-24
+  height: 155
+  occupation: Princess
+  children:
+    has: 0
+    wants: -1
+
+  bio: >
+    Rebel at heart, I hit the gym every day and eat Stormtroopers for breakfast.
+    Gungans with long tounge HMU! 🥵
+
+  pictures:
+    - https://static.wikia.nocookie.net/fictupedia/images/1/1d/Leia-princess-leia-organa-solo-skywalker-9301321-576-1010.jpg/revision/latest?cb=20170120065805
+    - https://images.photowall.com/products/62286/princess-leia-carrie-fisher.jpg?h=699&q=85
+    - https://i.guim.co.uk/img/media/35b5b0444e45c050e7247d3950b81f4e01d3a0a1/0_0_2062_1237/master/2062.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=658c66facb1b40eb5abd91a84226d144
+# - id: santa
+#   name: Santa
+#   gender: male
+#   occupation:
