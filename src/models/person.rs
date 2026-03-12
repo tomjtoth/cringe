@@ -1,5 +1,6 @@
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -37,7 +38,7 @@ pub struct Person {
     pub height: u8,
     pub occupation: Option<String>,
     pub children: Option<Children>,
-    pub bio: Option<String>,
+    pub prompts: HashMap<String, String>,
     pub pictures: Vec<Pic>,
     pub liked: Option<Liked>,
 }

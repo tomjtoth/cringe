@@ -15,11 +15,12 @@
     has: 2
     wants: 0
 
-  bio: >
-    I used to do modeling as a side business, but my accident ruined that career.
-    I'm into choking 🫶 and black leathery stuff. 
-    Will you join me (and the dark side)?
-    My lightsaber is long and red.
+  prompts:
+    Two truths and a lie: >
+      I used to do modeling as a side business, but my accident ruined that career.
+      I'm into choking 🫶 and black leathery stuff. 
+      Will you join me (and the dark side)?
+      My lightsaber is long and red.
 
   pictures:
     - url: vader/this-could-be-you.jpg
@@ -47,10 +48,11 @@
   children:
     wants: 0
 
-  bio: |
-    I'm more handsome, but shorter and less hairy than my bro (228cm) 🐵 Double date us? 😎
+  prompts:
+    About me: >
+      I'm more handsome, but shorter and less hairy than my bro (228cm) 🐵 Double date us? 😎
 
-    Just a few emojis I can relate to: 🔫🚀🌚🕺
+      Just a few emojis I can relate to: 🔫🚀🌚🕺
 
   pictures:
     - https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/86573/86126/lifesize_cardboard_cutout_of_Han_Solo_buy_Star_Wars_cutouts_at_starstills__25679__84175.1394515397.jpg?c=2
@@ -73,9 +75,10 @@
     has: 0
     wants: -1
 
-  bio: >
-    Rebel at heart, I hit the gym every day and eat Stormtroopers for breakfast.
-    Gungans with long tounge HMU! 🥵
+  prompts:
+    My simple pleasures: >
+      Rebel at heart, I hit the gym every day and eat Stormtroopers for breakfast.
+      Gungans with long tounge HMU! 🥵
 
   pictures:
     - https://static.wikia.nocookie.net/fictupedia/images/1/1d/Leia-princess-leia-organa-solo-skywalker-9301321-576-1010.jpg/revision/latest?cb=20170120065805
@@ -94,7 +97,7 @@
     lon: 66.54402909844879
     lat: 25.84736393256391
 
-  bio: |
+  prompts:
     If loving this is wrong, I don't wanna be right: lapset, piparit & maito.
 
   pictures:
