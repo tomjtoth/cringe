@@ -1,0 +1,12 @@
+{
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "tailwindCSS.includeLanguages": {
+    "rust": "html"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    "class:\\s*\\\"([^\\\"]*)\\\"",
+    "class:\\s*format!\\([^,]+,\\s*\\\"([^\\\"]*)\\\""
+  ]
+}
