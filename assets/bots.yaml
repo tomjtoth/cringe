@@ -85,6 +85,8 @@
 - id: santa
   name: Santa 🎅
   gender: male
+  born: 0001-01-01
+  height: 160
   occupation: Burglar
   city: Santa Claus Village
   # Santa Claus village
