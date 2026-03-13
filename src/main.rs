@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
 
+#[cfg(feature = "server")]
+mod auth;
+
 mod models;
 mod navbar;
 mod router;
@@ -13,7 +16,12 @@ fn main() {
     dioxus::launch(App);
 
     #[cfg(feature = "server")]
-    dioxus::serve(|| async { Ok(dioxus::server::router(App)) })
+    dioxus::serve(|| async {
+        dotenvy::dotenv().ok();
+
+        let app = dioxus::server::router(App).merge(auth::routes()?);
+        Ok(app)
+    })
 }
 
 #[component]
