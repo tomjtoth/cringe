@@ -61,7 +61,7 @@ jobs:
               "  v$TAG is already present in repo."
           fi
 
-  deploy:
+  build-image:
     name: Generate Docker image
     runs-on: ubuntu-latest
 
