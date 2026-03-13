@@ -3,7 +3,7 @@ use std::sync::LazyLock;
 use crate::models::person::Person;
 
 fn load_people_from_yaml() -> Result<Vec<Person>, Box<dyn std::error::Error>> {
-    let yaml_content = std::fs::read_to_string("assets/bots.yaml")?;
+    let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
     let people = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
     Ok(people)
 }

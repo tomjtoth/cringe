@@ -1,5 +1,5 @@
 - id: sw_vader
-  name: Darth Vader
+  name: Anakin
   gender: male
   born: 1935-07-01
   height: 198
@@ -22,8 +22,15 @@
       Will you join me (and the dark side)?
       My lightsaber is long and red.
 
+    I want someone who: >
+      Stares into the double sunset 🥹 with me holding my hands on the sandy beach
+
+    My greatest strength: >
+      The Force is strong with me 😉
+
   pictures:
-    - url: vader/this-could-be-you.jpg
+    - https://static.wikia.nocookie.net/starwarsuniverse/images/f/fd/Anakin_Skywalker_%28ep._3%29.jpg/revision/latest?cb=20200315161841
+    - url: sw_vader/this-could-be-you.jpg
       prompt: this could be you
     - https://cdn.artphotolimited.com/images/6718bf5f258c849397f6133d/1000x1000/star-wars-darth-vader-close-up.jpg
     - https://static.wikia.nocookie.net/star-wars-canon-extended/images/e/ed/Vader_Max.jpg/revision/latest/scale-to-width-down/376?cb=20181119183701
