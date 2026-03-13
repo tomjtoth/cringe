@@ -1,10 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    models::person::Liked,
-    state::client::{use_bot_loader, PEEPS},
-    views::people::person::Person,
-};
+use crate::{models::person::Liked, state::client::PEEPS, views::people::person::Person};
 
 #[derive(Clone)]
 struct PersonFilter(fn(&crate::models::person::Person) -> bool);
@@ -44,7 +40,6 @@ pub fn ListOfUncheckedProfiles() -> Element {
 
 #[component]
 fn Listing(filter: PersonFilter) -> Element {
-    use_bot_loader();
     rsx! {
         ul { class: "h-full overflow-scroll",
             for person in PEEPS.iter().filter(|person| (filter.0)(person)) {
