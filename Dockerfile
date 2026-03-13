@@ -1,11 +1,10 @@
-FROM tomjtoth/dioxus-docker:0.7.2-alpine AS builder
+FROM lewimbes/dioxus AS builder
 WORKDIR /app
 
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/app/target \
-    tailwindcss -i tailwind.css -o assets/tailwind.css --minify && \
     dx build --release --verbose --debug-symbols=false && \
     mv /app/target/dx/cringe/release/web /app.built
 
