@@ -33,5 +33,5 @@ body > div {
 }
 
 body > div {
-  @apply flex flex-col;
+  @apply flex flex-col p-2;
 }
