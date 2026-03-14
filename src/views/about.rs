@@ -8,13 +8,15 @@ pub fn About() -> Element {
         p {
             "This is a "
             b { "Work-in-Progress & currently insecure" }
-            " Hinge clone. "
+            " Hinge clone. Check out the source code "
+            a { href: "https://github.com/tomjtoth/cringe", target: "_blank", "here" }
+            "."
         }
 
-        p {
-            b { "This app is invitation-only. There is no automated verification process. " }
-            "Instead you invite your friends and moderate their photos. "
-            "If your direct inviter deletes their account, their inviter will moderate your pics. "
-        }
+        // p {
+        //     b { "This app is invitation-only. There is no automated verification process. " }
+        //     "Instead you invite your friends and moderate their photos. "
+        //     "If your direct inviter deletes their account, their inviter will moderate your pics. "
+        // }
     }
 }
