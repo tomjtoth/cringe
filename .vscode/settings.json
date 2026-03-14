@@ -8,5 +8,6 @@
   "tailwindCSS.experimental.classRegex": [
     "class:\\s*\\\"([^\\\"]*)\\\"",
     "class:\\s*format!\\([^,]+,\\s*\\\"([^\\\"]*)\\\""
-  ]
+  ],
+  "rust-analyzer.cargo.features": "all"
 }
