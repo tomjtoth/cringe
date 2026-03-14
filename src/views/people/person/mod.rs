@@ -19,29 +19,28 @@ pub fn Person(id: String) -> Element {
 
     rsx! {
 
-        div { class: "flex flex-wrap gap-2",
+        div { class: "relative md:columns-3 *:mb-2",
             h2 { "{person.name}" }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            Image { src: pics.next() }
-            Prompt { pp: prompts.next() }
+            Image { id: id.clone(), src: pics.next() }
+            Prompt { id: id.clone(), pp: prompts.next() }
 
-            buttons::LikeButton { id: id.clone(), person_liked: person.liked }
-            buttons::DislikeButton { id, person_liked: person.liked }
+            buttons::DislikeButton { id }
         }
 
     }
