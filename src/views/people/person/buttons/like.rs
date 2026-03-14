@@ -21,7 +21,7 @@ pub fn LikeButton(id: String) -> Element {
                         }
                     }
                 },
-                "✅"
+                "❤️"
             }
         }
     }

@@ -21,7 +21,7 @@ pub fn DislikeButton(id: String) -> Element {
                         }
                     }
                 },
-                "❌"
+                "💔"
             }
         }
 
