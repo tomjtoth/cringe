@@ -1,8 +1,18 @@
 use dioxus::prelude::*;
 
+use crate::views::people::person::buttons::LikeButton;
+
 #[component]
-pub fn Container(children: Element) -> Element {
+pub fn Container(children: Element, id: Option<String>) -> Element {
     rsx! {
-        div { class: "border rounded-2xl max-md:w-full overflow-hidden", {children} }
+        div { class: "relative border rounded-2xl w-full overflow-hidden",
+
+            {children}
+
+            if let Some(id) = id {
+                LikeButton { id }
+            }
+
+        }
     }
 }
