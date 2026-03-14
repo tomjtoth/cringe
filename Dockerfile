@@ -1,32 +1,32 @@
 FROM lewimbes/dioxus AS builder
 WORKDIR /app
 
-ARG TARGETARCH=amd64
+ARG TARGET3=x86_64-unknown-linux-musl
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends musl-tools && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN case "$TARGETARCH" in \
-        amd64) echo x86_64-unknown-linux-musl ;; \
-        arm64) echo aarch64-unknown-linux-musl ;; \
-    esac > /rust-target && \
-    rustup target add "$(cat /rust-target)"
+RUN set -eux; \
+    if [[ "$TARGET3 " == '*musl ']]; then \
+        apt-get update; \
+        apt-get install -y --no-install-recommends musl-tools; \
+        rm -rf /var/lib/apt/lists/*; \
+    fi; \
+    rustup target add "$TARGET3"
 
 COPY . .
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/usr/local/cargo/git \
-    --mount=type=cache,target=/app/target \
-    RUST_TARGET=$(cat /rust-target) && \
-    CC_x86_64_unknown_linux_musl=musl-gcc \
-    CC_aarch64_unknown_linux_musl=musl-gcc \
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git \
+    --mount=type=cache,id=cargo-target,target=/app/target \
+    set -eux; \
+    if echo "$TARGET3" | grep -q 'musl'; then \
+        export CC_x86_64_unknown_linux_musl=musl-gcc; \
+        export CC_aarch64_unknown_linux_musl=musl-gcc; \
+    fi; \
     dx build --release --verbose --debug-symbols=false --fullstack \
         @server \
-            --target "$RUST_TARGET" \
+            --target "$TARGET3" \
             --no-default-features \
             --features server && \
     mv /app/target/dx/cringe/release/web /app.built && \
-    cp /app/target/"$RUST_TARGET"/server-release/cringe /app.built/cringe
+    cp /app/target/"$TARGET3"/server-release/cringe /app.built/cringe
 
 FROM scratch
 WORKDIR /app
