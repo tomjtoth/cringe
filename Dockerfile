@@ -28,5 +28,7 @@ WORKDIR /app
 COPY --from=builder /app.built/ /app/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV IP=0.0.0.0 \
+    PORT=80 \
+    SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/app/cringe"]
