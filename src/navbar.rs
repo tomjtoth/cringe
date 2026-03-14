@@ -7,9 +7,9 @@ pub fn Navbar() -> Element {
     use_bot_loader();
 
     rsx! {
-        div { class: "grow overflow-scroll", Outlet::<Route> {} }
+        div { class: "grow overflow-scroll p-2 pb-0", Outlet::<Route> {} }
 
-        ul { class: "bg-background border-t flex justify-around w-full
+        ul { class: "pt-2 bg-background border-t flex justify-around w-full
                      [&_a]:flex [&_a]:flex-col text-center",
             li {
                 Link { to: Route::About {},
