@@ -108,7 +108,7 @@ jobs:
           push: true
           context: .
           build-args: |
-            TARGET3=aarch64-unknown-linux-musl
+            SERVER_TRIPLET=aarch64-unknown-linux-musl
           platforms: linux/arm64
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
