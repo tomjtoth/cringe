@@ -1,7 +1,6 @@
 FROM lewimbes/dioxus AS builder
 WORKDIR /app
 
-# needed for local dev, GHA overrides this with arm64
 ARG TARGETARCH=amd64
 
 RUN apt-get update && \

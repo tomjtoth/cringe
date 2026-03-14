@@ -89,6 +89,8 @@ jobs:
         with:
           push: true
           context: .
+          build-args: |
+            TARGETARCH=arm64
           platforms: linux/arm64
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
