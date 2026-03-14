@@ -92,8 +92,8 @@ jobs:
           platforms: linux/arm64
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
-          cache-from: type=gha,scope=shared
-          cache-to: type=gha,mode=max,scope=shared
+          cache-from: type=gha,scope=cringe
+          cache-to: type=gha,mode=max,scope=cringe
 
   gitops:
     name: Kustomize cluster
