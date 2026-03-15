@@ -31,6 +31,29 @@ pub enum Liked {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+pub enum Frequency {
+    Never,
+    Rarely,
+    Often,
+    #[serde(rename = "yes")]
+    YesPlease,
+}
+
+impl std::fmt::Display for Frequency {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let label = match self {
+            Self::Never => "Never",
+            Self::Rarely => "Rarely",
+            Self::Often => "Often",
+            Self::YesPlease => "Yes, please!",
+        };
+
+        f.write_str(label)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum ZodiacSign {
     Aries,
     Taurus,
