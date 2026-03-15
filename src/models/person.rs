@@ -133,6 +133,7 @@ pub struct Person {
     pub gender: Gender,
     pub born: NaiveDate,
     pub height: u8,
+    pub education: Option<String>,
     pub occupation: Option<String>,
     pub location: Location,
     pub children: Option<Children>,
