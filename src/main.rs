@@ -28,6 +28,8 @@ fn main() {
 fn App() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        document::Link { rel: "icon", href: "/icon.png" }
+        document::Link { rel: "manifest", href: "/manifest.json" }
 
         Router::<router::Route> {}
     }
