@@ -7,7 +7,7 @@
       "sizes": "1024x1024"
     }
   ],
-  "start_url": "/",
+  "start_url": "/swipe",
   "display": "standalone",
   "orientation": "portrait"
 }
