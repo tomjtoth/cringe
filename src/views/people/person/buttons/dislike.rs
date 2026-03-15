@@ -9,7 +9,7 @@ pub fn DislikeButton(id: String) -> Element {
     rsx! {
         if !matches!(person_liked, Some(Liked::No)) {
             button {
-                class: "z-2 sticky bottom-10 left-5 p-2
+                class: "z-2 sticky bottom-10 left-5 p-3
                         bg-background border rounded-full
                         cursor-pointer select-none",
 
@@ -21,7 +21,7 @@ pub fn DislikeButton(id: String) -> Element {
                         }
                     }
                 },
-                "💔"
+                "❌"
             }
         }
 

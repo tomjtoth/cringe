@@ -6,7 +6,6 @@ mod buttons;
 mod container;
 mod img;
 mod prompt;
-mod svg_quote_mark;
 
 use img::Image;
 use prompt::Prompt;

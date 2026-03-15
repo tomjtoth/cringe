@@ -1,9 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    models::person::Pic,
-    views::people::person::{container::Container, svg_quote_mark::SvgQuoteMark},
-};
+use crate::{models::person::Pic, views::people::person::container::Container};
 
 #[component]
 pub fn Image(src: Option<Pic>, id: String) -> Element {
@@ -12,8 +9,15 @@ pub fn Image(src: Option<Pic>, id: String) -> Element {
             Container { id,
 
                 if let Pic::Advanced { prompt: Some(prompt), .. } = &pic {
-                    SvgQuoteMark { class: "p-1 max-w-8 inline-block fill-foreground" }
-                    span { class: "p-2 text-2xl", "{prompt}" }
+                    p { class: "p-2 py-4 text-2xl",
+
+                        sub {
+                            class: "pr-2 text-4xl",
+                            style: "font-family: 'Times New Roman',serif;font-size:36px;",
+                            "”"
+                        }
+                        "{prompt}"
+                    }
                 }
 
                 img {

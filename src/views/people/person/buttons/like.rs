@@ -9,7 +9,7 @@ pub fn LikeButton(id: String) -> Element {
     rsx! {
         if !matches!(person_liked, Some(Liked::Yes)) {
             button {
-                class: "absolute z-2 bottom-5 right-5 p-2
+                class: "absolute z-2 bottom-5 right-5 p-3
                         bg-background border rounded-full
                         cursor-pointer select-none",
 
