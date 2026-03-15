@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::models::person::Person;
 
@@ -20,64 +21,59 @@ pub fn use_bot_loader() {
     });
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[post("/geo")]
+async fn post_geo_location(coords: Coords) -> Result<()> {
+    let _store_these_in_db_later = coords;
+
+    Ok(())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 struct Coords {
     lat: f64,
     lon: f64,
 }
 
-#[component]
-fn GeoExample() -> Element {
-    let mut coords = use_signal(|| None::<Coords>);
-    let mut err = use_signal(|| None::<String>);
+pub fn update_coords() {
+    #[cfg(target_arch = "wasm32")]
+    {
+        use wasm_bindgen::{closure::Closure, JsCast};
+        use web_sys::{window, GeolocationPosition, GeolocationPositionError};
 
-    let request_location = move |_| {
-        #[cfg(target_arch = "wasm32")]
-        {
-            use wasm_bindgen::{closure::Closure, JsCast};
-            use web_sys::{window, GeolocationPosition, GeolocationPositionError};
+        let Some(win) = window() else {
+            eprintln!("No window object");
+            return;
+        };
 
-            let Some(win) = window() else {
-                *err.write() = Some("No window object".to_string());
-                return;
+        let Ok(geo) = win.navigator().geolocation() else {
+            eprintln!("Geolocation unavailable");
+            return;
+        };
+
+        let success = Closure::wrap(Box::new(move |pos: GeolocationPosition| {
+            let c = pos.coords();
+            let coords = Coords {
+                lat: c.latitude(),
+                lon: c.longitude(),
             };
 
-            let Ok(geo) = win.navigator().geolocation() else {
-                *err.write() = Some("Geolocation unavailable".to_string());
-                return;
-            };
+            spawn(async move {
+                if let Err(e) = post_geo_location(coords).await {
+                    eprintln!("Failed to post geolocation: {e}");
+                }
+            });
+        }) as Box<dyn FnMut(_)>);
 
-            let mut coords_sig = coords;
-            let success = Closure::wrap(Box::new(move |pos: GeolocationPosition| {
-                let c = pos.coords();
-                *coords_sig.write() = Some(Coords {
-                    lat: c.latitude(),
-                    lon: c.longitude(),
-                });
-            }) as Box<dyn FnMut(_)>);
+        let failure = Closure::wrap(Box::new(move |e: GeolocationPositionError| {
+            eprintln!("Geolocation error: {}", e.code());
+        }) as Box<dyn FnMut(_)>);
 
-            let mut err_sig = err;
-            let failure = Closure::wrap(Box::new(move |e: GeolocationPositionError| {
-                *err_sig.write() = Some(format!("Geolocation error: {}", e.code()));
-            }) as Box<dyn FnMut(_)>);
+        let _ = geo.get_current_position_with_error_callback(
+            success.as_ref().unchecked_ref(),
+            Some(failure.as_ref().unchecked_ref()),
+        );
 
-            let _ = geo.get_current_position_with_error_callback(
-                success.as_ref().unchecked_ref(),
-                Some(failure.as_ref().unchecked_ref()),
-            );
-
-            success.forget();
-            failure.forget();
-        }
-    };
-
-    rsx! {
-        button { onclick: request_location, "Get location" }
-        if let Some(c) = coords() {
-            p { "lat: {c.lat}, lon: {c.lon}" }
-        }
-        if let Some(e) = err() {
-            p { "error: {e}" }
-        }
+        success.forget();
+        failure.forget();
     }
 }
