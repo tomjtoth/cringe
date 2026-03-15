@@ -37,6 +37,54 @@
     - url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
       prompt: without my helmet
 
+- id: thor
+  name: Thor
+  gender: male
+  born: 1983-08-11
+  height: 191
+  occupation: God of ⚡
+
+  current_city: Helsinki
+  from_city: Asgard
+
+  # ~ REDI
+  location:
+    lon: 60.187558609202355
+    lat: 24.978855475155996
+
+  prompts:
+    Low-key flex: >
+      Why stop at saving animals, when I can save whole planets? 😎
+      ... provided I don't smash the Bifrost again 🌈😂
+
+    Worst idea I ever had: >
+      I forgot my magical hammer, Mjolnir, at my *ex* girlfriend's place in the US.
+      While visiting Kumpula Library in Finland, I summoned it back.
+      Next day's news was full of reports about the destruction its flight caused.
+
+    Two truths and a lie: >
+      1️⃣ I was banished from Asgard by Odin
+      2️⃣ I have *not* lost an eye in battle
+      3️⃣ I have a crush on Ketu 🐱
+
+    My go-to karaoke song: >
+      M.C. Hammer - U can't touch this
+
+  pictures:
+    - prompt: I stare more intensely, than any of your exes
+      url: https://static0.srcdn.com/wordpress/wp-content/uploads/2017/09/Thor-Ragnarok-Glowing-Eyes-Lightning.jpg?w=1200&h=675&fit=crop
+
+    - prompt: Playgirl 🐰 photoshoot 🌶️
+      url: https://preview.redd.it/what-do-you-think-is-the-plan-for-thor-in-the-mcu-now-v0-qvgtbrqkldqd1.jpeg?width=640&crop=smart&auto=webp&s=9775f8c2f75ffc51d48b4378964265cea85eb40c
+    - https://s3.r29static.com/bin/entry/ce2/720x864,85/2169674/image.webp
+
+    - prompt: This could be you
+      url: /thor/this-could-be-you.png
+    - prompt: My vulnerable side
+      url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4BugPyqmMtOIAKO_o5DysIe-Zc2MVOWGO6L7BNu4XMe1GmSLhl8GKaq2jksHH3YGmDYSgAHpQRIG8PLSak21yMdV2qLKYFjubI3XkFr4&s=10
+    - prompt: Me being iconic at work
+      url: https://media.wired.com/photos/59330ed94cd5ce6f96c0c2c5/3:2/w_2560%2Cc_limit/gallery3.jpg
+
 - id: sw_solo
   name: Han Solo
   gender: male
