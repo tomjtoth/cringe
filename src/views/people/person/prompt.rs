@@ -1,15 +1,16 @@
 use dioxus::prelude::*;
 
+use crate::models::person::PersonPrompt;
 use crate::views::people::person::container::Container;
 
 #[component]
 
-pub fn Prompt(pp: Option<(String, String)>, id: String) -> Element {
+pub fn Prompt(prompt: Option<PersonPrompt>, id: String) -> Element {
     rsx! {
-        if let Some((prompt, text)) = pp {
+        if let Some(prompt) = prompt {
             Container { id,
-                h3 { class: "p-2 pt-10", "{prompt}" }
-                p { class: "p-2 pb-20 text-2xl", "{text}" }
+                h3 { class: "p-2 pt-10", "{prompt.title}" }
+                p { class: "p-2 pb-20 text-2xl", "{prompt.body}" }
             }
         }
     }
