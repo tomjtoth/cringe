@@ -122,7 +122,10 @@ pub struct Person {
     pub height: u8,
     pub occupation: Option<String>,
     pub children: Option<Children>,
-    pub prompts: HashMap<String, String>,
+    pub drinking: Option<Frequency>,
+    pub smoking: Option<Frequency>,
+    pub marijuana: Option<Frequency>,
+    pub drugs: Option<Frequency>,
     pub pictures: Vec<Pic>,
     pub liked: Option<Liked>,
 }
