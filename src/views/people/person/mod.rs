@@ -26,19 +26,19 @@ pub fn Person(id: String) -> Element {
             Prompt { id: id.clone(), pp: prompts.next() }
 
             Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), pp: prompts.next() }
+            Prompt { id: id.clone(), prompt: prompts.next() }
 
             Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), pp: prompts.next() }
+            Prompt { id: id.clone(), prompt: prompts.next() }
 
             Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), pp: prompts.next() }
+            Prompt { id: id.clone(), prompt: prompts.next() }
 
             Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), pp: prompts.next() }
+            Prompt { id: id.clone(), prompt: prompts.next() }
 
             Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), pp: prompts.next() }
+            Prompt { id: id.clone(), prompt: prompts.next() }
 
             buttons::DislikeButton { id }
         }
