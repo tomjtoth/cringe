@@ -136,6 +136,7 @@ pub struct Person {
     pub education: Option<String>,
     pub occupation: Option<String>,
     pub location: Location,
+    pub hometown: Option<String>,
     pub children: Option<Children>,
     pub drinking: Option<Frequency>,
     pub smoking: Option<Frequency>,
