@@ -41,7 +41,7 @@ pub fn ListOfUncheckedProfiles() -> Element {
 #[component]
 fn Listing(filter: PersonFilter) -> Element {
     rsx! {
-        ul { class: "h-full overflow-scroll",
+        ul { class: "h-full overflow-y-scroll p-2 pb-0",
             for person in PEEPS.iter().filter(|person| (filter.0)(person)) {
                 li { key: "{person.id}",
                     Person { id: &person.id }
