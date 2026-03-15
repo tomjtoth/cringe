@@ -1,6 +1,5 @@
 use chrono::{Datelike, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -50,6 +49,12 @@ impl std::fmt::Display for Frequency {
 
         f.write_str(label)
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PersonPrompt {
+    pub title: String,
+    pub body: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -135,6 +140,7 @@ pub struct Person {
     pub smoking: Option<Frequency>,
     pub marijuana: Option<Frequency>,
     pub drugs: Option<Frequency>,
+    pub prompts: Vec<PersonPrompt>,
     pub pictures: Vec<Pic>,
     pub liked: Option<Liked>,
 }
