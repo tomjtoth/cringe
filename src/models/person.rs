@@ -114,6 +114,14 @@ impl std::fmt::Display for ZodiacSign {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Location {
+    pub city: Option<String>,
+    pub lat: f64,
+    #[serde(alias = "long")]
+    pub lon: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Person {
     pub id: String,
     pub name: String,
@@ -121,6 +129,7 @@ pub struct Person {
     pub born: NaiveDate,
     pub height: u8,
     pub occupation: Option<String>,
+    pub location: Location,
     pub children: Option<Children>,
     pub drinking: Option<Frequency>,
     pub smoking: Option<Frequency>,
