@@ -9,7 +9,7 @@ pub enum Gender {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Children {
+pub struct Kids {
     pub has: Option<i8>,
     pub wants: Option<i8>,
 }
@@ -140,7 +140,7 @@ pub struct Person {
     pub children: Option<Children>,
     pub drinking: Option<Frequency>,
     pub smoking: Option<Frequency>,
-    pub marijuana: Option<Frequency>,
+    pub kids: Option<Kids>,
     pub drugs: Option<Frequency>,
     pub prompts: Vec<PersonPrompt>,
     pub pictures: Vec<Pic>,

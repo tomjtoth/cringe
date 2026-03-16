@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::{Children, Gender},
-    state::client::PEEPS,
-    views::people::person::container::Container,
+    models::person::Gender, state::client::PEEPS, views::people::person::container::Container,
 };
 
 mod buttons;
@@ -50,31 +48,33 @@ pub fn Person(id: i32) -> Element {
                         li { "📍 {city}" }
                     }
 
-                    if let Some(Children { has: Some(has), .. }) = &person.children {
-                        li {
-                            "🧑‍🧒‍🧒 "
-                            if *has > 0 {
-                                "Has {*has}"
-                                {already_has_kids = true}
-                            } else {
-                                "No"
+                    if let Some(kids) = &person.kids {
+                        if let Some(has) = kids.has {
+                            li {
+                                "🧑‍🧒‍🧒 "
+                                if has > 0 {
+                                    "Has {has}"
+                                    {already_has_kids = true}
+                                } else {
+                                    "No"
+                                }
+                                " kids"
                             }
-                            " kids"
                         }
-                    }
 
-                    if let Some(Children { wants: Some(wants), .. }) = &person.children {
-                        li {
-                            "🍼 "
-                            if *wants > 0 {
-                                "Wants {*wants}"
-                            } else {
-                                "Doesn't want"
+                        if let Some(wants) = kids.wants {
+                            li {
+                                "🍼 "
+                                if wants > 0 {
+                                    "Wants {wants}"
+                                } else {
+                                    "Doesn't want"
+                                }
+                                if already_has_kids {
+                                    " more"
+                                }
+                                " kids"
                             }
-                            if already_has_kids {
-                                " more"
-                            }
-                            " kids"
                         }
                     }
 
