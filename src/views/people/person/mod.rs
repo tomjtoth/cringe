@@ -80,22 +80,24 @@ pub fn Person(id: i32) -> Element {
 
                     li { "{person.zodiac_sign()}" }
 
-                    if let Some(drinking) = &person.drinking {
-                        li { "🍷 {drinking}" }
-                    }
+                    if let Some(habits) = &person.habits {
+                        if let Some(drinking) = habits.drinking {
+                            li { "🍷 {drinking}" }
+                        }
 
-                    if let Some(smoking) = &person.smoking {
-                        li { "🚬 {smoking}" }
-                    }
+                        if let Some(smoking) = habits.smoking {
+                            li { "🚬 {smoking}" }
+                        }
 
-                    if let Some(marijuana) = &person.marijuana {
-                        li { title: "marijuana", "🚬🥦 {marijuana}" }
-                    }
+                        if let Some(marijuana) = habits.marijuana {
+                            li { title: "marijuana", "🚬🥦 {marijuana}" }
+                        }
 
-                    if let Some(drugs) = &person.drugs {
-                        li { title: "drugs", "💊💉 {drugs}" }
+                        if let Some(drugs) = habits.drugs {
+                            li { title: "drugs", "💊💉 {drugs}" }
+                        }
                     }
-
+                
                 }
 
                 if let Some(job) = &person.occupation {

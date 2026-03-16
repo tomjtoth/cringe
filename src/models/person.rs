@@ -15,6 +15,14 @@ pub struct Kids {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Habits {
+    pub drinking: Option<Frequency>,
+    pub smoking: Option<Frequency>,
+    pub marijuana: Option<Frequency>,
+    pub drugs: Option<Frequency>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Pic {
     Url(String),
@@ -137,11 +145,8 @@ pub struct Person {
     pub occupation: Option<String>,
     pub location: Location,
     pub hometown: Option<String>,
-    pub children: Option<Children>,
-    pub drinking: Option<Frequency>,
-    pub smoking: Option<Frequency>,
     pub kids: Option<Kids>,
-    pub drugs: Option<Frequency>,
+    pub habits: Option<Habits>,
     pub prompts: Vec<PersonPrompt>,
     pub pictures: Vec<Pic>,
     pub liked: Option<Liked>,

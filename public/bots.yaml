@@ -16,9 +16,10 @@
     has: 2
     wants: 0
 
-  drinking: never
-  marijuana: rarely
-  drugs: often
+  habits:
+    drinking: never
+    marijuana: rarely
+    drugs: often
 
   prompts:
     - title: Two truths and a lie
@@ -52,10 +53,11 @@
   education: Electric Engineer PhD
   occupation: God of ⚡
 
-  drinking: yes
-  smoking: rarely
-  marijuana: rarely
-  drugs: never
+  habits:
+    drinking: yes
+    smoking: rarely
+    marijuana: rarely
+    drugs: never
 
   hometown: Asgard 👽
   # ~ REDI
@@ -118,9 +120,10 @@
   kids:
     wants: 0
 
-  drinking: yes
-  smoking: yes
-  marijuana: never
+  habits:
+    drinking: yes
+    smoking: yes
+    marijuana: never
 
   prompts:
     - title: About me
@@ -141,9 +144,10 @@
   education: Diplomatic Academy valedictorian, rage management unfinished
   occupation: Princess
 
-  drinking: rarely
-  smoking: never
-  marijuana: never
+  habits:
+    drinking: rarely
+    smoking: never
+    marijuana: never
 
   hometown: Alderaan
   # Mall of Tripla
@@ -173,10 +177,11 @@
   education: MBA in logistics, chimney systems specialization
   occupation: Burglar
 
-  drinking: yes
-  smoking: never
-  marijuana: often
-  drugs: rarely
+  habits:
+    drinking: yes
+    smoking: never
+    marijuana: often
+    drugs: rarely
 
   # Santa Claus village
   location:
