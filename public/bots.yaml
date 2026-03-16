@@ -1,5 +1,4 @@
-- id: sw_vader
-  name: Anakin
+- name: Anakin
   gender: male
   born: 1935-07-01
   height: 198
@@ -46,8 +45,7 @@
     - url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
       prompt: without my helmet
 
-- id: thor
-  name: Thor
+- name: Thor
   gender: male
   born: 1983-08-11
   height: 191
@@ -103,8 +101,7 @@
     - prompt: Me being iconic at work
       url: https://media.wired.com/photos/59330ed94cd5ce6f96c0c2c5/3:2/w_2560%2Cc_limit/gallery3.jpg
 
-- id: sw_solo
-  name: Han Solo
+- name: Han Solo
   gender: male
   born: 1942-07-13
   height: 185
@@ -137,8 +134,7 @@
     - https://lumiere-a.akamaihd.net/v1/images/han-solo-main_a4c8ff79.jpeg?region=0%2C0%2C1920%2C960
     - https://i.etsystatic.com/17350622/r/il/e2f58e/5552510342/il_fullxfull.5552510342_of11.jpg
 
-- id: sw_leia
-  name: Leia
+- name: Leia
   gender: female
   born: 1956-10-21
   height: 155
@@ -170,8 +166,7 @@
     - https://images.photowall.com/products/62286/princess-leia-carrie-fisher.jpg?h=699&q=85
     - https://i.guim.co.uk/img/media/35b5b0444e45c050e7247d3950b81f4e01d3a0a1/0_0_2062_1237/master/2062.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=658c66facb1b40eb5abd91a84226d144
 
-- id: santa
-  name: Santa 🎅
+- name: Santa 🎅
   gender: male
   born: 0001-01-01
   height: 160

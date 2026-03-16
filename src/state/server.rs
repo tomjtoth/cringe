@@ -4,7 +4,13 @@ use crate::models::person::Person;
 
 fn load_people_from_yaml() -> Result<Vec<Person>, Box<dyn std::error::Error>> {
     let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
-    let people = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
+    let mut people = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
+
+    // Keep bot IDs out of YAML and assign deterministic negatives at load time.
+    for (idx, person) in people.iter_mut().enumerate() {
+        person.id = Some(-((idx as i32) + 1));
+    }
+
     Ok(people)
 }
 
