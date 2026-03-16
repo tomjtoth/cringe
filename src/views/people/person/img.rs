@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::{models::person::Pic, views::people::person::container::Container};
 
 #[component]
-pub fn Image(src: Option<Pic>, id: String) -> Element {
+pub fn Image(src: Option<Pic>, id: i32) -> Element {
     rsx! {
         if let Some(pic) = src {
             Container { id,

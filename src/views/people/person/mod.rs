@@ -15,8 +15,8 @@ use img::Image;
 use prompt::Prompt;
 
 #[component]
-pub fn Person(id: String) -> Element {
-    let person = PEEPS.iter().find(|p| p.id == id).unwrap();
+pub fn Person(id: i32) -> Element {
+    let person = PEEPS.iter().find(|p| p.id == Some(id)).unwrap();
 
     let mut already_has_kids = false;
 
@@ -28,19 +28,20 @@ pub fn Person(id: String) -> Element {
         div { class: "relative md:columns-3 *:mb-2 text-lg",
             h2 { "{person.name}" }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
             Container { class: "[&>*+*]:border-t [&>*+*]:p-2",
                 ul { class: "p-2 flex overflow-x-scroll [&>*+*]:ml-2 [&>*+*]:border-l *:p-2 text-nowrap",
+
                     li { "🎂 {person.age()}" }
+
                     li {
                         if matches!(person.gender, Gender::Male) {
                             "♂️ Man"
                         } else {
                             "♀️ Woman"
                         }
-
                     }
 
                     li { "📏 {person.height} cm" }
@@ -110,20 +111,20 @@ pub fn Person(id: String) -> Element {
                 }
             }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
-            Image { id: id.clone(), src: pics.next() }
-            Prompt { id: id.clone(), prompt: prompts.next() }
+            Image { id, src: pics.next() }
+            Prompt { id, prompt: prompts.next() }
 
             buttons::DislikeButton { id }
         }

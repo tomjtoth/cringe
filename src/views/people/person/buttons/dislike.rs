@@ -3,8 +3,8 @@ use dioxus::prelude::*;
 use crate::{models::person::Liked, state::client::PEEPS};
 
 #[component]
-pub fn DislikeButton(id: String) -> Element {
-    let person_liked = PEEPS.iter().find(|p| p.id == id).unwrap().liked;
+pub fn DislikeButton(id: i32) -> Element {
+    let person_liked = PEEPS.iter().find(|p| p.id == Some(id)).unwrap().liked;
 
     rsx! {
         if !matches!(person_liked, Some(Liked::No)) {
@@ -15,7 +15,7 @@ pub fn DislikeButton(id: String) -> Element {
 
                 onclick: move |_| {
                     for p in PEEPS.write().iter_mut() {
-                        if p.id == id {
+                        if p.id == Some(id) {
                             p.liked = Some(Liked::No);
                             break;
                         }

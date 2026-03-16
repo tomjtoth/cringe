@@ -128,7 +128,7 @@ pub struct Location {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Person {
-    pub id: String,
+    pub id: Option<i32>,
     pub name: String,
     pub gender: Gender,
     pub born: NaiveDate,
