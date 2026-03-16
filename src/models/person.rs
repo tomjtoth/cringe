@@ -127,10 +127,8 @@ impl std::fmt::Display for ZodiacSign {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Location {
-    pub city: Option<String>,
+pub struct Gps {
     pub lat: f64,
-    #[serde(alias = "long")]
     pub lon: f64,
 }
 
@@ -143,7 +141,16 @@ pub struct Person {
     pub height: u8,
     pub education: Option<String>,
     pub occupation: Option<String>,
-    pub location: Location,
+
+    // location is a human-readable city/area label shown to clients
+    pub location: Option<String>,
+
+    // gps coordinates are server-side source data for distance calculations
+    pub gps: Option<Gps>,
+
+    // u16::MAX = 65_535 vs. 40_075 largest Earth circumference
+    pub distance: Option<u16>,
+
     pub hometown: Option<String>,
     pub kids: Option<Kids>,
     pub habits: Option<Habits>,

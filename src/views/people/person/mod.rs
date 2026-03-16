@@ -44,7 +44,7 @@ pub fn Person(id: i32) -> Element {
 
                     li { "📏 {person.height} cm" }
 
-                    if let Some(city) = &person.location.city {
+                    if let Some(city) = &person.location {
                         li { "📍 {city}" }
                     }
 
