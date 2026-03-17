@@ -31,7 +31,38 @@ pub struct Habits {
 #[serde(untagged)]
 pub enum Pic {
     Url(String),
-    Advanced { url: String, prompt: Option<String> },
+    Advanced {
+        url: String,
+        prompt: Option<String>,
+    },
+    Uploaded {
+        bytes: Vec<u8>,
+        mime_type: String,
+        prompt: Option<String>,
+    },
+}
+
+impl Pic {
+    pub fn prompt(&self) -> Option<&str> {
+        match self {
+            Self::Url(_) => None,
+            Self::Advanced { prompt, .. } | Self::Uploaded { prompt, .. } => prompt.as_deref(),
+        }
+    }
+
+    pub fn src(&self) -> String {
+        match self {
+            Self::Url(src) => src.clone(),
+            Self::Advanced { url, .. } => url.clone(),
+            Self::Uploaded {
+                bytes, mime_type, ..
+            } => {
+                use base64::{engine::general_purpose::STANDARD, Engine as _};
+
+                format!("data:{mime_type};base64,{}", STANDARD.encode(bytes))
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]

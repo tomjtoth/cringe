@@ -87,9 +87,16 @@ CREATE INDEX user_prompts_user_id_idx ON user_prompts(user_id);
 CREATE TABLE user_pictures (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	position INTEGER NOT NULL CHECK (position >= 0),
-	url TEXT NOT NULL,
+	url TEXT,
+	image_bytes BYTEA,
+	mime_type TEXT,
 	prompt TEXT,
-	PRIMARY KEY (user_id, position)
+	PRIMARY KEY (user_id, position),
+	CONSTRAINT user_pictures_source_ck CHECK (
+		(url IS NOT NULL AND image_bytes IS NULL AND mime_type IS NULL)
+		OR
+		(url IS NULL AND image_bytes IS NOT NULL AND mime_type IS NOT NULL)
+	)
 );
 
 CREATE INDEX user_pictures_user_id_idx ON user_pictures(user_id);

@@ -7,8 +7,7 @@ pub fn Image(src: Option<Pic>, id: i32) -> Element {
     rsx! {
         if let Some(pic) = src {
             Container { id,
-
-                if let Pic::Advanced { prompt: Some(prompt), .. } = &pic {
+                if let Some(prompt) = pic.prompt() {
                     p { class: "p-2 py-4 text-2xl",
 
                         sub {
@@ -20,13 +19,7 @@ pub fn Image(src: Option<Pic>, id: i32) -> Element {
                     }
                 }
 
-                img {
-                    class: "object-cover w-full",
-                    src: match pic {
-                        Pic::Url(src) => src,
-                        Pic::Advanced { url, .. } => url,
-                    },
-                }
+                img { class: "object-cover w-full", src: pic.src() }
             }
         }
     }
