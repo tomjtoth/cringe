@@ -112,6 +112,15 @@ pub fn Person(id: i32) -> Element {
                 if let Some(city) = &person.hometown {
                     p { "🏠 {city}" }
                 }
+
+                if let Some(seeking) = &person.seeking {
+                    p { "{seeking}" }
+                }
+
+                if let Some(relationship_type) = &person.relationship_type {
+                    p { "{relationship_type}" }
+                }
+
             }
 
             Image { id, src: pics.next() }
