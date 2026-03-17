@@ -1,11 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::{router::Route, state::client::use_bot_loader};
+use crate::router::Route;
 
 #[component]
 pub fn Navbar() -> Element {
-    use_bot_loader();
-
     rsx! {
         div { class: "grow overflow-hidden", Outlet::<Route> {} }
 
