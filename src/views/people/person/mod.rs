@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::Gender, state::client::PEEPS, views::people::person::container::Container,
+    models::person::Gender,
+    state::client::PEEPS,
+    views::people::person::{buttons::SkipButton, container::Container},
 };
 
 mod buttons;
@@ -97,7 +99,6 @@ pub fn Person(id: i32) -> Element {
                             li { title: "drugs", "💊💉 {drugs}" }
                         }
                     }
-                
                 }
 
                 if let Some(job) = &person.occupation {
@@ -128,7 +129,7 @@ pub fn Person(id: i32) -> Element {
             Image { id, src: pics.next() }
             Prompt { id, prompt: prompts.next() }
 
-            buttons::DislikeButton { id }
+            SkipButton { id }
         }
 
     }

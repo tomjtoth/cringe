@@ -1,5 +1,5 @@
-mod dislike;
 mod like;
+mod skip;
 
-pub use dislike::DislikeButton;
 pub use like::LikeButton;
+pub use skip::SkipButton;
