@@ -186,6 +186,7 @@ pub struct Gps {
 pub struct Person {
     pub id: Option<i32>,
     pub name: String,
+    pub email: Option<String>,
     pub gender: Gender,
     pub born: NaiveDate,
     pub height: u8,

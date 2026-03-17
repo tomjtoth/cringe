@@ -1,4 +1,5 @@
 - name: Anakin
+  email: vader@definitely-not-a-sith.com
   gender: male
   born: 1935-07-01
   height: 198
@@ -47,6 +48,7 @@
       prompt: without my helmet
 
 - name: Thor
+  email: thor.odinson@asgard-singles.com
   gender: male
   born: 1983-08-11
   height: 191
@@ -104,6 +106,7 @@
       url: https://media.wired.com/photos/59330ed94cd5ce6f96c0c2c5/3:2/w_2560%2Cc_limit/gallery3.jpg
 
 - name: Han Solo
+  email: han@kessel-run-record-holder.com
   gender: male
   born: 1942-07-13
   height: 185
@@ -138,6 +141,7 @@
     - https://i.etsystatic.com/17350622/r/il/e2f58e/5552510342/il_fullxfull.5552510342_of11.jpg
 
 - name: Leia
+  email: leia@notarebel.io
   gender: female
   born: 1956-10-21
   height: 155
@@ -171,6 +175,7 @@
     - https://i.guim.co.uk/img/media/35b5b0444e45c050e7247d3950b81f4e01d3a0a1/0_0_2062_1237/master/2062.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=658c66facb1b40eb5abd91a84226d144
 
 - name: Santa 🎅
+  email: santa@real-human-bean.com
   gender: male
   born: 0001-01-01
   height: 160

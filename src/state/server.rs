@@ -39,6 +39,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
             "
             INSERT INTO users (
                 name,
+                email,
                 gender,
                 born,
                 height,
@@ -58,12 +59,13 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
                 habits_drugs
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                $11, $12, $13, $14, $15, $16, $17, $18
+                $11, $12, $13, $14, $15, $16, $17, $18, $19
             )
             RETURNING id
             ",
         )
         .bind(&bot.name)
+        .bind(&bot.email)
         .bind(bot.gender)
         .bind(bot.born)
         .bind(i16::from(bot.height))
