@@ -9,7 +9,6 @@
 //! ```
 
 use anyhow::{anyhow, Context, Result};
-use async_session::{MemoryStore, Session, SessionStore};
 use axum::{
     extract::{FromRef, FromRequestParts, OptionalFromRequestParts, Query, State},
     http::{header::SET_COOKIE, HeaderMap},
@@ -25,10 +24,10 @@ use oauth2::{
     RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 use std::{convert::Infallible, env};
 
 static COOKIE_NAME: &str = "SESSION";
-static CSRF_TOKEN: &str = "csrf_token";
 
 type BasicClient = oauth2::basic::BasicClient<
     EndpointSet,
@@ -38,14 +37,9 @@ type BasicClient = oauth2::basic::BasicClient<
     EndpointSet,
 >;
 
-pub fn routes() -> Result<Router> {
-    // `MemoryStore` is just used as an example. Don't use this in production.
-    let store = MemoryStore::new();
+pub fn routes(pool: PgPool) -> Result<Router> {
     let oauth_client = oauth_client()?;
-    let app_state = AppState {
-        store,
-        oauth_client,
-    };
+    let app_state = AppState { oauth_client, pool };
 
     let auth_layer = Router::new()
         .route("/auth/discord", get(discord_auth))
@@ -59,19 +53,19 @@ pub fn routes() -> Result<Router> {
 
 #[derive(Clone)]
 struct AppState {
-    store: MemoryStore,
     oauth_client: BasicClient,
-}
-
-impl FromRef<AppState> for MemoryStore {
-    fn from_ref(state: &AppState) -> Self {
-        state.store.clone()
-    }
+    pool: PgPool,
 }
 
 impl FromRef<AppState> for BasicClient {
     fn from_ref(state: &AppState) -> Self {
         state.oauth_client.clone()
+    }
+}
+
+impl FromRef<AppState> for PgPool {
+    fn from_ref(state: &AppState) -> Self {
+        state.pool.clone()
     }
 }
 
@@ -118,28 +112,28 @@ struct User {
 
 async fn discord_auth(
     State(client): State<BasicClient>,
-    State(store): State<MemoryStore>,
+    State(pool): State<PgPool>,
 ) -> Result<impl IntoResponse, AppError> {
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("identify".to_string()))
         .url();
 
-    // Create session to store csrf_token
-    let mut session = Session::new();
-    session
-        .insert(CSRF_TOKEN, &csrf_token)
-        .context("failed in inserting CSRF token into session")?;
-
-    // Store the session in MemoryStore and retrieve the session cookie
-    let cookie = store
-        .store_session(session)
-        .await
-        .context("failed to store CSRF token session")?
-        .context("unexpected error retrieving CSRF cookie value")?;
+    let session_id = CsrfToken::new_random().secret().to_string();
+    sqlx::query(
+        "
+        INSERT INTO auth_sessions (id, csrf_token, expires_at)
+        VALUES ($1, $2, NOW() + INTERVAL '15 minutes')
+        ",
+    )
+    .bind(&session_id)
+    .bind(csrf_token.secret())
+    .execute(&pool)
+    .await
+    .context("failed to store csrf session")?;
 
     // Attach the session cookie to the response header
-    let cookie = format!("{COOKIE_NAME}={cookie}; SameSite=Lax; HttpOnly; Secure; Path=/");
+    let cookie = format!("{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly; Secure; Path=/");
     let mut headers = HeaderMap::new();
     headers.insert(
         SET_COOKIE,
@@ -155,27 +149,18 @@ async fn protected(user: User) -> impl IntoResponse {
 }
 
 async fn logout(
-    State(store): State<MemoryStore>,
+    State(pool): State<PgPool>,
     TypedHeader(cookies): TypedHeader<headers::Cookie>,
 ) -> Result<impl IntoResponse, AppError> {
-    let cookie = cookies
-        .get(COOKIE_NAME)
-        .context("unexpected error getting cookie name")?;
-
-    let session = match store
-        .load_session(cookie.to_string())
-        .await
-        .context("failed to load session")?
-    {
-        Some(s) => s,
-        // No session active, just redirect
-        None => return Ok(Redirect::to("/")),
+    let Some(cookie) = cookies.get(COOKIE_NAME) else {
+        return Ok(Redirect::to("/"));
     };
 
-    store
-        .destroy_session(session)
+    sqlx::query("DELETE FROM auth_sessions WHERE id = $1")
+        .bind(cookie)
+        .execute(&pool)
         .await
-        .context("failed to destroy session")?;
+        .context("failed to delete session")?;
 
     Ok(Redirect::to("/"))
 }
@@ -190,7 +175,7 @@ struct AuthRequest {
 async fn csrf_token_validation_workflow(
     auth_request: &AuthRequest,
     cookies: &headers::Cookie,
-    store: &MemoryStore,
+    pool: &PgPool,
 ) -> Result<(), AppError> {
     // Extract the cookie from the request
     let cookie = cookies
@@ -198,43 +183,37 @@ async fn csrf_token_validation_workflow(
         .context("unexpected error getting cookie name")?
         .to_string();
 
-    // Load the session
-    let session = match store
-        .load_session(cookie)
-        .await
-        .context("failed to load session")?
-    {
-        Some(session) => session,
-        None => return Err(anyhow!("Session not found").into()),
-    };
+    let stored_csrf_token: Option<String> = sqlx::query_scalar(
+        "SELECT csrf_token FROM auth_sessions WHERE id = $1 AND expires_at > NOW()",
+    )
+    .bind(&cookie)
+    .fetch_optional(pool)
+    .await
+    .context("failed to load csrf session")?;
 
-    // Extract the CSRF token from the session
-    let stored_csrf_token = session
-        .get::<CsrfToken>(CSRF_TOKEN)
-        .context("CSRF token not found in session")?
-        .to_owned();
-
-    // Cleanup the CSRF token session
-    store
-        .destroy_session(session)
-        .await
-        .context("Failed to destroy old session")?;
+    let stored_csrf_token = stored_csrf_token.ok_or_else(|| anyhow!("Session not found"))?;
 
     // Validate CSRF token is the same as the one in the auth request
-    if *stored_csrf_token.secret() != auth_request.state {
+    if stored_csrf_token != auth_request.state {
         return Err(anyhow!("CSRF token mismatch").into());
     }
+
+    sqlx::query("UPDATE auth_sessions SET csrf_token = NULL WHERE id = $1")
+        .bind(&cookie)
+        .execute(pool)
+        .await
+        .context("failed to consume csrf token")?;
 
     Ok(())
 }
 
 async fn login_authorized(
     Query(query): Query<AuthRequest>,
-    State(store): State<MemoryStore>,
+    State(pool): State<PgPool>,
     State(oauth_client): State<BasicClient>,
     TypedHeader(cookies): TypedHeader<headers::Cookie>,
 ) -> Result<impl IntoResponse, AppError> {
-    csrf_token_validation_workflow(&query, &cookies, &store).await?;
+    csrf_token_validation_workflow(&query, &cookies, &pool).await?;
 
     let client = oauth2::reqwest::Client::new();
 
@@ -257,21 +236,38 @@ async fn login_authorized(
         .await
         .context("failed to deserialize response as JSON")?;
 
-    // Create a new session filled with user data
-    let mut session = Session::new();
-    session
-        .insert("user", &user_data)
-        .context("failed in inserting serialized value into session")?;
+    let session_id = cookies
+        .get(COOKIE_NAME)
+        .context("unexpected error getting cookie name")?;
 
-    // Store session and get corresponding cookie
-    let cookie = store
-        .store_session(session)
-        .await
-        .context("failed to store session")?
-        .context("unexpected error retrieving cookie value")?;
+    let updated = sqlx::query(
+        "
+        UPDATE auth_sessions
+        SET
+            discord_user_id = $2,
+            avatar = $3,
+            username = $4,
+            discriminator = $5,
+            expires_at = NOW() + INTERVAL '30 days'
+        WHERE id = $1 AND expires_at > NOW()
+        ",
+    )
+    .bind(session_id)
+    .bind(&user_data.id)
+    .bind(&user_data.avatar)
+    .bind(&user_data.username)
+    .bind(&user_data.discriminator)
+    .execute(&pool)
+    .await
+    .context("failed to persist user session")?
+    .rows_affected();
+
+    if updated == 0 {
+        return Err(anyhow!("Session not found or expired").into());
+    }
 
     // Build the cookie
-    let cookie = format!("{COOKIE_NAME}={cookie}; SameSite=Lax; HttpOnly; Secure; Path=/");
+    let cookie = format!("{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly; Secure; Path=/");
 
     // Set cookie
     let mut headers = HeaderMap::new();
@@ -293,14 +289,14 @@ impl IntoResponse for AuthRedirect {
 
 impl<S> FromRequestParts<S> for User
 where
-    MemoryStore: FromRef<S>,
+    PgPool: FromRef<S>,
     S: Send + Sync,
 {
     // If anything goes wrong or no session is found, redirect to the auth page
     type Rejection = AuthRedirect;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let store = MemoryStore::from_ref(state);
+        let pool = PgPool::from_ref(state);
 
         let cookies = parts
             .extract::<TypedHeader<headers::Cookie>>()
@@ -314,13 +310,25 @@ where
             })?;
         let session_cookie = cookies.get(COOKIE_NAME).ok_or(AuthRedirect)?;
 
-        let session = store
-            .load_session(session_cookie.to_string())
-            .await
-            .unwrap()
-            .ok_or(AuthRedirect)?;
+        let user_row = sqlx::query_as::<_, (String, Option<String>, String, String)>(
+            "
+            SELECT discord_user_id, avatar, username, discriminator
+            FROM auth_sessions
+            WHERE id = $1 AND expires_at > NOW() AND discord_user_id IS NOT NULL
+            ",
+        )
+        .bind(session_cookie)
+        .fetch_optional(&pool)
+        .await
+        .map_err(|_| AuthRedirect)?
+        .ok_or(AuthRedirect)?;
 
-        let user = session.get::<User>("user").ok_or(AuthRedirect)?;
+        let user = User {
+            id: user_row.0,
+            avatar: user_row.1,
+            username: user_row.2,
+            discriminator: user_row.3,
+        };
 
         Ok(user)
     }
@@ -328,7 +336,7 @@ where
 
 impl<S> OptionalFromRequestParts<S> for User
 where
-    MemoryStore: FromRef<S>,
+    PgPool: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = Infallible;

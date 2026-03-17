@@ -19,7 +19,9 @@ fn main() {
     dioxus::serve(|| async {
         dotenvy::dotenv().ok();
 
-        let app = dioxus::server::router(App).merge(auth::routes()?);
+        let app = dioxus::server::router(App)
+            .merge(auth::routes(pool.clone())?)
+            .layer(axum::Extension(pool));
         Ok(app)
     })
 }
