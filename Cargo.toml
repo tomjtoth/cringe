@@ -12,6 +12,7 @@ axum = { version = "0.8.8", optional = true }
 axum-extra = { version = "0.12.5", features = [
     "typed-header",
 ], optional = true }
+base64 = "0.22.1"
 chrono = { version = "0.4.44", features = ["serde"] }
 dioxus = { version = "0.7.1", features = ["router", "fullstack"] }
 dotenvy = { version = "0.15.7", optional = true }
