@@ -1,9 +1,18 @@
 use dioxus::prelude::*;
 
 use crate::router::Route;
+use crate::state::client::get_my_pic;
 
 #[component]
 pub fn Navbar() -> Element {
+    let mut avatar_url = use_signal(|| None::<String>);
+
+    let _ = use_server_future(move || async move {
+        if let Ok(Some(pic)) = get_my_pic().await {
+            avatar_url.set(Some(pic.src()));
+        }
+    });
+
     rsx! {
         div { class: "grow overflow-hidden", Outlet::<Route> {} }
 
@@ -35,8 +44,13 @@ pub fn Navbar() -> Element {
             }
             li {
                 Link { to: Route::About {},
-                    "🧑"
-                    span { "profile" }
+
+                    if let Some(src) = avatar_url() {
+                        img { class: "w-6 border rounded-full", src }
+                    } else {
+                        "🧑"
+                        span { "profile" }
+                    }
                 }
             }
         }
