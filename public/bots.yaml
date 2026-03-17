@@ -8,6 +8,7 @@
 
   hometown: Mos Espa, Tatooine 🪐
   seeking: long-term, open to short
+  relationship_type: monogamy
   location: Coruscant
   # some Picnic near city center
   gps:
@@ -64,6 +65,7 @@
 
   hometown: Asgard 👽
   seeking: short-term fun
+  relationship_type: figuring out my relationship type
   # ~ REDI
   location: Helsinki
   gps:
@@ -117,6 +119,7 @@
 
   hometown: Corellia
   seeking: short-term, open to long
+  relationship_type: non-monogamy
   # ~ Tikkurin Hesburger
   location: Coruscant
   gps:
@@ -158,6 +161,7 @@
 
   hometown: Alderaan
   seeking: long-term
+  relationship_type: monogamy
   # Mall of Tripla
   gps:
     lon: 60.19836313262283
@@ -185,6 +189,7 @@
   height: 160
   education: MBA in logistics, chimney systems specialization
   occupation: Burglar
+  relationship_type: monogamy
 
   habits:
     drinking: yes
