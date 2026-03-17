@@ -185,7 +185,7 @@
 - name: Santa 🎅
   email: santa@real-human-bean.com
   gender: male
-  born: 0001-01-01
+  born: 0280-01-01
   height: 160
   education: MBA in logistics, chimney systems specialization
   occupation: Burglar
@@ -205,8 +205,20 @@
 
   prompts:
     - title: If loving this is wrong, I don't wanna be right
-      body: lapset, piparit & maito.
+      body: lapset, piparit & maito
+    - title: Best travel story
+      body: >
+        Around the world in one night 🦌🦌🦌🦌🦌🦌🦌🛷🎅
+        ... been doing it yearly since my 40s!
+    - title: I hype myself up by
+      body: singing Christmas carols
+    - title: My Love Language is
+      body: gifts 🎁🎁🎁
+    - title: I won't shut up
+      body: and yell ho-ho-ho while landing on every single rooftop
 
   pictures:
     - https://parade.com/.image/c_fill,w_1200,h_1200,g_faces:center/MTkwNTgxMDYyNDUyNTIwODI4/santa-facts-jpg.jpg
+    - https://as2.ftcdn.net/v2/jpg/04/78/81/13/1000_F_478811316_jT4TcE6IAslepJ7FNgTJw36zvCnt62Z0.jpg
+    - https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_1_1200x1200/public/field_blog_entry_teaser_image/2021-10/8479cdc2ae06a65f3218ce179ab6-1611309.jpg?itok=um5T3MJC
     - https://www.hollywoodreporter.com/wp-content/uploads/2022/11/163413_4279r_9caf121d-copy.jpg?w=1000&h=667&crop=1
