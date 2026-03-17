@@ -3,6 +3,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "server",
+    sqlx(type_name = "gender", rename_all = "lowercase")
+)]
 pub enum Gender {
     Male,
     Female,
@@ -31,6 +36,11 @@ pub enum Pic {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "server",
+    sqlx(type_name = "decision", rename_all = "lowercase")
+)]
 pub enum Decision {
     Like,
     Skip,
@@ -38,11 +48,17 @@ pub enum Decision {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "server",
+    sqlx(type_name = "frequency", rename_all = "lowercase")
+)]
 pub enum Frequency {
     Never,
     Rarely,
     Often,
     #[serde(rename = "yes")]
+    #[cfg_attr(feature = "server", sqlx(rename = "yes"))]
     YesPlease,
 }
 
@@ -60,16 +76,23 @@ impl std::fmt::Display for Frequency {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(feature = "server", sqlx(type_name = "seeking"))]
 pub enum Seeking {
     #[serde(rename = "short-term fun")]
+    #[cfg_attr(feature = "server", sqlx(rename = "short-term fun"))]
     ShortTermFun,
     #[serde(rename = "short-term, open to long")]
+    #[cfg_attr(feature = "server", sqlx(rename = "short-term, open to long"))]
     ShortTermOpenToLong,
     #[serde(rename = "long-term, open to short")]
+    #[cfg_attr(feature = "server", sqlx(rename = "long-term, open to short"))]
     LongTermOpenToShort,
     #[serde(rename = "long-term")]
+    #[cfg_attr(feature = "server", sqlx(rename = "long-term"))]
     LongTerm,
     #[serde(rename = "still figuring it out")]
+    #[cfg_attr(feature = "server", sqlx(rename = "still figuring it out"))]
     StillFiguringItOut,
 }
 
@@ -88,12 +111,17 @@ impl std::fmt::Display for Seeking {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(feature = "server", sqlx(type_name = "relationship_type"))]
 pub enum RelationshipType {
     #[serde(rename = "monogamy")]
+    #[cfg_attr(feature = "server", sqlx(rename = "monogamy"))]
     Monogamy,
     #[serde(rename = "non-monogamy")]
+    #[cfg_attr(feature = "server", sqlx(rename = "non-monogamy"))]
     NonMonogamy,
     #[serde(rename = "figuring out my relationship type")]
+    #[cfg_attr(feature = "server", sqlx(rename = "figuring out my relationship type"))]
     FiguringOutMyRelationshipType,
 }
 
