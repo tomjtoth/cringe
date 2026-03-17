@@ -1,17 +1,27 @@
-use std::sync::LazyLock;
-
 use crate::models::person::Person;
 
-fn load_people_from_yaml() -> Result<Vec<Person>, Box<dyn std::error::Error>> {
-    let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
-    let mut people = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
+pub async fn get_db() -> sqlx::PgPool {
+    let dioxus::prelude::dioxus_fullstack::extract::Extension(pool) =
+        dioxus::prelude::dioxus_fullstack::FullstackContext::extract::<
+            dioxus::prelude::dioxus_fullstack::extract::Extension<sqlx::PgPool>,
+            _,
+        >()
+        .await
+        .expect("PgPool extension is missing from server context");
 
-    // Keep bot IDs out of YAML and assign deterministic negatives at load time.
-    for (idx, person) in people.iter_mut().enumerate() {
-        person.id = Some(-((idx as i32) + 1));
+    pool
+}
+
+fn parse_yaml() -> anyhow::Result<Vec<Person>> {
+    let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
+    let mut bots = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
+
+    // assign negative IDs to bots
+    for (idx, bot) in bots.iter_mut().enumerate() {
+        bot.id = Some(-((idx as i32) + 1));
     }
 
-    Ok(people)
+    Ok(bots)
 }
 
 pub static BOTS: LazyLock<Vec<Person>> = LazyLock::new(|| {
@@ -39,7 +49,7 @@ fn no_broken_bot_img_urls() {
         .build()
         .unwrap();
 
-    let pps = load_people_from_yaml().unwrap();
+    let pps = parse_yaml().unwrap();
 
     for pp in pps {
         for (idx, img) in pp.pictures.iter().enumerate() {
