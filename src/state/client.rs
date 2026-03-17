@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::{Decision, Person};
+use crate::models::person::{Decision, Person, Pic};
 
 pub static PEEPS: GlobalSignal<Vec<Person>> = Signal::global(|| vec![]);
 
@@ -27,6 +27,51 @@ async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
 
     #[cfg(not(feature = "server"))]
     Ok(vec![])
+}
+
+#[get("/api/me/pic")]
+pub async fn get_my_pic() -> Result<Option<Pic>> {
+    #[cfg(feature = "server")]
+    {
+        let cookies = crate::state::server::get_cookies().await;
+
+        let session_id = match cookies.get("SESSION") {
+            Some(v) => v,
+            None => return Ok(None),
+        };
+
+        let pool = crate::state::server::get_db().await;
+
+        // Get user's primary avatar URL (if any)
+        let pic_parts: Option<(String, Vec<u8>)> = sqlx::query_scalar(
+            "
+            SELECT up.mime_type, up.image_bytes
+            FROM auth_sessions a
+            JOIN users u ON u.email = a.email
+            JOIN user_pictures up ON up.user_id = u.id
+            WHERE a.id = $1 AND a.expires_at > NOW()
+            ORDER BY up.position
+            LIMIT 1
+            ",
+        )
+        .bind(session_id)
+        .fetch_optional(&pool)
+        .await?;
+
+        let Some((mime_type, bytes)) = pic_parts else {
+            return Ok(None);
+        };
+
+        let pic = Pic::Uploaded {
+            bytes,
+            mime_type,
+            prompt: None,
+        };
+
+        Ok(Some(pic))
+    }
+    #[cfg(not(feature = "server"))]
+    Ok(None)
 }
 
 pub fn use_state_initializer() {
