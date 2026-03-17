@@ -17,7 +17,7 @@ async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
 
         // Demo query: fetch recent checks as (target_user_id, decision).
         let decisions = sqlx::query_as::<_, (i32, Decision)>(
-            "SELECT user_id2, decision FROM user_checks ORDER BY updated_at DESC LIMIT 500",
+            "SELECT target_user_id, decision FROM user_decisions ORDER BY updated_at DESC LIMIT 500",
         )
         .fetch_all(&pool)
         .await?;
