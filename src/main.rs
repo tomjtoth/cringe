@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::state::client::use_state_initializer;
+
 #[cfg(feature = "server")]
 mod auth;
 
@@ -35,6 +37,8 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    use_state_initializer();
+
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         document::Link { rel: "icon", href: "/icon.png" }

@@ -1,19 +1,38 @@
+use std::collections::HashMap;
+
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::Person;
+use crate::models::person::{Decision, Person};
 
 pub static PEEPS: GlobalSignal<Vec<Person>> = Signal::global(|| vec![]);
 
-#[get("/bots")]
-async fn get_bots() -> Result<Vec<Person>> {
-    Ok(super::server::BOTS.clone())
+pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| HashMap::new());
+
+#[get("/api/decisions")]
+async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
+    #[cfg(feature = "server")]
+    {
+        let pool = crate::state::server::get_db().await;
+
+        // Demo query: fetch recent checks as (target_user_id, decision).
+        let decisions = sqlx::query_as::<_, (i32, Decision)>(
+            "SELECT user_id2, decision FROM user_checks ORDER BY updated_at DESC LIMIT 500",
+        )
+        .fetch_all(&pool)
+        .await?;
+
+        Ok(decisions)
+    }
+
+    #[cfg(not(feature = "server"))]
+    Ok(vec![])
 }
 
-pub fn use_bot_loader() {
+pub fn use_state_initializer() {
     let _ = use_server_future(|| async {
-        if let Ok(mut bots) = get_bots().await {
-            PEEPS.write().append(&mut bots);
+        if let Ok(decisions) = get_decisions().await {
+            DECISIONS.write().extend(decisions);
             println!("writing peeps succeeded!");
         } else {
             eprintln!("writing peeps failed!");
