@@ -87,6 +87,28 @@ impl std::fmt::Display for Seeking {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum RelationshipType {
+    #[serde(rename = "monogamy")]
+    Monogamy,
+    #[serde(rename = "non-monogamy")]
+    NonMonogamy,
+    #[serde(rename = "figuring out my relationship type")]
+    FiguringOutMyRelationshipType,
+}
+
+impl std::fmt::Display for RelationshipType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let label = match self {
+            Self::Monogamy => "💍 Monogamy",
+            Self::NonMonogamy => "🌈 Non-monogamy",
+            Self::FiguringOutMyRelationshipType => "🧭 Figuring out my relationship type",
+        };
+
+        f.write_str(label)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PersonPrompt {
     pub title: String,
@@ -181,6 +203,7 @@ pub struct Person {
 
     pub hometown: Option<String>,
     pub seeking: Option<Seeking>,
+    pub relationship_type: Option<RelationshipType>,
     pub kids: Option<Kids>,
     pub habits: Option<Habits>,
     pub prompts: Vec<PersonPrompt>,
