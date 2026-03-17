@@ -104,10 +104,7 @@ CREATE INDEX user_pictures_user_id_idx ON user_pictures(user_id);
 CREATE TABLE auth_sessions (
 	id TEXT PRIMARY KEY,
 	csrf_token TEXT,
-	discord_user_id TEXT,
-	avatar TEXT,
-	username TEXT,
-	discriminator TEXT,
+	email TEXT,
 	expires_at TIMESTAMPTZ NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

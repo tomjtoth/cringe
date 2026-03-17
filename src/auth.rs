@@ -10,22 +10,22 @@
 
 use anyhow::{anyhow, Context, Result};
 use axum::{
-    extract::{FromRef, FromRequestParts, OptionalFromRequestParts, Query, State},
+    extract::{FromRef, Query, State},
     http::{header::SET_COOKIE, HeaderMap},
     response::{IntoResponse, Redirect, Response},
     routing::get,
-    RequestPartsExt, Router,
+    Router,
 };
-use axum_extra::{headers, typed_header::TypedHeaderRejectionReason, TypedHeader};
+use axum_extra::{headers, TypedHeader};
 use dioxus::logger::tracing;
-use http::{header, request::Parts, StatusCode};
+use http::StatusCode;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EndpointNotSet, EndpointSet,
     RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::PgPool;
-use std::{convert::Infallible, env};
+use std::env;
 
 static COOKIE_NAME: &str = "SESSION";
 
@@ -44,7 +44,6 @@ pub fn routes(pool: PgPool) -> Result<Router> {
     let auth_layer = Router::new()
         .route("/auth/discord", get(discord_auth))
         .route("/auth/authorized", get(login_authorized))
-        .route("/protected", get(protected))
         .route("/logout", get(logout))
         .with_state(app_state);
 
@@ -82,7 +81,7 @@ fn oauth_client() -> Result<BasicClient> {
     let redirect_url = env::var("REDIRECT_URL")
         .unwrap_or_else(|_| "http://127.0.0.1:8080/auth/authorized".to_string());
 
-    let auth_url = env::var("AUTH_URL").unwrap_or_else(|_| {
+    let auth_url = env::var("AUTH_DISCORD_URL").unwrap_or_else(|_| {
         "https://discord.com/api/oauth2/authorize?response_type=code".to_string()
     });
 
@@ -100,14 +99,11 @@ fn oauth_client() -> Result<BasicClient> {
         ))
 }
 
-// The user data we'll get back from Discord.
-// https://discord.com/developers/docs/resources/user#user-object-user-structure
-#[derive(Debug, Serialize, Deserialize)]
-struct User {
-    id: String,
-    avatar: Option<String>,
-    username: String,
-    discriminator: String,
+// Discord may omit email-related fields even when the email scope is requested.
+#[derive(Debug, Deserialize)]
+struct DiscordUser {
+    email: Option<String>,
+    verified: Option<bool>,
 }
 
 async fn discord_auth(
@@ -116,14 +112,14 @@ async fn discord_auth(
 ) -> Result<impl IntoResponse, AppError> {
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new("identify".to_string()))
+        .add_scope(Scope::new("email".to_string()))
         .url();
 
     let session_id = CsrfToken::new_random().secret().to_string();
     sqlx::query(
         "
-        INSERT INTO auth_sessions (id, csrf_token, expires_at)
-        VALUES ($1, $2, NOW() + INTERVAL '15 minutes')
+        INSERT INTO auth_sessions (id, csrf_token, email, expires_at)
+        VALUES ($1, $2, NULL, NOW() + INTERVAL '15 minutes')
         ",
     )
     .bind(&session_id)
@@ -141,11 +137,6 @@ async fn discord_auth(
     );
 
     Ok((headers, Redirect::to(auth_url.as_ref())))
-}
-
-// Valid user session required. If there is none, redirect to the auth page
-async fn protected(user: User) -> impl IntoResponse {
-    format!("Welcome to the protected area :)\nHere's your info:\n{user:?}")
 }
 
 async fn logout(
@@ -225,16 +216,24 @@ async fn login_authorized(
         .context("failed in sending request request to authorization server")?;
 
     // Fetch user data from discord
-    let user_data: User = client
+    let user_data = client
         // https://discord.com/developers/docs/resources/user#get-current-user
         .get("https://discordapp.com/api/users/@me")
         .bearer_auth(token.access_token().secret())
         .send()
         .await
         .context("failed in sending request to target Url")?
-        .json::<User>()
+        .json::<DiscordUser>()
         .await
         .context("failed to deserialize response as JSON")?;
+
+    let email = user_data
+        .email
+        .ok_or_else(|| anyhow!("Discord account did not provide an email"))?;
+
+    if !user_data.verified.unwrap_or(false) {
+        return Err(anyhow!("Discord account email is not verified").into());
+    }
 
     let session_id = cookies
         .get(COOKIE_NAME)
@@ -244,19 +243,13 @@ async fn login_authorized(
         "
         UPDATE auth_sessions
         SET
-            discord_user_id = $2,
-            avatar = $3,
-            username = $4,
-            discriminator = $5,
+            email = $2,
             expires_at = NOW() + INTERVAL '30 days'
         WHERE id = $1 AND expires_at > NOW()
         ",
     )
     .bind(session_id)
-    .bind(&user_data.id)
-    .bind(&user_data.avatar)
-    .bind(&user_data.username)
-    .bind(&user_data.discriminator)
+    .bind(&email)
     .execute(&pool)
     .await
     .context("failed to persist user session")?
@@ -277,79 +270,6 @@ async fn login_authorized(
     );
 
     Ok((headers, Redirect::to("/")))
-}
-
-struct AuthRedirect;
-
-impl IntoResponse for AuthRedirect {
-    fn into_response(self) -> Response {
-        Redirect::temporary("/auth/discord").into_response()
-    }
-}
-
-impl<S> FromRequestParts<S> for User
-where
-    PgPool: FromRef<S>,
-    S: Send + Sync,
-{
-    // If anything goes wrong or no session is found, redirect to the auth page
-    type Rejection = AuthRedirect;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let pool = PgPool::from_ref(state);
-
-        let cookies = parts
-            .extract::<TypedHeader<headers::Cookie>>()
-            .await
-            .map_err(|e| match *e.name() {
-                header::COOKIE => match e.reason() {
-                    TypedHeaderRejectionReason::Missing => AuthRedirect,
-                    _ => panic!("unexpected error getting Cookie header(s): {e}"),
-                },
-                _ => panic!("unexpected error getting cookies: {e}"),
-            })?;
-        let session_cookie = cookies.get(COOKIE_NAME).ok_or(AuthRedirect)?;
-
-        let user_row = sqlx::query_as::<_, (String, Option<String>, String, String)>(
-            "
-            SELECT discord_user_id, avatar, username, discriminator
-            FROM auth_sessions
-            WHERE id = $1 AND expires_at > NOW() AND discord_user_id IS NOT NULL
-            ",
-        )
-        .bind(session_cookie)
-        .fetch_optional(&pool)
-        .await
-        .map_err(|_| AuthRedirect)?
-        .ok_or(AuthRedirect)?;
-
-        let user = User {
-            id: user_row.0,
-            avatar: user_row.1,
-            username: user_row.2,
-            discriminator: user_row.3,
-        };
-
-        Ok(user)
-    }
-}
-
-impl<S> OptionalFromRequestParts<S> for User
-where
-    PgPool: FromRef<S>,
-    S: Send + Sync,
-{
-    type Rejection = Infallible;
-
-    async fn from_request_parts(
-        parts: &mut Parts,
-        state: &S,
-    ) -> Result<Option<Self>, Self::Rejection> {
-        match <User as FromRequestParts<S>>::from_request_parts(parts, state).await {
-            Ok(res) => Ok(Some(res)),
-            Err(AuthRedirect) => Ok(None),
-        }
-    }
 }
 
 // Use anyhow, define error and enable '?'
