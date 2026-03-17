@@ -1,25 +1,21 @@
 use dioxus::prelude::*;
 
-use crate::{models::person::Liked, state::client::PEEPS};
+use crate::{models::person::Decision, state::client::DECISIONS};
 
 #[component]
 pub fn LikeButton(id: i32) -> Element {
-    let person_liked = PEEPS.iter().find(|p| p.id == Some(id)).unwrap().liked;
+    let liked_already =
+        DECISIONS.with(|decisions| matches!(decisions.get(&id), Some(&Decision::Like)));
 
     rsx! {
-        if !matches!(person_liked, Some(Liked::Yes)) {
+        if !liked_already {
             button {
                 class: "absolute z-2 bottom-5 right-5 p-3
                         bg-background border rounded-full
                         cursor-pointer select-none",
 
                 onclick: move |_| {
-                    for p in PEEPS.write().iter_mut() {
-                        if p.id == Some(id) {
-                            p.liked = Some(Liked::Yes);
-                            break;
-                        }
-                    }
+                    DECISIONS.write().insert(id, Decision::Like);
                 },
                 "❤️"
             }
