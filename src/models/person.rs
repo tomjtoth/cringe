@@ -31,9 +31,9 @@ pub enum Pic {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum Liked {
-    Yes,
-    No,
+pub enum Decision {
+    Like,
+    Skip,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -208,7 +208,6 @@ pub struct Person {
     pub habits: Option<Habits>,
     pub prompts: Vec<PersonPrompt>,
     pub pictures: Vec<Pic>,
-    pub liked: Option<Liked>,
 }
 
 impl Person {
