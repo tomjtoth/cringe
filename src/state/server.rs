@@ -24,19 +24,100 @@ fn parse_yaml() -> anyhow::Result<Vec<Person>> {
     Ok(bots)
 }
 
-pub static BOTS: LazyLock<Vec<Person>> = LazyLock::new(|| {
-    // Load people from YAML on server startup
-    match load_people_from_yaml() {
-        Ok(p) => {
-            println!("Loaded {} people from bots.yaml", p.len());
-            p
+pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
+    let bots = parse_yaml()?;
+    let bots_len = bots.len();
+    let mut tx = pool.begin().await?;
+
+    // drop all bots on server startup
+    sqlx::query("DELETE FROM users WHERE id < 0")
+        .execute(&mut *tx)
+        .await?;
+
+    for bot in bots {
+        let user_id: i32 = sqlx::query_scalar(
+            "
+            INSERT INTO users (
+                name,
+                gender,
+                born,
+                height,
+                education,
+                occupation,
+                location,
+                hometown,
+                gps_lat,
+                gps_lon,
+                seeking,
+                relationship_type,
+                kids_has,
+                kids_wants,
+                habits_drinking,
+                habits_smoking,
+                habits_marijuana,
+                habits_drugs
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                $11, $12, $13, $14, $15, $16, $17, $18
+            )
+            RETURNING id
+            ",
+        )
+        .bind(&bot.name)
+        .bind(bot.gender)
+        .bind(bot.born)
+        .bind(i16::from(bot.height))
+        .bind(bot.education)
+        .bind(bot.occupation)
+        .bind(bot.location)
+        .bind(bot.hometown)
+        .bind(bot.gps.as_ref().map(|g| g.lat))
+        .bind(bot.gps.as_ref().map(|g| g.lon))
+        .bind(bot.seeking)
+        .bind(bot.relationship_type)
+        .bind(bot.kids.as_ref().and_then(|k| k.has).map(i16::from))
+        .bind(bot.kids.as_ref().and_then(|k| k.wants).map(i16::from))
+        .bind(bot.habits.as_ref().and_then(|h| h.drinking))
+        .bind(bot.habits.as_ref().and_then(|h| h.smoking))
+        .bind(bot.habits.as_ref().and_then(|h| h.marijuana))
+        .bind(bot.habits.as_ref().and_then(|h| h.drugs))
+        .fetch_one(&mut *tx)
+        .await?;
+
+        for (position, prompt) in bot.prompts.into_iter().enumerate() {
+            sqlx::query(
+                "INSERT INTO user_prompts (user_id, position, title, body) VALUES ($1, $2, $3, $4)",
+            )
+            .bind(user_id)
+            .bind(position as i32)
+            .bind(prompt.title)
+            .bind(prompt.body)
+            .execute(&mut *tx)
+            .await?;
         }
-        Err(e) => {
-            eprintln!("Failed to load bots.yaml: {}", e);
-            vec![]
+
+        for (position, picture) in bot.pictures.into_iter().enumerate() {
+            let (url, prompt) = match picture {
+                crate::models::person::Pic::Url(url) => (url, None),
+                crate::models::person::Pic::Advanced { url, prompt } => (url, prompt),
+            };
+
+            sqlx::query(
+                "INSERT INTO user_pictures (user_id, position, url, prompt) VALUES ($1, $2, $3, $4)",
+            )
+            .bind(user_id)
+            .bind(position as i32)
+            .bind(url)
+            .bind(prompt)
+            .execute(&mut *tx)
+            .await?;
         }
     }
-});
+
+    tx.commit().await?;
+    println!("Loaded and seeded {} people from bots.yaml", bots_len);
+    Ok(())
+}
 
 #[test]
 fn no_broken_bot_img_urls() {

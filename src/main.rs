@@ -18,6 +18,13 @@ fn main() {
     #[cfg(feature = "server")]
     dioxus::serve(|| async {
         dotenvy::dotenv().ok();
+        use sqlx::PgPool;
+
+        let pool = PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
+
+        if let Err(e) = crate::state::server::seed_bots(&pool).await {
+            eprintln!("Failed to load bots.yaml: {}", e);
+        }
 
         let app = dioxus::server::router(App)
             .merge(auth::routes(pool.clone())?)
