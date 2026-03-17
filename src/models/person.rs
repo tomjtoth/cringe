@@ -59,6 +59,34 @@ impl std::fmt::Display for Frequency {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub enum Seeking {
+    #[serde(rename = "short-term fun")]
+    ShortTermFun,
+    #[serde(rename = "short-term, open to long")]
+    ShortTermOpenToLong,
+    #[serde(rename = "long-term, open to short")]
+    LongTermOpenToShort,
+    #[serde(rename = "long-term")]
+    LongTerm,
+    #[serde(rename = "still figuring it out")]
+    StillFiguringItOut,
+}
+
+impl std::fmt::Display for Seeking {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let label = match self {
+            Self::ShortTermFun => "🎉 Short-term fun",
+            Self::ShortTermOpenToLong => "🪄 Short-term, open to long",
+            Self::LongTermOpenToShort => "🍷 Long-term, open to short",
+            Self::LongTerm => "❤️ Long-term",
+            Self::StillFiguringItOut => "🤔 Still figuring it out",
+        };
+
+        f.write_str(label)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PersonPrompt {
     pub title: String,
@@ -152,6 +180,7 @@ pub struct Person {
     pub distance: Option<u16>,
 
     pub hometown: Option<String>,
+    pub seeking: Option<Seeking>,
     pub kids: Option<Kids>,
     pub habits: Option<Habits>,
     pub prompts: Vec<PersonPrompt>,
