@@ -64,6 +64,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         let user_id: i32 = sqlx::query_scalar(
             "
             INSERT INTO users (
+                id,
                 name,
                 email,
                 gender,
@@ -84,12 +85,13 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
                 habits_marijuana,
                 habits_drugs
             ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                $11, $12, $13, $14, $15, $16, $17, $18, $19
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
+                $12, $13, $14, $15, $16, $17, $18, $19, $20
             )
             RETURNING id
             ",
         )
+        .bind(&bot.id)
         .bind(&bot.name)
         .bind(&bot.email)
         .bind(bot.gender)
@@ -138,7 +140,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
     }
 
     tx.commit().await?;
-    println!("Loaded and seeded {} people from bots.yaml", bots_len);
+    println!("Loaded and seeded {} profiles from bots.yaml", bots_len);
     Ok(())
 }
 
