@@ -3,7 +3,7 @@ use dioxus::{
     prelude::dioxus_fullstack::{extract::Extension as FullstackExtension, FullstackContext},
 };
 
-use crate::models::person::Person;
+use crate::{auth::COOKIE_NAME, models::person::Person};
 
 pub async fn get_db() -> sqlx::PgPool {
     let FullstackExtension(pool) =
@@ -14,13 +14,24 @@ pub async fn get_db() -> sqlx::PgPool {
     pool
 }
 
-pub async fn get_cookies() -> axum_extra::headers::Cookie {
-    let TypedHeader(cookies) =
-        FullstackContext::extract::<TypedHeader<axum_extra::headers::Cookie>, _>()
-            .await
-            .expect("Cookie header missing from server context");
+async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
+    if let Ok(TypedHeader(cookies)) =
+        FullstackContext::extract::<TypedHeader<axum_extra::headers::Cookie>, _>().await
+    {
+        return Some(cookies);
+    }
 
-    cookies
+    None
+}
+
+pub async fn get_session_id() -> Option<String> {
+    if let Some(cookies) = get_cookies().await {
+        if let Some(id) = cookies.get(COOKIE_NAME) {
+            return Some(String::from(id));
+        }
+    }
+
+    None
 }
 
 fn parse_yaml() -> anyhow::Result<Vec<Person>> {
