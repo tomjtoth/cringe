@@ -1,10 +1,30 @@
-BEGIN;
+CREATE TABLE auth_sessions (
+	id TEXT PRIMARY KEY,
+	csrf_token TEXT,
+	email TEXT,
+	expires_at TIMESTAMPTZ NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
-CREATE TYPE gender AS ENUM ('male', 'female');
+CREATE INDEX auth_sessions_expires_idx ON auth_sessions(expires_at);
 
-CREATE TYPE decision AS ENUM ('like', 'skip');
 
-CREATE TYPE frequency AS ENUM ('never', 'rarely', 'often', 'yes');
+CREATE TYPE gender AS ENUM (
+	'male',
+	'female'
+);
+
+CREATE TYPE decision AS ENUM (
+	'like',
+	'skip'
+);
+
+CREATE TYPE frequency AS ENUM (
+	'never',
+	'rarely',
+	'often',
+	'yes'
+);
 
 CREATE TYPE seeking AS ENUM (
 	'short-term fun',
@@ -101,16 +121,6 @@ CREATE TABLE user_pictures (
 
 CREATE INDEX user_pictures_user_id_idx ON user_pictures(user_id);
 
-CREATE TABLE auth_sessions (
-	id TEXT PRIMARY KEY,
-	csrf_token TEXT,
-	email TEXT,
-	expires_at TIMESTAMPTZ NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX auth_sessions_expires_idx ON auth_sessions(expires_at);
-
 CREATE TABLE user_decisions (
 	actor_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -124,5 +134,3 @@ CREATE TABLE user_decisions (
 CREATE INDEX user_decisions_actor_user_id_idx ON user_decisions(actor_user_id);
 CREATE INDEX user_decisions_target_user_id_idx ON user_decisions(target_user_id);
 CREATE INDEX user_decisions_decision_idx ON user_decisions(decision);
-
-COMMIT;
