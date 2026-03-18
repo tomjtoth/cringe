@@ -37,6 +37,10 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .await?;
 
     for bot in bots {
+        let habits = bot.habits.as_ref();
+        let kids = bot.kids.as_ref();
+        let gps = bot.gps.as_ref();
+
         let user_id: i32 = sqlx::query_scalar(
             "
             INSERT INTO users (
@@ -75,16 +79,16 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .bind(bot.occupation)
         .bind(bot.location)
         .bind(bot.hometown)
-        .bind(bot.gps.as_ref().map(|g| g.lat))
-        .bind(bot.gps.as_ref().map(|g| g.lon))
+        .bind(gps.map(|g| g.lat))
+        .bind(gps.map(|g| g.lon))
         .bind(bot.seeking)
         .bind(bot.relationship_type)
-        .bind(bot.kids.as_ref().and_then(|k| k.has).map(i16::from))
-        .bind(bot.kids.as_ref().and_then(|k| k.wants).map(i16::from))
-        .bind(bot.habits.as_ref().and_then(|h| h.drinking))
-        .bind(bot.habits.as_ref().and_then(|h| h.smoking))
-        .bind(bot.habits.as_ref().and_then(|h| h.marijuana))
-        .bind(bot.habits.as_ref().and_then(|h| h.drugs))
+        .bind(kids.and_then(|k| k.has).map(i16::from))
+        .bind(kids.and_then(|k| k.wants).map(i16::from))
+        .bind(habits.and_then(|h| h.drinking))
+        .bind(habits.and_then(|h| h.smoking))
+        .bind(habits.and_then(|h| h.marijuana))
+        .bind(habits.and_then(|h| h.drugs))
         .fetch_one(&mut *tx)
         .await?;
 
@@ -100,19 +104,14 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
             .await?;
         }
 
-        for (position, picture) in bot.pictures.into_iter().enumerate() {
-            let (url, prompt) = match picture {
-                crate::models::person::Pic::Url(url) => (url, None),
-                crate::models::person::Pic::Advanced { url, prompt } => (url, prompt),
-            };
-
+        for (position, pic) in bot.pictures.into_iter().enumerate() {
             sqlx::query(
                 "INSERT INTO user_pictures (user_id, position, url, prompt) VALUES ($1, $2, $3, $4)",
             )
             .bind(user_id)
             .bind(position as i32)
-            .bind(url)
-            .bind(prompt)
+            .bind(pic.src())
+            .bind(pic.prompt())
             .execute(&mut *tx)
             .await?;
         }
