@@ -27,7 +27,8 @@ use serde::Deserialize;
 use sqlx::PgPool;
 use std::env;
 
-static COOKIE_NAME: &str = "SESSION";
+pub static COOKIE_NAME: &str = "SESSION";
+static REDIRECT_URL: &str = "http://127.0.0.1:8080/auth/authorized";
 
 type BasicClient = oauth2::basic::BasicClient<
     EndpointSet,
@@ -78,8 +79,7 @@ fn oauth_client() -> Result<BasicClient> {
 
     let client_id = env::var("AUTH_DISCORD_ID").context("Missing AUTH_DISCORD_ID!")?;
     let client_secret = env::var("AUTH_DISCORD_SECRET").context("Missing AUTH_DISCORD_SECRET!")?;
-    let redirect_url = env::var("REDIRECT_URL")
-        .unwrap_or_else(|_| "http://127.0.0.1:8080/auth/authorized".to_string());
+    let redirect_url = env::var("REDIRECT_URL").unwrap_or_else(|_| REDIRECT_URL.to_string());
 
     let auth_url = env::var("AUTH_DISCORD_URL").unwrap_or_else(|_| {
         "https://discord.com/api/oauth2/authorize?response_type=code".to_string()
@@ -97,6 +97,16 @@ fn oauth_client() -> Result<BasicClient> {
         .set_redirect_uri(
             RedirectUrl::new(redirect_url).context("failed to create new redirection URL")?,
         ))
+}
+
+fn build_session_cookie(session_id: &str) -> String {
+    let redirect_url = std::env::var("REDIRECT_URL").unwrap_or_else(|_| REDIRECT_URL.to_string());
+    let using_dev_url = redirect_url == REDIRECT_URL;
+
+    format!(
+        "{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly;{} Path=/",
+        if using_dev_url { "" } else { " Secure;" }
+    )
 }
 
 // Discord may omit email-related fields even when the email scope is requested.
@@ -129,7 +139,7 @@ async fn discord_auth(
     .context("failed to store csrf session")?;
 
     // Attach the session cookie to the response header
-    let cookie = format!("{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly; Secure; Path=/");
+    let cookie = build_session_cookie(&session_id);
     let mut headers = HeaderMap::new();
     headers.insert(
         SET_COOKIE,
@@ -259,10 +269,8 @@ async fn login_authorized(
         return Err(anyhow!("Session not found or expired").into());
     }
 
-    // Build the cookie
-    let cookie = format!("{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly; Secure; Path=/");
-
-    // Set cookie
+    // Build and set the cookie
+    let cookie = build_session_cookie(session_id);
     let mut headers = HeaderMap::new();
     headers.insert(
         SET_COOKIE,
