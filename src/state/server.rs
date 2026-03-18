@@ -1,13 +1,15 @@
+use dioxus::{
+    fullstack::TypedHeader,
+    prelude::dioxus_fullstack::{extract::Extension as FullstackExtension, FullstackContext},
+};
+
 use crate::models::person::Person;
 
 pub async fn get_db() -> sqlx::PgPool {
-    let dioxus::prelude::dioxus_fullstack::extract::Extension(pool) =
-        dioxus::prelude::dioxus_fullstack::FullstackContext::extract::<
-            dioxus::prelude::dioxus_fullstack::extract::Extension<sqlx::PgPool>,
-            _,
-        >()
-        .await
-        .expect("PgPool extension is missing from server context");
+    let FullstackExtension(pool) =
+        FullstackContext::extract::<FullstackExtension<sqlx::PgPool>, _>()
+            .await
+            .expect("PgPool extension is missing from server context");
 
     pool
 }
