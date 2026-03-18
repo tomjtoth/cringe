@@ -124,12 +124,9 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
 
 #[test]
 fn no_broken_bot_img_urls() {
-    use crate::models::person::Pic;
-    use std::time::Duration;
-
     let client = reqwest::blocking::Client::builder()
         .user_agent("Mozilla/5.0 (compatible; cringe-bot/1.0)")
-        .timeout(Duration::from_secs(15))
+        .timeout(std::time::Duration::from_secs(15))
         .build()
         .unwrap();
 
@@ -137,10 +134,11 @@ fn no_broken_bot_img_urls() {
 
     for pp in pps {
         for (idx, img) in pp.pictures.iter().enumerate() {
-            let src = match img {
-                Pic::Url(src) => src,
-                Pic::Advanced { url, .. } => url,
-            };
+            if matches!(img, crate::models::person::Pic::Uploaded { .. }) {
+                continue;
+            }
+
+            let src = &img.src();
 
             // check only 3rd party links
             if src.starts_with("https://") {
