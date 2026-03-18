@@ -14,6 +14,15 @@ pub async fn get_db() -> sqlx::PgPool {
     pool
 }
 
+pub async fn get_cookies() -> axum_extra::headers::Cookie {
+    let TypedHeader(cookies) =
+        FullstackContext::extract::<TypedHeader<axum_extra::headers::Cookie>, _>()
+            .await
+            .expect("Cookie header missing from server context");
+
+    cookies
+}
+
 fn parse_yaml() -> anyhow::Result<Vec<Person>> {
     let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
     let mut bots = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
