@@ -4,6 +4,8 @@ use crate::state::client::use_state_initializer;
 
 #[cfg(feature = "server")]
 mod auth;
+#[cfg(feature = "server")]
+mod db;
 
 mod models;
 mod navbar;
@@ -20,9 +22,10 @@ fn main() {
     #[cfg(feature = "server")]
     dioxus::serve(|| async {
         dotenvy::dotenv().ok();
-        use sqlx::PgPool;
 
-        let pool = PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
+        let pool = sqlx::PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
+
+        crate::db::migrate(&pool).await?;
 
         if let Err(e) = crate::state::server::seed_bots(&pool).await {
             eprintln!("Failed to load bots.yaml: {}", e);
