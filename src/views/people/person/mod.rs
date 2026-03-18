@@ -69,8 +69,10 @@ pub fn Person(id: i32) -> Element {
                                 "🍼 "
                                 if wants > 0 {
                                     "Wants {wants}"
-                                } else {
+                                } else if wants == 0 {
                                     "Doesn't want"
+                                } else {
+                                    "Doesn't know if wants any"
                                 }
                                 if already_has_kids {
                                     " more"
