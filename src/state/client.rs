@@ -75,12 +75,13 @@ pub async fn get_my_pic() -> Result<Option<Pic>> {
 }
 
 pub fn use_state_initializer() {
+    update_coords();
     let _ = use_server_future(|| async {
         if let Ok(decisions) = get_decisions().await {
             DECISIONS.write().extend(decisions);
-            println!("writing peeps succeeded!");
+            println!("writing decisions succeeded!");
         } else {
-            eprintln!("writing peeps failed!");
+            eprintln!("writing decisions failed!");
         }
     });
 }
@@ -98,7 +99,7 @@ struct Coords {
     lon: f64,
 }
 
-pub fn update_coords() {
+fn update_coords() {
     #[cfg(target_arch = "wasm32")]
     {
         use wasm_bindgen::{closure::Closure, JsCast};
