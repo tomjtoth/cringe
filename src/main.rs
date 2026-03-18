@@ -4,8 +4,6 @@ use crate::state::client::use_state_initializer;
 
 #[cfg(feature = "server")]
 mod auth;
-#[cfg(feature = "server")]
-mod db;
 
 mod models;
 mod navbar;
@@ -25,7 +23,7 @@ fn main() {
 
         let pool = sqlx::PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
 
-        crate::db::migrate(&pool).await?;
+        sqlx::migrate!().run(&pool).await?;
 
         if let Err(e) = crate::state::server::seed_bots(&pool).await {
             eprintln!("Failed to load bots.yaml: {}", e);
