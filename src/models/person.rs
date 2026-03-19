@@ -16,12 +16,14 @@ pub enum Gender {
     Female,
 }
 
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Kids {
     pub has: Option<i8>,
     pub wants: Option<i8>,
 }
 
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Habits {
     pub drinking: Option<Frequency>,
@@ -177,6 +179,7 @@ impl std::fmt::Display for RelationshipType {
     }
 }
 
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PersonPrompt {
     pub title: String,
@@ -249,12 +252,14 @@ impl std::fmt::Display for ZodiacSign {
     }
 }
 
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Gps {
     pub lat: f64,
     pub lon: f64,
 }
 
+#[cfg_attr(feature = "server", derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Person {
     pub id: Option<i32>,
@@ -262,7 +267,8 @@ pub struct Person {
     pub email: Option<String>,
     pub gender: Gender,
     pub born: NaiveDate,
-    pub height: u8,
+
+    pub height: i16,
     pub education: Option<String>,
     pub occupation: Option<String>,
 
@@ -273,7 +279,7 @@ pub struct Person {
     pub gps: Option<Gps>,
 
     // u16::MAX = 65_535 vs. 40_075 largest Earth circumference
-    pub distance: Option<u16>,
+    pub distance: Option<i16>,
 
     pub hometown: Option<String>,
     pub seeking: Option<Seeking>,
