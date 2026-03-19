@@ -156,10 +156,6 @@ fn no_broken_bot_img_urls() {
 
     for pp in pps {
         for (idx, img) in pp.pictures.iter().enumerate() {
-            if matches!(img, crate::models::person::Pic::Uploaded { .. }) {
-                continue;
-            }
-
             let src = &img.src();
 
             // check only 3rd party links
