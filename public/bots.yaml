@@ -260,3 +260,39 @@
 
     - prompt: This could be you
       url: mike/this-could-be-you.jpg
+
+- name: C. J. Parker
+  email: c.j.parker@bay.watch
+  gender: female
+  born: 1967-07-01
+  height: 170
+  education: School of Sun, Sand & Surf
+  occupation: Lifeguard / TV Personality
+
+  location: Los Angeles
+  gps:
+    lon: -118.4912
+    lat: 34.0195
+
+  prompts:
+    - title: Beach day essentials
+      body: >
+        Sunscreen, a great playlist, and someone who can run in slow motion beside me.
+
+    - title: My perfect weekend
+      body: >
+        Sunrise surf, a farmers market brunch, and an evening bonfire with good friends.
+
+    - title: Looking for
+      body: >
+        Someone confident, kind, and up for spontaneous dance-offs on the sand.
+
+  pictures:
+    - prompt: Low-key flex
+      url: https://static.wikia.nocookie.net/baywatch/images/7/7c/Pamela-anderson-cj-parker.jpg/revision/latest/scale-to-width-down/1200?cb=20151229045935
+
+    - prompt: Saving lives
+      url: https://img.cas.sk/cas/900px/2584359.jpg
+
+    - prompt: This could be you
+      url: cj-parker/this-could-be-you.jpg
