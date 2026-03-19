@@ -1,6 +1,9 @@
 use chrono::{Datelike, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "server")]
+use sqlx::types::Json;
+
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -64,6 +67,12 @@ impl Pic {
         }
     }
 }
+
+#[cfg(feature = "server")]
+type Pictures = Json<Vec<Pic>>;
+#[cfg(not(feature = "server"))]
+type Pictures = Vec<Pic>;
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -174,6 +183,11 @@ pub struct PersonPrompt {
     pub body: String,
 }
 
+#[cfg(feature = "server")]
+type Prompts = Json<Vec<PersonPrompt>>;
+#[cfg(not(feature = "server"))]
+type Prompts = Vec<PersonPrompt>;
+
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ZodiacSign {
@@ -266,14 +280,34 @@ pub struct Person {
     pub relationship_type: Option<RelationshipType>,
     pub kids: Option<Kids>,
     pub habits: Option<Habits>,
-    pub prompts: Vec<PersonPrompt>,
-    pub pictures: Vec<Pic>,
+    pub prompts: Prompts,
+    pub pictures: Pictures,
 }
 
 impl Person {
     pub fn age(&self) -> u32 {
         let today = Utc::now().date_naive();
         today.years_since(self.born).unwrap()
+    }
+
+    pub fn pics(&self) -> &Vec<Pic> {
+        #[cfg(feature = "server")]
+        {
+            self.pictures.as_ref()
+        }
+
+        #[cfg(not(feature = "server"))]
+        &self.pictures
+    }
+
+    pub fn prompts(&self) -> &Vec<PersonPrompt> {
+        #[cfg(feature = "server")]
+        {
+            self.prompts.as_ref()
+        }
+
+        #[cfg(not(feature = "server"))]
+        &self.prompts
     }
 
     pub fn zodiac_sign(&self) -> ZodiacSign {

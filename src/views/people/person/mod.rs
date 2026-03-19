@@ -20,8 +20,8 @@ pub fn Person(id: i32) -> Element {
 
     let mut already_has_kids = false;
 
-    let mut pics = person.pictures.clone().into_iter();
-    let mut prompts = person.prompts.clone().into_iter();
+    let mut pics = person.pics().clone().into_iter();
+    let mut prompts = person.prompts().clone().into_iter();
 
     rsx! {
 
