@@ -222,3 +222,41 @@
     - https://as2.ftcdn.net/v2/jpg/04/78/81/13/1000_F_478811316_jT4TcE6IAslepJ7FNgTJw36zvCnt62Z0.jpg
     - https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_1_1200x1200/public/field_blog_entry_teaser_image/2021-10/8479cdc2ae06a65f3218ce179ab6-1611309.jpg?itok=um5T3MJC
     - https://www.hollywoodreporter.com/wp-content/uploads/2022/11/163413_4279r_9caf121d-copy.jpg?w=1000&h=667&crop=1
+
+- name: Magic Mike
+  email: mike@magic.com
+  gender: male
+  born: 1980-04-26
+  height: 185
+  education: Professional Dance Conservatory
+  occupation: Entertainer & Choreographer
+
+  location: Miami
+  gps:
+    lon: -80.19179
+    lat: 25.76168
+
+  prompts:
+    - title: About me
+      body: >
+        Sunshine, rhythms, and moves that will make your socks slip off — I love dancing,
+        late-night tacos, and making people laugh.
+
+    - title: My go-to party trick
+      body: >
+        I can choreograph a full routine in under an hour and make strangers join in.
+
+    - title: Looking for
+      body: >
+        Someone with a sense of humor, adventurous taste in music, and appreciation for sequins.
+
+  pictures:
+    - https://content.api.news/v3/images/bin/81a6d9fb987259902c22e3810744765e
+
+    - prompt: Work hard, party harder
+      url: https://wpcdn.us-midwest-1.vip.tn-cloud.net/www.honolulumagazine.com/content/uploads/2021/01/s3-mm1.jpg
+
+    - https://media.glamour.com/photos/61a52a4227ac6fa8fa7182f0/master/pass/MCDMAMI_EC224.jpg
+
+    - prompt: This could be you
+      url: mike/this-could-be-you.jpg
