@@ -41,66 +41,85 @@ pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
     Ok(vec![])
 }
 
-#[get("/api/me/pic")]
-pub async fn get_my_pic() -> Result<Option<Pic>> {
+#[get("/api/me")]
+pub async fn get_me() -> Result<AuthResponse> {
     #[cfg(feature = "server")]
     {
-        let cookies = crate::state::server::get_cookies().await;
+        if let Some(sess_id) = get_session_id().await {
+            let pool = get_db().await;
 
-        let session_id = match cookies.get("SESSION") {
-            Some(v) => v,
-            None => return Ok(None),
-        };
+            let user_profile = sqlx::query_as::<_, Person>(
+                r#"
+                SELECT
+                    name,
+                    gender,
+                    born,
+                    height,
+                    education,
+                    occupation,
+                    location,
+                    hometown,
+                    seeking,
+                    relationship_type,
 
-        let pool = crate::state::server::get_db().await;
+                    json_build_object(
+                        'has',      kids_has,
+                        'wants',    kids_wants
+                    ) AS kids,
 
-        // Get user's primary avatar URL (if any)
-        let pic_parts: Option<(String, Vec<u8>)> = sqlx::query_scalar(
-            "
-            SELECT up.mime_type, up.image_bytes
-            FROM auth_sessions a
-            JOIN users u ON u.email = a.email
-            JOIN user_pictures up ON up.user_id = u.id
-            WHERE a.id = $1 AND a.expires_at > NOW()
-            ORDER BY up.position
-            LIMIT 1
-            ",
-        )
-        .bind(session_id)
-        .fetch_optional(&pool)
-        .await?;
+                    json_build_object(
+                        'drinking',     habits_drinking,
+                        'smoking',      habits_smoking,
+                        'marijuana',    habits_marijuana,
+                        'drugs',        habits_drugs
+                    ) AS habits,
 
-        let Some((mime_type, bytes)) = pic_parts else {
-            return Ok(None);
-        };
+                    (
+                        SELECT coalesce(
+                            json_agg(row_to_json(pp) ORDER BY pp.position),
+                            '[]'
+                        )
+                        FROM user_prompts pp
+                        WHERE pp.user_id = u.id
+                    ) as prompts,
 
-        let pic = Pic::Uploaded {
-            bytes,
-            mime_type,
-            prompt: None,
-        };
+                    (
+                        SELECT coalesce(
+                            json_agg(row_to_json(up) ORDER BY up.position),
+                            '[]'
+                        )
+                        FROM user_pictures up
+                        WHERE up.user_id = u.id
+                    ) AS pictures
 
-        Ok(Some(pic))
-    }
-    #[cfg(not(feature = "server"))]
-    Ok(None)
-}
+                FROM auth_sessions a
+                JOIN users u ON a.email = u.email
+                WHERE a.id = $1 AND expires_at > NOW() AND csrf_token IS NULL
+                "#,
+            )
+            .bind(&sess_id)
+            .fetch_optional(&pool)
+            .await?;
 
-pub fn use_state_initializer() {
-    update_coords();
-    let _ = use_server_future(|| async {
-        if let Ok(decisions) = get_decisions().await {
-            DECISIONS.write().extend(decisions);
-            println!("writing decisions succeeded!");
-        } else {
-            eprintln!("writing decisions failed!");
+            if let Some(Person {
+                email: Some(email), ..
+            }) = &user_profile
+            {
+                use dioxus::logger::tracing;
+
+                tracing::info!(r#"Session ID "{sess_id}" resolved to email "{email}""#)
+            }
+
+            return Ok(AuthResponse(true, user_profile));
         }
-    });
+    }
+
+    Ok(AuthResponse(false, None))
 }
 
-#[post("/geo")]
-async fn post_geo_location(coords: Coords) -> Result<()> {
-    let _store_these_in_db_later = coords;
+#[derive(Serialize, Deserialize)]
+pub struct AuthResponse(pub bool, pub Option<Person>);
+
 
     Ok(())
 }
