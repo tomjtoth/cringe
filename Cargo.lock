@@ -611,6 +611,7 @@ dependencies = [
  "chrono",
  "dioxus",
  "dotenvy",
+ "futures",
  "http",
  "oauth2",
  "reqwest 0.13.2",
