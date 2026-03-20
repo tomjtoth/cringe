@@ -271,35 +271,123 @@ pub struct Gps {
     pub lon: f64,
 }
 
-#[cfg_attr(feature = "server", derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Person {
+    #[serde(default)]
     pub id: Option<i32>,
     pub name: String,
+    #[serde(default)]
     pub email: Option<String>,
     pub gender: Gender,
     pub born: NaiveDate,
 
     pub height: i16,
+    #[serde(default)]
     pub education: Option<String>,
+    #[serde(default)]
     pub occupation: Option<String>,
 
     // location is a human-readable city/area label shown to clients
+    #[serde(default)]
     pub location: Option<String>,
 
     // gps coordinates are server-side source data for distance calculations
+    #[serde(default)]
     pub gps: Option<Gps>,
 
     // u16::MAX = 65_535 vs. 40_075 largest Earth circumference
+    #[serde(default)]
     pub distance: Option<i16>,
 
+    #[serde(default)]
     pub hometown: Option<String>,
+    #[serde(default)]
     pub seeking: Option<Seeking>,
+    #[serde(default)]
     pub relationship_type: Option<RelationshipType>,
+    #[serde(default)]
     pub kids: Option<TKids>,
+    #[serde(default)]
     pub habits: Option<THabits>,
     pub prompts: TPrompts,
     pub pictures: TPics,
+}
+
+#[cfg(feature = "server")]
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
+    fn from_row(row: &'r sqlx::postgres::PgRow) -> Result<Self, sqlx::Error> {
+        use sqlx::Row;
+
+        macro_rules! try_opt {
+            ($ty:ty, $name:expr) => {
+                match row.try_get::<Option<$ty>, _>($name) {
+                    Ok(v) => v,
+                    Err(sqlx::Error::ColumnNotFound(_)) => None,
+                    Err(e) => return Err(e),
+                }
+            };
+        }
+
+        let id = try_opt!(i32, "id");
+        let email = try_opt!(String, "email");
+
+        let name: String = row.try_get("name")?;
+        let gender: Gender = row.try_get("gender")?;
+        let born: NaiveDate = row.try_get("born")?;
+        let height: i16 = row.try_get("height")?;
+
+        let education = try_opt!(String, "education");
+        let occupation = try_opt!(String, "occupation");
+
+        let location = try_opt!(String, "location");
+
+        let gps = match row.try_get::<Option<Gps>, _>("gps") {
+            Ok(v) => v,
+            Err(sqlx::Error::ColumnNotFound(_)) => None,
+            Err(e) => return Err(e),
+        };
+
+        let distance = try_opt!(i16, "distance");
+
+        let hometown = try_opt!(String, "hometown");
+        let seeking = try_opt!(Seeking, "seeking");
+        let relationship_type = try_opt!(RelationshipType, "relationship_type");
+        let kids = try_opt!(TKids, "kids");
+        let habits = try_opt!(THabits, "habits");
+
+        let prompts = match row.try_get::<TPrompts, _>("prompts") {
+            Ok(v) => v,
+            Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
+            Err(e) => return Err(e),
+        };
+
+        let pictures = match row.try_get::<TPics, _>("pictures") {
+            Ok(v) => v,
+            Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
+            Err(e) => return Err(e),
+        };
+
+        Ok(Person {
+            id,
+            name,
+            email,
+            gender,
+            born,
+            height,
+            education,
+            occupation,
+            location,
+            gps,
+            distance,
+            hometown,
+            seeking,
+            relationship_type,
+            kids,
+            habits,
+            prompts,
+            pictures,
+        })
+    }
 }
 
 impl Person {
