@@ -42,7 +42,7 @@ CREATE TYPE relationship_type AS ENUM (
 
 CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL,
+	"name" TEXT NOT NULL,
 	email TEXT NOT NULL,
 	gender gender NOT NULL,
 	born DATE NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE users (
 	education TEXT,
 	occupation TEXT,
 
-	location TEXT,
+	"location" TEXT,
 	hometown TEXT,
 	gps_lat DOUBLE PRECISION,
 	gps_lon DOUBLE PRECISION,
@@ -107,15 +107,15 @@ CREATE INDEX user_prompts_user_id_idx ON user_prompts(user_id);
 CREATE TABLE user_pictures (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	position SMALLINT NOT NULL CHECK (position >= 0 AND position < 9),
-	url TEXT,
-	image_bytes BYTEA,
+	"url" TEXT,
+	bytes BYTEA,
 	mime_type TEXT,
 	prompt TEXT,
 	PRIMARY KEY (user_id, position),
 	CONSTRAINT user_pictures_source_ck CHECK (
-		(url IS NOT NULL AND image_bytes IS NULL AND mime_type IS NULL)
+		("url" IS NOT NULL AND bytes IS NULL AND mime_type IS NULL)
 		OR
-		(url IS NULL AND image_bytes IS NOT NULL AND mime_type IS NOT NULL)
+		("url" IS NULL AND bytes IS NOT NULL AND mime_type IS NOT NULL)
 	)
 );
 
