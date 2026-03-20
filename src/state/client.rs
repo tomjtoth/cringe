@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "server")]
+use crate::state::server::{get_db, get_session_id};
 
 /// **outer** option indicates an **authorized session**
 ///
@@ -13,22 +15,29 @@ pub static PEEPS: GlobalSignal<Vec<Person>> = Signal::global(|| vec![]);
 pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| HashMap::new());
 
 #[get("/api/decisions")]
-async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
+pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
     #[cfg(feature = "server")]
     {
-        let pool = crate::state::server::get_db().await;
+        if let Some(session_id) = get_session_id().await {
+            let pool = get_db().await;
 
-        // Demo query: fetch recent checks as (target_user_id, decision).
-        let decisions = sqlx::query_as::<_, (i32, Decision)>(
-            "SELECT target_user_id, decision FROM user_decisions ORDER BY updated_at DESC LIMIT 500",
-        )
-        .fetch_all(&pool)
-        .await?;
+            let decisions = sqlx::query_as::<_, (i32, Decision)>(
+                "
+                SELECT target_user_id, decision
+                FROM auth_sessions a
+                JOIN users u ON u.email = a.email
+                JOIN user_decisions d ON u.id = d.actor_user_id
+                WHERE a.id = $1 AND csrf_token IS NULL AND a.expires_at > NOW()
+                ",
+            )
+            .bind(&session_id)
+            .fetch_all(&pool)
+            .await?;
 
-        Ok(decisions)
+            return Ok(decisions);
+        };
     }
 
-    #[cfg(not(feature = "server"))]
     Ok(vec![])
 }
 
