@@ -51,11 +51,15 @@ pub enum Pic {
     Advanced {
         url: String,
         prompt: Option<String>,
+        #[serde(default)]
+        position: Option<i16>,
     },
     Uploaded {
         bytes: Vec<u8>,
         mime_type: String,
         prompt: Option<String>,
+        #[serde(default)]
+        position: Option<i16>,
     },
 }
 
