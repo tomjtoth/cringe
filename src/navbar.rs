@@ -1,18 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::router::Route;
-use crate::state::client::get_my_pic;
+use crate::{router::Route, state::client::ME};
 
 #[component]
 pub fn Navbar() -> Element {
-    let mut avatar_url = use_signal(|| None::<String>);
-
-    let _ = use_server_future(move || async move {
-        if let Ok(Some(pic)) = get_my_pic().await {
-            avatar_url.set(Some(pic.src()));
-        }
-    });
-
     rsx! {
         div { class: "grow overflow-hidden", Outlet::<Route> {} }
 
@@ -25,31 +16,41 @@ pub fn Navbar() -> Element {
                 }
             }
             li {
-                Link { to: Route::ListOfDislikedProfiles {},
+                Link { to: Route::SkippedProfiles {},
                     "💔"
-                    span { "disliked" }
+                    span { "skipped" }
                 }
             }
             li {
-                Link { to: Route::ListOfUncheckedProfiles {},
+                Link { to: Route::SwipeProfiles {},
                     "🎉"
                     span { "swipe" }
                 }
             }
             li {
-                Link { to: Route::ListOfLikedProfiles {},
+                Link { to: Route::LikedProfiles {},
                     "❤️"
                     span { "liked" }
                 }
             }
             li {
-                Link { to: Route::About {},
+                if let Some(logged_in) = ME() {
+                    Link { to: Route::Me {},
+                        if let Some(pic) = logged_in.as_ref().and_then(|p| p.pics().get(0)) {
+                            img {
+                                class: "w-6 border rounded-full",
+                                src: pic.src(),
+                            }
+                        } else {
+                            "🧑"
+                            span { "profile" }
+                        }
+                    }
+                } else {
+                    Link { to: "/auth/discord",
 
-                    if let Some(src) = avatar_url() {
-                        img { class: "w-6 border rounded-full", src }
-                    } else {
-                        "🧑"
-                        span { "profile" }
+                        "➜]"
+                        span { "login" }
                     }
                 }
             }
