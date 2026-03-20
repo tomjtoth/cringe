@@ -106,7 +106,7 @@ CREATE INDEX user_prompts_user_id_idx ON user_prompts(user_id);
 
 CREATE TABLE user_pictures (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-	position INTEGER NOT NULL CHECK (position >= 0),
+	position SMALLINT NOT NULL CHECK (position >= 0 AND position < 9),
 	url TEXT,
 	image_bytes BYTEA,
 	mime_type TEXT,
