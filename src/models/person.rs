@@ -23,6 +23,12 @@ pub struct Kids {
     pub wants: Option<i8>,
 }
 
+#[cfg(feature = "server")]
+type TKids = Json<Kids>;
+
+#[cfg(not(feature = "server"))]
+type TKids = Kids;
+
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Habits {
@@ -31,6 +37,12 @@ pub struct Habits {
     pub marijuana: Option<Frequency>,
     pub drugs: Option<Frequency>,
 }
+
+#[cfg(feature = "server")]
+type THabits = Json<Habits>;
+
+#[cfg(not(feature = "server"))]
+type THabits = Habits;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -71,9 +83,9 @@ impl Pic {
 }
 
 #[cfg(feature = "server")]
-type Pictures = Json<Vec<Pic>>;
+type TPics = Json<Vec<Pic>>;
 #[cfg(not(feature = "server"))]
-type Pictures = Vec<Pic>;
+type TPics = Vec<Pic>;
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -187,9 +199,9 @@ pub struct PersonPrompt {
 }
 
 #[cfg(feature = "server")]
-type Prompts = Json<Vec<PersonPrompt>>;
+type TPrompts = Json<Vec<PersonPrompt>>;
 #[cfg(not(feature = "server"))]
-type Prompts = Vec<PersonPrompt>;
+type TPrompts = Vec<PersonPrompt>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -284,10 +296,10 @@ pub struct Person {
     pub hometown: Option<String>,
     pub seeking: Option<Seeking>,
     pub relationship_type: Option<RelationshipType>,
-    pub kids: Option<Kids>,
-    pub habits: Option<Habits>,
-    pub prompts: Prompts,
-    pub pictures: Pictures,
+    pub kids: Option<TKids>,
+    pub habits: Option<THabits>,
+    pub prompts: TPrompts,
+    pub pictures: TPics,
 }
 
 impl Person {
