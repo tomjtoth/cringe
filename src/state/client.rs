@@ -2,6 +2,9 @@ use std::collections::HashMap;
 
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
+
+use crate::models::person::{Decision, Person};
+
 #[cfg(feature = "server")]
 use crate::state::server::{get_db, get_session_id};
 
@@ -120,6 +123,34 @@ pub async fn get_me() -> Result<AuthResponse> {
 #[derive(Serialize, Deserialize)]
 pub struct AuthResponse(pub bool, pub Option<Person>);
 
+#[post("/api/gps")]
+async fn post_gps(coords: Coords) -> Result<()> {
+    #[cfg(feature = "server")]
+    {
+        if let Some(sess_id) = get_session_id().await {
+            let pool = get_db().await;
+
+            let res = sqlx::query(
+                "
+                UPDATE users u 
+                SET gps_lon = $1, gps_lat = $2
+                FROM auth_sessions a
+                WHERE a.id = $3 
+                AND u.email = a.email
+                AND expires_at > NOW()
+                ",
+            )
+            .bind(&coords.lon)
+            .bind(&coords.lat)
+            .bind(&sess_id)
+            .execute(&pool)
+            .await?;
+
+            if res.rows_affected() == 0 {
+                eprintln!("expired session \"{sess_id}\", nothing to update")
+            }
+        }
+    }
 
     Ok(())
 }
@@ -130,7 +161,7 @@ struct Coords {
     lon: f64,
 }
 
-fn update_coords() {
+pub fn update_gps_pos() {
     #[cfg(target_arch = "wasm32")]
     {
         use wasm_bindgen::{closure::Closure, JsCast};
@@ -154,7 +185,7 @@ fn update_coords() {
             };
 
             spawn(async move {
-                if let Err(e) = post_geo_location(coords).await {
+                if let Err(e) = post_gps(coords).await {
                     eprintln!("Failed to post geolocation: {e}");
                 }
             });
