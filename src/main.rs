@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::client::use_state_initializer;
+use crate::state::client::{get_decisions, get_me, update_gps_pos, AuthResponse, DECISIONS, ME};
 
 #[cfg(feature = "server")]
 mod auth;
@@ -38,7 +38,26 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    use_state_initializer();
+    let mut initial_state =
+        use_server_future(|| async { futures::join!(get_decisions(), get_me()) })?;
+
+    if let Some((decisions, user)) = initial_state.write().as_mut() {
+        if let Ok(decisions) = decisions {
+            DECISIONS.write().extend(decisions.to_owned());
+        }
+
+        if let Ok(AuthResponse(authorized, profile)) = user {
+            *ME.write() = if authorized.to_owned() {
+                Some(profile.to_owned())
+            } else {
+                None
+            };
+
+            if profile.is_some() {
+                update_gps_pos();
+            }
+        }
+    }
 
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
