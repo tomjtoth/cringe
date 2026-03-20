@@ -1,5 +1,6 @@
 use dioxus::{
     fullstack::TypedHeader,
+    logger::tracing,
     prelude::dioxus_fullstack::{extract::Extension as FullstackExtension, FullstackContext},
 };
 
@@ -61,7 +62,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         let kids = bot.kids.as_ref();
         let gps = bot.gps.as_ref();
 
-        let user_id: i32 = sqlx::query_scalar(
+        sqlx::query(
             "
             INSERT INTO users (
                 id,
@@ -97,10 +98,10 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .bind(bot.gender)
         .bind(bot.born)
         .bind(i16::from(bot.height))
-        .bind(bot.education)
-        .bind(bot.occupation)
-        .bind(bot.location)
-        .bind(bot.hometown)
+        .bind(&bot.education)
+        .bind(&bot.occupation)
+        .bind(&bot.location)
+        .bind(&bot.hometown)
         .bind(gps.map(|g| g.lat))
         .bind(gps.map(|g| g.lon))
         .bind(bot.seeking)
@@ -114,33 +115,33 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .fetch_one(&mut *tx)
         .await?;
 
-        for (position, prompt) in bot.prompts.into_iter().enumerate() {
+        for (position, prompt) in bot.prompts().iter().enumerate() {
             sqlx::query(
                 "INSERT INTO user_prompts (user_id, position, title, body) VALUES ($1, $2, $3, $4)",
             )
-            .bind(user_id)
+            .bind(&bot.id)
             .bind(position as i32)
-            .bind(prompt.title)
-            .bind(prompt.body)
+            .bind(&prompt.title)
+            .bind(&prompt.body)
             .execute(&mut *tx)
             .await?;
         }
 
-        for (position, pic) in bot.pictures.into_iter().enumerate() {
+        for (position, pic) in bot.pictures.iter().enumerate() {
             sqlx::query(
                 "INSERT INTO user_pictures (user_id, position, url, prompt) VALUES ($1, $2, $3, $4)",
             )
-            .bind(user_id)
+            .bind(&bot.id)
             .bind(position as i32)
             .bind(pic.src())
-            .bind(pic.prompt())
+            .bind(&pic.prompt())
             .execute(&mut *tx)
             .await?;
         }
     }
 
     tx.commit().await?;
-    println!("Loaded and seeded {} profiles from bots.yaml", bots_len);
+    tracing::info!("Loaded and seeded {} profiles from bots.yaml", bots_len);
     Ok(())
 }
 
