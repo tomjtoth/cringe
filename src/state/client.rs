@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::{Decision, Person, Pic};
+/// **outer** option indicates an **authorized session**
+///
+/// **inner** option holds the **user profile** if exists
+pub static ME: GlobalSignal<Option<Option<Person>>> = Signal::global(|| None);
 
 pub static PEEPS: GlobalSignal<Vec<Person>> = Signal::global(|| vec![]);
 
