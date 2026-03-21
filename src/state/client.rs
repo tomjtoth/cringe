@@ -13,8 +13,7 @@ use crate::state::server::{get_db, get_session_id};
 /// **inner** option holds the **user profile** if exists
 pub static ME: GlobalSignal<Option<Option<Person>>> = Signal::global(|| None);
 
-pub static PEEPS: GlobalSignal<Vec<Person>> = Signal::global(|| vec![]);
-
+/// keeps track of unlogged users' decisions
 pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| HashMap::new());
 
 #[get("/api/decisions")]
