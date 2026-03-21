@@ -20,7 +20,8 @@ RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
             --no-default-features \
             --features server && \
     mv /app/target/dx/cringe/release/web /app.built && \
-    cp /app/target/$SERVER_TRIPLET/server-release/cringe /app.built/cringe
+    cp /app/target/$SERVER_TRIPLET/server-release/cringe /app.built/cringe && \
+    cp -a /app/migrations/ /app.built/migrations/
 
 FROM scratch
 WORKDIR /app
