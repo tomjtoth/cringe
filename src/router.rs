@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     navbar::Navbar,
-    views::{about::About, people::listing::*},
+    views::{about::About, me::Me, people::listing::*},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -18,5 +18,6 @@ pub enum Route {
     ListOfDislikedProfiles {},
 
     #[route("/swipe")]
-    ListOfUncheckedProfiles {},
+    #[route("/me")]
+    Me {},
 }

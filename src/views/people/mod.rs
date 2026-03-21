@@ -1,2 +1,2 @@
 pub mod listing;
-mod person;
+pub mod person;
