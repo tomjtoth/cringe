@@ -1,8 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::Gender,
-    state::client::PEEPS,
+    models::person::{Gender, Person as MPerson},
     views::people::person::{buttons::SkipButton, container::Container},
 };
 
@@ -15,8 +14,12 @@ use img::Image;
 use prompt::Prompt;
 
 #[component]
-pub fn Person(id: i32) -> Element {
-    let person = PEEPS.iter().find(|p| p.id == Some(id)).unwrap();
+pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
+    let id = if wo_buttons.is_some_and(|x| x == true) {
+        person.id
+    } else {
+        None
+    };
 
     let mut already_has_kids = false;
 
