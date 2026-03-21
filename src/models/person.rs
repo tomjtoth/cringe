@@ -351,7 +351,13 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             Err(e) => return Err(e),
         };
 
-        let distance = try_opt!(i16, "distance");
+        let distance = try_opt!(f64, "distance").map(|d| d.round()).and_then(|d| {
+            if d.is_finite() && d >= i16::MIN as f64 && d <= i16::MAX as f64 {
+                Some(d as i16)
+            } else {
+                None
+            }
+        });
 
         let hometown = try_opt!(String, "hometown");
         let seeking = try_opt!(Seeking, "seeking");
