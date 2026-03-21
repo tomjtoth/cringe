@@ -8,16 +8,18 @@ use crate::{
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
     #[layout(Navbar)]
-    #[route("/")]
+    #[route("/about")]
     About {},
 
     #[route("/liked")]
-    ListOfLikedProfiles {},
+    LikedProfiles {},
 
-    #[route("/disliked")]
-    ListOfDislikedProfiles {},
+    #[route("/skipped")]
+    SkippedProfiles {},
 
-    #[route("/swipe")]
+    #[route("/")]
+    SwipeProfiles {},
+
     #[route("/me")]
     Me {},
 }
