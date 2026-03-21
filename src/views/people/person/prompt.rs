@@ -5,7 +5,7 @@ use crate::views::people::person::container::Container;
 
 #[component]
 
-pub fn Prompt(prompt: Option<PersonPrompt>, id: i32) -> Element {
+pub fn Prompt(prompt: Option<PersonPrompt>, id: Option<i32>) -> Element {
     rsx! {
         if let Some(prompt) = prompt {
             Container { id,
