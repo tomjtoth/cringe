@@ -8,7 +8,6 @@ CREATE TABLE auth_sessions (
 
 CREATE INDEX auth_sessions_expires_idx ON auth_sessions(expires_at);
 
-
 CREATE TYPE gender AS ENUM (
 	'male',
 	'female'
@@ -40,6 +39,32 @@ CREATE TYPE relationship_type AS ENUM (
 	'figuring out my relationship type'
 );
 
+
+
+CREATE FUNCTION age_from_dob(born DATE) RETURNS INTEGER AS $$
+BEGIN
+	RETURN date_part('year', age(CURRENT_DATE, born))::int;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE STRICT;
+
+CREATE FUNCTION distance_km(lat1 DOUBLE PRECISION, lon1 DOUBLE PRECISION, lat2 DOUBLE PRECISION, lon2 DOUBLE PRECISION) RETURNS DOUBLE PRECISION AS $$
+DECLARE
+	R CONSTANT DOUBLE PRECISION := 6371.0088; -- Earth radius in kilometers
+	phi1 DOUBLE PRECISION := radians(lat1);
+	phi2 DOUBLE PRECISION := radians(lat2);
+	delta_phi DOUBLE PRECISION := radians(lat2 - lat1);
+	delta_lambda DOUBLE PRECISION := radians(lon2 - lon1);
+	ahalf DOUBLE PRECISION;
+	c DOUBLE PRECISION;
+BEGIN
+	ahalf := sin(delta_phi / 2)^2 + cos(phi1) * cos(phi2) * sin(delta_lambda / 2)^2;
+	c := 2 * atan2(sqrt(ahalf), sqrt(1 - ahalf));
+	RETURN R * c;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE STRICT;
+
+
+
 CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
 	"name" TEXT NOT NULL,
@@ -67,7 +92,6 @@ CREATE TABLE users (
 	habits_drugs frequency,
 
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 	CONSTRAINT users_gps_lat_ck CHECK (
 		gps_lat IS NULL OR (gps_lat BETWEEN -90 AND 90)
@@ -125,8 +149,6 @@ CREATE TABLE user_decisions (
 	actor_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	target_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	decision decision NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	PRIMARY KEY (actor_user_id, target_user_id),
 	CONSTRAINT user_decisions_no_self_ck CHECK (actor_user_id <> target_user_id)
 );
