@@ -389,7 +389,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let kids = try_opt!(TKids, "kids");
         let habits = try_opt!(THabits, "habits");
 
-        let prompts = match row.try_get::<TPrompts, _>("prompts") {
+        let prompts: Json<Vec<PersonPrompt>> = match row.try_get::<TPrompts, _>("prompts") {
             Ok(v) => v,
             Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
             Err(e) => return Err(e),
