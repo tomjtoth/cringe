@@ -16,9 +16,9 @@ use prompt::Prompt;
 #[component]
 pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
     let id = if wo_buttons.is_some_and(|x| x == true) {
-        person.id
-    } else {
         None
+    } else {
+        person.id
     };
 
     let mut already_has_kids = false;
