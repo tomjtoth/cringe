@@ -10,8 +10,8 @@ pub fn LikeButton(id: i32) -> Element {
     rsx! {
         if !liked_already {
             button {
-                class: "absolute z-2 bottom-5 right-5 p-3
-                        bg-background border rounded-full
+                class: "absolute z-2 bottom-5 right-5 p-3!
+                        bg-background rounded-full!
                         cursor-pointer select-none",
 
                 onclick: move |_| {

@@ -8,8 +8,8 @@ pub fn SkipButton(id: Option<i32>) -> Element {
         if let Some(id) = id {
             if !DECISIONS.with(|ds| matches!(ds.get(&id), Some(&Decision::Skip))) {
                 button {
-                    class: "z-2 sticky bottom-10 left-5 p-3
-                        bg-background border rounded-full
+                    class: "z-2 sticky bottom-10 left-5 p-3!
+                        bg-background rounded-full!
                         cursor-pointer select-none",
 
                     onclick: move |_| {

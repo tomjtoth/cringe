@@ -22,10 +22,6 @@ body {
   @apply text-foreground bg-background;
 }
 
-h1 {
-  @apply text-3xl m-2 mr-0;
-}
-
 html,
 body,
 body > div {
@@ -34,4 +30,17 @@ body > div {
 
 body > div {
   @apply flex flex-col;
+}
+
+h1 {
+  @apply text-3xl m-2 mr-0;
+}
+
+input,
+select {
+  @apply p-2 border rounded;
+}
+
+button {
+  @apply p-2 border rounded cursor-pointer;
 }
