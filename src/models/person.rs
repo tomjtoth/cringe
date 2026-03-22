@@ -308,6 +308,9 @@ pub struct Person {
     #[serde(default)]
     pub email: Option<String>,
     pub gender: Gender,
+    pub born: Option<NaiveDate>,
+    #[serde(default)]
+    pub age: Option<u16>,
     pub zodiac_sign: Option<ZodiacSign>,
 
     pub height: i16,
@@ -362,6 +365,8 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
 
         let name: String = row.try_get("name")?;
         let gender: Gender = row.try_get("gender")?;
+        let born = try_opt!(NaiveDate, "born");
+        let age = try_opt!(i32, "age").map(|a| a as u16);
         let zodiac_sign = try_opt!(ZodiacSign, "zodiac_sign");
         let height: i16 = row.try_get("height")?;
 
@@ -408,6 +413,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             email,
             gender,
             born,
+            age,
             zodiac_sign,
             height,
             education,
@@ -427,6 +433,17 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
 }
 
 impl Person {
+    pub fn age(&self) -> Option<u16> {
+        if self.age.is_some() {
+            return self.age;
+        }
+
+        self.born.map(|born| {
+            let today = Utc::now().date_naive();
+            today.years_since(born).unwrap() as u16
+        })
+    }
+
     pub fn zodiac_sign(&self) -> Option<ZodiacSign> {
         if self.zodiac_sign.is_some() {
             return self.zodiac_sign;
