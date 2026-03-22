@@ -50,69 +50,70 @@ pub async fn get_me() -> Result<AuthResponse> {
         if let Some(sess_id) = get_session_id().await {
             let pool = get_db().await;
 
-            let user_profile = sqlx::query_as::<_, Person>(
-                r#"
-                SELECT
-                    name,
-                    gender,
-                    born,
-                    height,
-                    education,
-                    occupation,
-                    location,
-                    hometown,
-                    seeking,
-                    relationship_type,
+            let (authenticated, profile) =
+                sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
+                    r#"
+                    WITH auth AS (
+                        SELECT email FROM auth_sessions 
+                        WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
+                    ),
+                    profile AS (
+                        SELECT
+                            name,
+                            gender,
+                            born,
+                            height,
+                            education,
+                            occupation,
+                            location,
+                            hometown,
+                            seeking,
+                            relationship_type,
 
-                    json_build_object(
-                        'has',      kids_has,
-                        'wants',    kids_wants
-                    ) AS kids,
+                            json_build_object(
+                                'has',      kids_has,
+                                'wants',    kids_wants
+                            ) AS kids,
 
-                    json_build_object(
-                        'drinking',     habits_drinking,
-                        'smoking',      habits_smoking,
-                        'marijuana',    habits_marijuana,
-                        'drugs',        habits_drugs
-                    ) AS habits,
+                            json_build_object(
+                                'drinking',     habits_drinking,
+                                'smoking',      habits_smoking,
+                                'marijuana',    habits_marijuana,
+                                'drugs',        habits_drugs
+                            ) AS habits,
 
-                    (
-                        SELECT coalesce(
-                            json_agg(row_to_json(pp) ORDER BY pp.position),
-                            '[]'
-                        )
-                        FROM user_prompts pp
-                        WHERE pp.user_id = u.id
-                    ) as prompts,
+                            (
+                                SELECT coalesce(
+                                    json_agg(row_to_json(pp) ORDER BY pp.position),
+                                    '[]'
+                                )
+                                FROM user_prompts pp
+                                WHERE pp.user_id = u.id
+                            ) as prompts,
 
-                    (
-                        SELECT coalesce(
-                            json_agg(row_to_json(up) ORDER BY up.position),
-                            '[]'
-                        )
-                        FROM user_pictures up
-                        WHERE up.user_id = u.id
-                    ) AS pictures
+                            (
+                                SELECT coalesce(
+                                    json_agg(row_to_json(up) ORDER BY up.position),
+                                    '[]'
+                                )
+                                FROM user_pictures up
+                                WHERE up.user_id = u.id
+                            ) AS pictures
 
-                FROM auth_sessions a
-                JOIN users u ON a.email = u.email
-                WHERE a.id = $1 AND expires_at > NOW() AND csrf_token IS NULL
-                "#,
-            )
-            .bind(&sess_id)
-            .fetch_optional(&pool)
-            .await?;
+                        FROM auth a
+                        JOIN users u ON a.email = u.email
+                    )
 
-            if let Some(Person {
-                email: Some(email), ..
-            }) = &user_profile
-            {
-                use dioxus::logger::tracing;
+                    SELECT 
+                        (SELECT count(*) > 0 FROM auth),
+                        (SELECT row_to_json(profile) FROM profile)
+                    "#,
+                )
+                .bind(&sess_id)
+                .fetch_one(&pool)
+                .await?;
 
-                tracing::info!(r#"Session ID "{sess_id}" resolved to email "{email}""#)
-            }
-
-            return Ok(AuthResponse(true, user_profile));
+            return Ok(AuthResponse(authenticated, profile.map(|s| s.0)));
         }
     }
 
