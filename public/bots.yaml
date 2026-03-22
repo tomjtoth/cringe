@@ -65,8 +65,8 @@
   gender: male
   born: 1983-08-11
   height: 191
-  education: Electric Engineer PhD
-  occupation: God of ⚡
+  education: Electric Engineer PhD, minor in beer tasting
+  occupation: God of Thunder & resource provider at Helen ⚡
 
   habits:
     drinking: yes
@@ -111,12 +111,15 @@
 
     - prompt: Playgirl 🐰 photoshoot 🌶️
       url: https://preview.redd.it/what-do-you-think-is-the-plan-for-thor-in-the-mcu-now-v0-qvgtbrqkldqd1.jpeg?width=640&crop=smart&auto=webp&s=9775f8c2f75ffc51d48b4378964265cea85eb40c
+
     - https://s3.r29static.com/bin/entry/ce2/720x864,85/2169674/image.webp
 
     - prompt: This could be you
       url: /thor/this-could-be-you.png
+
     - prompt: My vulnerable side
       url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4BugPyqmMtOIAKO_o5DysIe-Zc2MVOWGO6L7BNu4XMe1GmSLhl8GKaq2jksHH3YGmDYSgAHpQRIG8PLSak21yMdV2qLKYFjubI3XkFr4&s=10
+
     - prompt: Me being iconic at work
       url: https://media.wired.com/photos/59330ed94cd5ce6f96c0c2c5/3:2/w_2560%2Cc_limit/gallery3.jpg
 
