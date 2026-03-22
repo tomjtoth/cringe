@@ -36,6 +36,14 @@ h1 {
   @apply text-3xl m-2 mr-0;
 }
 
+h2 {
+  @apply text-2xl m-2 mr-0;
+}
+
+h3 {
+  @apply text-xl m-2 mr-0;
+}
+
 input,
 select {
   @apply p-2 border rounded;
