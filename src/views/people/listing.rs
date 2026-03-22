@@ -119,9 +119,8 @@ fn list(wants: Option<Decision>) -> Element {
         NeedsLoginAndProfile {
             if let Some(Ok(peeps)) = profiles().to_owned() {
                 if peeps.len() > 0 {
-                    ul {
-                        class: "h-full overflow-y-scroll p-2 pb-0 [&_>_*+*]:mt-2",
-                        class: if wants.is_none() { "[&_>_*+*]:hidden" },
+                    ul { class: "h-full overflow-y-scroll p-2 pb-0 [&_>_*+*]:mt-2",
+                        // class: if wants.is_none() { "[&_>_*+*]:hidden" },
                         for person in peeps {
                             if let Some(id) = person.id {
                                 li { key: "{id}",
