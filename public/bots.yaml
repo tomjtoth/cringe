@@ -27,27 +27,38 @@
   prompts:
     - title: Two truths and a lie
       body: >
-        I used to do modeling as a side business, but my accident ruined that career.
-        I'm into choking 🫶 and black leathery stuff.
-        Will you join me (and the dark side)?
-        My lightsaber is long and red.
+        1️⃣ I have the high ground, not Obi-Wanker 🖕
+        2️⃣ I'm into choking 🫶 and dressing in black leathery stuff 🥵
+        3️⃣ I have 3rd degree burns all over my body, it ruined my modeling career
+
+    - title: Hallmark of a good relationship
+      body: >
+        keeping it a secret, else I get fired from the Jedi Council...
+        those greedy arrogant dudes did not even grant me the rank of master 😭
 
     - title: I want someone who
       body: >
-        Stares into the double sunset 🥹 with me holding my hands on the sandy beach
+        Stares into the double sunset 🥹 with me, holding my hands on the sandy beach
 
     - title: My greatest strength
       body: >
         The Force is strong with me 😉
 
   pictures:
-    - https://static.wikia.nocookie.net/starwarsuniverse/images/f/fd/Anakin_Skywalker_%28ep._3%29.jpg/revision/latest?cb=20200315161841
-    - url: sw_vader/this-could-be-you.jpg
-      prompt: this could be you
-    - https://cdn.artphotolimited.com/images/6718bf5f258c849397f6133d/1000x1000/star-wars-darth-vader-close-up.jpg
-    - https://static.wikia.nocookie.net/star-wars-canon-extended/images/e/ed/Vader_Max.jpg/revision/latest/scale-to-width-down/376?cb=20181119183701
-    - url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
-      prompt: without my helmet
+    - prompt: The moment I knew my modeling career was over
+      url: https://static.wikia.nocookie.net/starwarsuniverse/images/f/fd/Anakin_Skywalker_%28ep._3%29.jpg/revision/latest?cb=20200315161841
+
+    - prompt: This could be you
+      url: sw_vader/this-could-be-you.jpg
+
+    - prompt: The Empire wants You!
+      url: https://cdn.artphotolimited.com/images/6718bf5f258c849397f6133d/1000x1000/star-wars-darth-vader-close-up.jpg
+
+    - prompt: My red, long lightsaber
+      url: https://static.wikia.nocookie.net/star-wars-canon-extended/images/e/ed/Vader_Max.jpg/revision/latest/scale-to-width-down/376?cb=20181119183701
+
+    - prompt: Chilling without my helmet
+      url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
 
 - name: Thor
   email: thor.odinson@asgard-singles.com
