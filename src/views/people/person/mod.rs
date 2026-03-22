@@ -45,13 +45,7 @@ pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
                         li { "{dist}" }
                     }
 
-                    li {
-                        if matches!(person.gender, Gender::Male) {
-                            "♂️ Man"
-                        } else {
-                            "♀️ Woman"
-                        }
-                    }
+                    li { "{person.gender}" }
 
                     li { "📏 {person.height} cm" }
 
