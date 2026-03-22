@@ -60,6 +60,33 @@
     - prompt: Chilling without my helmet
       url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
 
+- name: Tom ... noo, I mean Dickie!
+  email: tom.ripley@totally-myself.com
+  gender: male
+  born: 1970-10-08
+  height: 178
+  languages:
+    - English
+    - Italian
+    - French
+
+  location: Rome
+  # near ROMAnticSuites
+  gps:
+    lon: 41.88891624591634
+    lat: 12.500540973862527
+
+  prompts:
+    - title: My greatest strength
+      body: >
+        I have a lot of *talents*, like impersonating others and forging signatures
+
+  pictures:
+    - https://m.media-amazon.com/images/M/MV5BMjMwMDU4NzMyNl5BMl5BanBnXkFtZTgwNDY0NTA2MjI@._V1_.jpg
+
+    - prompt: Being a 3rd wheel
+      url: https://i0.wp.com/georgehahn.com/wp-content/uploads/2014/01/The-Talented-Mr.-Ripley-e1354598725612.jpg?fit=840%2C504&ssl=1
+
 - name: Thor
   email: thor.odinson@asgard-singles.com
   gender: male
