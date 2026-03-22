@@ -329,7 +329,7 @@ pub struct Person {
 
     // u16::MAX = 65_535 vs. 40_075 largest Earth circumference
     #[serde(default)]
-    pub distance: Option<i16>,
+    pub distance: Option<u16>,
 
     #[serde(default)]
     pub hometown: Option<String>,
@@ -381,13 +381,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             Err(e) => return Err(e),
         };
 
-        let distance = try_opt!(f64, "distance").map(|d| d.round()).and_then(|d| {
-            if d.is_finite() && d >= i16::MIN as f64 && d <= i16::MAX as f64 {
-                Some(d as i16)
-            } else {
-                None
-            }
-        });
+        let distance = try_opt!(f64, "distance").map(|d| d.round() as u16);
 
         let hometown = try_opt!(String, "hometown");
         let seeking = try_opt!(Seeking, "seeking");
@@ -451,6 +445,18 @@ impl Person {
 
         self.born.map(ZodiacSign::from_date)
     }
+
+    pub fn distance(&self) -> Option<String> {
+        self.distance.map(|x| {
+            let (emoji, d) = match x {
+                0..=3 => ("🥾", x),
+                4..=10 => ("🚲", x),
+                11..=30 => ("🚗", x),
+                31..=120 => ("🚂", x),
+                _ => ("✈️", x),
+            };
+            format!("{emoji} ~{d}km away")
+        })
     }
 
     pub fn pics(&self) -> &Vec<Pic> {
