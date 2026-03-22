@@ -37,7 +37,13 @@ pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
             Container { class: "[&>*+*]:border-t [&>*+*]:p-2",
                 ul { class: "p-2 flex overflow-x-scroll [&>*+*]:ml-2 [&>*+*]:border-l *:p-2 text-nowrap",
 
-                    li { "🎂 {person.age()}" }
+                    if let Some(age) = person.age() {
+                        li { "🎂 {age}" }
+                    }
+
+                    if let Some(dist) = person.distance() {
+                        li { "{dist}" }
+                    }
 
                     li {
                         if matches!(person.gender, Gender::Male) {
@@ -85,7 +91,9 @@ pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
                         }
                     }
 
-                    li { "{person.zodiac_sign()}" }
+                    if let Some(sign) = person.zodiac_sign() {
+                        li { "{sign}" }
+                    }
 
                     if let Some(habits) = &person.habits {
                         if let Some(drinking) = habits.drinking {
