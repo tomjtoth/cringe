@@ -39,7 +39,44 @@ CREATE TYPE relationship_type AS ENUM (
 	'figuring out my relationship type'
 );
 
+CREATE TYPE zodiac_sign AS ENUM (
+	'aries',
+    'taurus',
+    'gemini',
+    'cancer',
+    'leo',
+    'virgo',
+    'libra',
+    'scorpio',
+    'sagittarius',
+    'capricorn',
+    'aquarius',
+    'pisces'
+);
 
+
+CREATE FUNCTION zodiac_sign_from_dob(born DATE) RETURNS zodiac_sign AS $$
+DECLARE
+	m INT := EXTRACT(MONTH FROM born)::INT;
+	d INT := EXTRACT(DAY FROM born)::INT;
+BEGIN
+	RETURN CASE
+		WHEN (m = 3 AND d >= 21) OR (m = 4 AND d <= 19) THEN 'aries'::zodiac_sign
+		WHEN (m = 4 AND d >= 20) OR (m = 5 AND d <= 20) THEN 'taurus'::zodiac_sign
+		WHEN (m = 5 AND d >= 21) OR (m = 6 AND d <= 20) THEN 'gemini'::zodiac_sign
+		WHEN (m = 6 AND d >= 21) OR (m = 7 AND d <= 22) THEN 'cancer'::zodiac_sign
+		WHEN (m = 7 AND d >= 23) OR (m = 8 AND d <= 22) THEN 'leo'::zodiac_sign
+		WHEN (m = 8 AND d >= 23) OR (m = 9 AND d <= 22) THEN 'virgo'::zodiac_sign
+		WHEN (m = 9 AND d >= 23) OR (m = 10 AND d <= 22) THEN 'libra'::zodiac_sign
+		WHEN (m = 10 AND d >= 23) OR (m = 11 AND d <= 21) THEN 'scorpio'::zodiac_sign
+		WHEN (m = 11 AND d >= 22) OR (m = 12 AND d <= 21) THEN 'sagittarius'::zodiac_sign
+		WHEN (m = 12 AND d >= 22) OR (m = 1 AND d <= 19) THEN 'capricorn'::zodiac_sign
+		WHEN (m = 1 AND d >= 20) OR (m = 2 AND d <= 18) THEN 'aquarius'::zodiac_sign
+		WHEN (m = 2 AND d >= 19) OR (m = 3 AND d <= 20) THEN 'pisces'::zodiac_sign
+		ELSE NULL
+	END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE STRICT;
 
 CREATE FUNCTION age_from_dob(born DATE) RETURNS INTEGER AS $$
 BEGIN
