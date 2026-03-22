@@ -229,6 +229,11 @@ type TPrompts = Vec<PersonPrompt>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "server", derive(sqlx::Type))]
+#[cfg_attr(
+    feature = "server",
+    sqlx(type_name = "zodiac_sign", rename_all = "lowercase")
+)]
 pub enum ZodiacSign {
     Aries,
     Taurus,
@@ -303,7 +308,7 @@ pub struct Person {
     #[serde(default)]
     pub email: Option<String>,
     pub gender: Gender,
-    pub born: NaiveDate,
+    pub zodiac_sign: Option<ZodiacSign>,
 
     pub height: i16,
     #[serde(default)]
@@ -357,7 +362,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
 
         let name: String = row.try_get("name")?;
         let gender: Gender = row.try_get("gender")?;
-        let born: NaiveDate = row.try_get("born")?;
+        let zodiac_sign = try_opt!(ZodiacSign, "zodiac_sign");
         let height: i16 = row.try_get("height")?;
 
         let education = try_opt!(String, "education");
@@ -403,6 +408,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             email,
             gender,
             born,
+            zodiac_sign,
             height,
             education,
             occupation,
@@ -421,9 +427,13 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
 }
 
 impl Person {
-    pub fn age(&self) -> u32 {
-        let today = Utc::now().date_naive();
-        today.years_since(self.born).unwrap()
+    pub fn zodiac_sign(&self) -> Option<ZodiacSign> {
+        if self.zodiac_sign.is_some() {
+            return self.zodiac_sign;
+        }
+
+        self.born.map(ZodiacSign::from_date)
+    }
     }
 
     pub fn pics(&self) -> &Vec<Pic> {
@@ -444,9 +454,5 @@ impl Person {
 
         #[cfg(not(feature = "server"))]
         &self.prompts
-    }
-
-    pub fn zodiac_sign(&self) -> ZodiacSign {
-        ZodiacSign::from_date(self.born)
     }
 }
