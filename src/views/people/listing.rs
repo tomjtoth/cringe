@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::{Decision, Person},
-    views::people::person::Person as VPerson,
+    views::{people::person::Person as VPerson, protector::NeedsLoginAndProfile},
 };
 
 // keep it as POST, otherwise cannot send pos. args
@@ -99,34 +99,39 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
 
 #[component]
 pub fn LikedProfiles() -> Element {
-    list(Some(Decision::Like), false)
+    list(Some(Decision::Like))
 }
 
 #[component]
 pub fn SkippedProfiles() -> Element {
-    list(Some(Decision::Skip), false)
+    list(Some(Decision::Skip))
 }
 
 #[component]
 pub fn SwipeProfiles() -> Element {
-    list(None, true)
+    list(None)
 }
 
-fn list(wants: Option<Decision>, swiping: bool) -> Element {
+fn list(wants: Option<Decision>) -> Element {
     let profiles = use_server_future(move || async move { get_profiles(wants).await })?;
 
     rsx! {
-        if let Some(Ok(peeps)) = profiles().to_owned() {
-            ul {
-                class: "h-full overflow-y-scroll p-2 pb-0",
-                class: if swiping { "[&_>_*+*]:hidden" },
-
-                for person in peeps {
-                    if let Some(id) = person.id {
-                        li { key: "{id}",
-                            VPerson { person }
+        NeedsLoginAndProfile {
+            if let Some(Ok(peeps)) = profiles().to_owned() {
+                if peeps.len() > 0 {
+                    ul {
+                        class: "h-full overflow-y-scroll p-2 pb-0 [&_>_*+*]:mt-2",
+                        class: if wants.is_none() { "[&_>_*+*]:hidden" },
+                        for person in peeps {
+                            if let Some(id) = person.id {
+                                li { key: "{id}",
+                                    VPerson { person }
+                                }
+                            }
                         }
                     }
+                } else {
+                    p { class: "absolute top-1/2 left-1/2 -translate-1/2", "Nobody here!" }
                 }
             }
         }
