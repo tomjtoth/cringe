@@ -15,7 +15,7 @@ async fn post_basics(
     dob: NaiveDate,
     height: u8,
 ) -> Result<Option<Person>> {
-    if dob.years_since(legal_age()).is_some_and(|age| age >= 18) {
+    if dob.years_since(legal_age()).is_some() {
         #[cfg(feature = "server")]
         {
             use crate::state::server::{get_db, get_session_id};
@@ -109,7 +109,7 @@ pub fn BasicMe() -> Element {
                 value: gender().map(|g| g as u8),
                 onchange: move |evt| *gender.write() = Some(Gender::from_numerical_str(evt.value())),
 
-                option { value: "", selected: true, disabled: true, "Your gender" }
+                option { value: "", disabled: true, "Your gender" }
                 option { value: Gender::Male as u8, "{Gender::Male}" }
                 option { value: Gender::Female as u8, "{Gender::Female}" }
             }
