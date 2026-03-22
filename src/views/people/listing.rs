@@ -18,9 +18,9 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
             let profiles = sqlx::query_as::<_, Person>(&format!(
                 r#"
                 WITH me AS (
-                    SELECT 
+                    SELECT
                         u.id, gps_lon, gps_lat
-                        -- TODO: expand with other settings later for filtering, such as distance, age_min, age_max
+                        -- TODO: expand later with other filters, such as distance, age_min, age_max, gender
                     FROM auth_sessions a
                     JOIN users u on a.email = u.email
                     WHERE a.id = $1 AND expires_at > NOW() AND csrf_token IS NULL
@@ -30,7 +30,6 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
                     u.id,
                     name,
                     gender,
-                    born,
                     height,
                     education,
                     occupation,
@@ -38,8 +37,9 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
                     hometown,
 
                     age_from_dob(born) as age,
+                    zodiac_sign_from_dob(born) as zodiac_sign,
                     distance_km(
-                        u.gps_lat, u.gps_lon, 
+                        u.gps_lat, u.gps_lon,
                         me.gps_lat, me.gps_lon
                     ) as distance,
 
@@ -81,7 +81,7 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
                 LEFT JOIN user_decisions d ON d.actor_user_id = me.id AND d.target_user_id = u.id
                 WHERE u.id <> me.id
                 AND d.decision {}
-                ORDER BY distance DESC
+                ORDER BY distance
                 "#,
                 if wants.is_some() { " = $2" } else { "IS NULL" }
             ))
