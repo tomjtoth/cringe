@@ -7,7 +7,7 @@ pub fn Navbar() -> Element {
     rsx! {
         div { class: "grow overflow-hidden", Outlet::<Route> {} }
 
-        ul { class: "pt-2 bg-background border-t flex justify-around w-full
+        ul { class: "py-2 bg-background border-t flex items-center justify-around w-full
                      [&_a]:flex [&_a]:flex-col text-center",
             li {
                 Link { to: Route::About {},
