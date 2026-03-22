@@ -1,20 +1,23 @@
 use dioxus::prelude::*;
 
-use crate::{state::client::ME, views::people::person::Person};
+use crate::{
+    state::client::ME,
+    views::{me::basic::BasicMe, people::person::Person, protector::NeedsLogin},
+};
+
+mod basic;
 
 #[component]
 pub fn Me() -> Element {
     rsx! {
-        if let Some(authorized) = ME() {
-            if let Some(profile) = authorized {
+        NeedsLogin {
+            if let Some(Some(person)) = ME() {
                 div { class: "h-full overflow-y-scroll",
-                    Person { person: profile.clone(), wo_buttons: true }
+                    Person { person, wo_buttons: true }
                 }
             } else {
-                p { "You don't have a profile!" }
+                BasicMe {}
             }
-        } else {
-            p { "You are not even logged in!" }
         }
     }
 }
