@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::client::{get_decisions, get_me, update_gps_pos, AuthResponse, DECISIONS, ME};
+use crate::state::client::{get_decisions, get_me, AuthResponse, DECISIONS, ME};
 
 #[cfg(feature = "server")]
 mod auth;
@@ -52,10 +52,6 @@ fn App() -> Element {
             } else {
                 None
             };
-
-            if profile.is_some() {
-                update_gps_pos();
-            }
         }
     }
 
