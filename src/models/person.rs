@@ -16,6 +16,26 @@ pub enum Gender {
     Female,
 }
 
+impl Gender {
+    pub fn from_numerical_str(str: String) -> Self {
+        match str.as_str() {
+            "1" => Gender::Female,
+            _ => Gender::Male,
+        }
+    }
+}
+
+impl std::fmt::Display for Gender {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let label = match self {
+            Gender::Male => "♂️ Man",
+            Gender::Female => "♀️ Woman",
+        };
+
+        f.write_str(label)
+    }
+}
+
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Kids {
