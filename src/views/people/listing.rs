@@ -10,11 +10,7 @@ use crate::{
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
     #[cfg(feature = "server")]
     {
-        use crate::state::server::{get_db, get_session_id};
-
-        if let Some(sess_id) = get_session_id().await {
-            let pool = get_db().await;
-
+        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
             let profiles = sqlx::query_as::<_, Person>(&format!(
                 r#"
                 WITH me AS (

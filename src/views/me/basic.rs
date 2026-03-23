@@ -17,7 +17,6 @@ async fn post_basics(
 ) -> Result<Option<Person>> {
     #[cfg(feature = "server")]
     {
-        use crate::state::server::{get_db, get_session_id};
         use dioxus::logger::tracing;
 
         tracing::info!(
@@ -31,9 +30,7 @@ async fn post_basics(
         if let Some(age) = legal_dob().years_since(dob) {
             tracing::debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
 
-            if let Some(sess_id) = get_session_id().await {
-                let pool = get_db().await;
-
+            if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
                 let profile = sqlx::query_as::<_, Person>(
                     r#"
                     INSERT INTO users (name, email, gender, born, height)

@@ -6,13 +6,20 @@ use dioxus::{
 
 use crate::{auth::COOKIE_NAME, models::person::Person};
 
-pub async fn get_db() -> sqlx::PgPool {
+async fn get_db() -> sqlx::PgPool {
     let FullstackExtension(pool) =
         FullstackContext::extract::<FullstackExtension<sqlx::PgPool>, _>()
             .await
             .expect("PgPool extension is missing from server context");
 
     pool
+}
+
+pub async fn get_ctx() -> (Option<String>, sqlx::PgPool) {
+    let session_id = get_session_id().await;
+    let pool = get_db().await;
+
+    (session_id, pool)
 }
 
 async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
@@ -25,7 +32,7 @@ async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
     None
 }
 
-pub async fn get_session_id() -> Option<String> {
+async fn get_session_id() -> Option<String> {
     let cookies = get_cookies().await?;
     let id = cookies.get(COOKIE_NAME)?;
 

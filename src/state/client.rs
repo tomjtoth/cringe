@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::person::{Decision, Person};
 
 #[cfg(feature = "server")]
-use crate::state::server::{get_db, get_session_id};
+use crate::state::server::get_ctx;
 
 /// **outer** option indicates an **authorized session**
 ///
@@ -20,9 +20,7 @@ pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| H
 pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
     #[cfg(feature = "server")]
     {
-        if let Some(session_id) = get_session_id().await {
-            let pool = get_db().await;
-
+        if let (Some(session_id), pool) = get_ctx().await {
             let decisions = sqlx::query_as::<_, (i32, Decision)>(
                 "
                 SELECT target_user_id, decision
@@ -47,9 +45,7 @@ pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
 pub async fn get_me() -> Result<AuthResponse> {
     #[cfg(feature = "server")]
     {
-        if let Some(sess_id) = get_session_id().await {
-            let pool = get_db().await;
-
+        if let (Some(sess_id), pool) = get_ctx().await {
             let (authenticated, profile) =
                 sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
                     r#"
@@ -127,9 +123,7 @@ pub struct AuthResponse(pub bool, pub Option<Person>);
 async fn post_gps(coords: Coords) -> Result<()> {
     #[cfg(feature = "server")]
     {
-        if let Some(sess_id) = get_session_id().await {
-            let pool = get_db().await;
-
+        if let (Some(sess_id), pool) = get_ctx().await {
             let res = sqlx::query(
                 "
                 UPDATE users u 
