@@ -148,7 +148,7 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
             Image { id, src: pics.next() }
             Prompt { id, prompt: prompts.next() }
 
-            SkipButton { id }
+            SkipButton {}
         }
 
     }
