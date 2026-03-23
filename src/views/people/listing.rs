@@ -112,8 +112,13 @@ pub fn SwipeProfiles() -> Element {
     list(None)
 }
 
+#[derive(Clone)]
+pub struct ListingCtx(pub Option<Decision>);
+
 fn list(wants: Option<Decision>) -> Element {
     let profiles = use_server_future(move || async move { get_profiles(wants).await })?;
+
+    use_context_provider(|| Some(ListingCtx(wants)));
 
     rsx! {
         NeedsLoginAndProfile {
