@@ -8,10 +8,8 @@ use crate::{
 // keep it as POST, otherwise cannot send pos. args
 #[post("/api/profiles")]
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
-    #[cfg(feature = "server")]
-    {
-        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            let profiles = sqlx::query_as::<_, Person>(&format!(
+    if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+        let profiles = sqlx::query_as::<_, Person>(&format!(
                 r#"
                 WITH me AS (
                     SELECT
@@ -86,8 +84,7 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
             .fetch_all(&pool)
             .await?;
 
-            return Ok(profiles);
-        }
+        return Ok(profiles);
     }
 
     Ok(vec![])

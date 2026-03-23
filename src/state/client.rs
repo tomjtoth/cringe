@@ -18,37 +18,32 @@ pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| H
 
 #[get("/api/decisions")]
 pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
-    #[cfg(feature = "server")]
-    {
-        if let (Some(session_id), pool) = get_ctx().await {
-            let decisions = sqlx::query_as::<_, (i32, Decision)>(
-                "
+    if let (Some(session_id), pool) = get_ctx().await {
+        let decisions = sqlx::query_as::<_, (i32, Decision)>(
+            "
                 SELECT target_user_id, decision
                 FROM auth_sessions a
                 JOIN users u ON u.email = a.email
                 JOIN user_decisions d ON u.id = d.actor_user_id
                 WHERE a.id = $1 AND csrf_token IS NULL AND a.expires_at > NOW()
                 ",
-            )
-            .bind(&session_id)
-            .fetch_all(&pool)
-            .await?;
+        )
+        .bind(&session_id)
+        .fetch_all(&pool)
+        .await?;
 
-            return Ok(decisions);
-        };
-    }
+        return Ok(decisions);
+    };
 
     Ok(vec![])
 }
 
 #[get("/api/me")]
 pub async fn get_me() -> Result<AuthResponse> {
-    #[cfg(feature = "server")]
-    {
-        if let (Some(sess_id), pool) = get_ctx().await {
-            let (authenticated, profile) =
-                sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
-                    r#"
+    if let (Some(sess_id), pool) = get_ctx().await {
+        let (authenticated, profile) =
+            sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
+                r#"
                     WITH auth AS (
                         SELECT email FROM auth_sessions 
                         WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
@@ -104,13 +99,12 @@ pub async fn get_me() -> Result<AuthResponse> {
                         (SELECT count(*) > 0 FROM auth),
                         (SELECT row_to_json(profile) FROM profile)
                     "#,
-                )
-                .bind(&sess_id)
-                .fetch_one(&pool)
-                .await?;
+            )
+            .bind(&sess_id)
+            .fetch_one(&pool)
+            .await?;
 
-            return Ok(AuthResponse(authenticated, profile.map(|s| s.0)));
-        }
+        return Ok(AuthResponse(authenticated, profile.map(|s| s.0)));
     }
 
     Ok(AuthResponse(false, None))
@@ -121,28 +115,25 @@ pub struct AuthResponse(pub bool, pub Option<Person>);
 
 #[post("/api/gps")]
 async fn post_gps(coords: Coords) -> Result<()> {
-    #[cfg(feature = "server")]
-    {
-        if let (Some(sess_id), pool) = get_ctx().await {
-            let res = sqlx::query(
-                "
-                UPDATE users u 
-                SET gps_lon = $1, gps_lat = $2
-                FROM auth_sessions a
-                WHERE a.id = $3 
-                AND u.email = a.email
-                AND expires_at > NOW()
-                ",
-            )
-            .bind(&coords.lon)
-            .bind(&coords.lat)
-            .bind(&sess_id)
-            .execute(&pool)
-            .await?;
+    if let (Some(sess_id), pool) = get_ctx().await {
+        let res = sqlx::query(
+            "
+            UPDATE users u 
+            SET gps_lon = $1, gps_lat = $2
+            FROM auth_sessions a
+            WHERE a.id = $3 
+            AND u.email = a.email
+            AND expires_at > NOW()
+            ",
+        )
+        .bind(&coords.lon)
+        .bind(&coords.lat)
+        .bind(&sess_id)
+        .execute(&pool)
+        .await?;
 
-            if res.rows_affected() == 0 {
-                eprintln!("expired session \"{sess_id}\", nothing to update")
-            }
+        if res.rows_affected() == 0 {
+            eprintln!("expired session \"{sess_id}\", nothing to update")
         }
     }
 
