@@ -108,7 +108,7 @@ CREATE TABLE users (
 	email TEXT NOT NULL,
 	gender gender NOT NULL,
 	born DATE NOT NULL,
-	height SMALLINT NOT NULL CHECK (height BETWEEN 30 AND 300),
+	height SMALLINT NOT NULL CHECK (height BETWEEN 0 AND 255), -- u8 in Rust
 	education TEXT,
 	occupation TEXT,
 
