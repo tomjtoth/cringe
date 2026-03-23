@@ -13,9 +13,7 @@ pub fn Container(children: Element, id: Option<i32>, class: Option<String>) -> E
         div { class,
             {children}
 
-            if let Some(id) = id {
-                LikeButton { id }
-            }
+            LikeButton {}
         }
     }
 }
