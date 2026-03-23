@@ -15,22 +15,33 @@ async fn post_basics(
     dob: NaiveDate,
     height: u8,
 ) -> Result<Option<Person>> {
-    if dob.years_since(legal_age()).is_some() {
-        #[cfg(feature = "server")]
-        {
-            use crate::state::server::{get_db, get_session_id};
+    #[cfg(feature = "server")]
+    {
+        use crate::state::server::{get_db, get_session_id};
+        use dioxus::logger::tracing;
+
+        tracing::info!(
+            r#"ℹ️ Attempting to insert " {} ", " {} ", " {} ", " {} " into users"#,
+            name,
+            sex,
+            dob,
+            height
+        );
+
+        if let Some(age) = legal_dob().years_since(dob) {
+            tracing::debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
 
             if let Some(sess_id) = get_session_id().await {
                 let pool = get_db().await;
 
                 let profile = sqlx::query_as::<_, Person>(
                     r#"
-                INSERT INTO users (name, email, gender, born, height)
-                    SELECT $2, a.email, $3, $4, $5
-                    FROM auth_sessions a
-                    WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
-                RETURNING *
-                "#,
+                    INSERT INTO users (name, email, gender, born, height)
+                        SELECT $2, a.email, $3, $4, $5
+                        FROM auth_sessions a
+                        WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
+                    RETURNING *
+                    "#,
                 )
                 .bind(&sess_id)
                 .bind(&name)
@@ -40,6 +51,14 @@ async fn post_basics(
                 .fetch_optional(&pool)
                 .await?;
 
+                let [emoji, txt] = if profile.is_some() {
+                    ["✅", "succeeded"]
+                } else {
+                    ["🚫", "failed"]
+                };
+
+                tracing::info!(r#"{emoji} INSERT {txt}!"#,);
+
                 return Ok(profile);
             }
         }
@@ -48,14 +67,14 @@ async fn post_basics(
     Ok(None)
 }
 
-fn legal_age() -> NaiveDate {
+fn legal_dob() -> NaiveDate {
     let today = Local::now().date_naive();
     today.checked_sub_months(Months::new(18 * 12)).unwrap()
 }
 
 #[component]
 pub fn BasicMe() -> Element {
-    let legal = legal_age();
+    let legal = legal_dob();
 
     let mut name = use_signal(|| String::new());
     let mut gender = use_signal(|| Gender::Male);
