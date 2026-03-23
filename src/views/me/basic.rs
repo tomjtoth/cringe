@@ -81,10 +81,7 @@ pub fn BasicMe() -> Element {
     let mut bday = use_signal(|| legal.to_string());
     let mut height = use_signal(|| 180u8);
 
-    let onsubmit = move |evt: Event<FormData>| async move {
-        // should I actually? this could simply reload the page
-        evt.prevent_default();
-
+    let handle_submit = move || async move {
         if name().len() > 0 {
             if let Ok(dob) = NaiveDate::from_str(&bday()) {
                 if let Ok(Some(my_profile)) = post_basics(name(), gender(), dob, height()).await {
@@ -98,7 +95,11 @@ pub fn BasicMe() -> Element {
 
     rsx! {
         form {
-            onsubmit,
+            onsubmit: move |evt| async move {
+                evt.prevent_default();
+                handle_submit().await;
+            },
+
             class: "absolute top-1/2 left-1/2 -translate-1/2
                     flex flex-col gap-2 items-center",
 
