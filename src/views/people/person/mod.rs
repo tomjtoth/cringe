@@ -13,13 +13,16 @@ mod prompt;
 use img::Image;
 use prompt::Prompt;
 
+#[derive(Clone)]
+pub struct PersonCtx {
+    pub person: MPerson,
+}
+
 #[component]
-pub fn Person(person: MPerson, wo_buttons: Option<bool>) -> Element {
-    let id = if wo_buttons.is_some_and(|x| x == true) {
-        None
-    } else {
-        person.id
-    };
+pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
+    let ctx = use_context_provider(move || PersonCtx { person });
+
+    let person = ctx.person;
 
     let mut already_has_kids = false;
 
