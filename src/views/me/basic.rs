@@ -81,21 +81,34 @@ pub fn BasicMe() -> Element {
     let mut bday = use_signal(|| legal.to_string());
     let mut height = use_signal(|| 180u8);
 
-    let handle_submit = move |_| async move {
-        if name().len() > 0 {
-            if let Ok(dob) = NaiveDate::from_str(&bday()) {
-                if let Ok(Some(my_profile)) = post_basics(name(), gender(), dob, height()).await {
-                    *ME.write() = Some(Some(my_profile))
-                }
-            }
-        }
-    };
-
     let required = true;
 
+    // this really should be a form,
+    // but onsubmit's evt.prevent_default() did nothing...
     rsx! {
-        div { class: "absolute top-1/2 left-1/2 -translate-1/2
+        form {
+
+            class: "absolute top-1/2 left-1/2 -translate-1/2
                     flex flex-col gap-2 items-center",
+
+            onsubmit: move |evt| async move {
+                evt.prevent_default();
+
+                if name().len() > 0 {
+                    if let Ok(dob) = NaiveDate::from_str(&bday()) {
+                        if let Ok(Some(my_profile)) = post_basics(
+                                name(),
+                                gender(),
+                                dob,
+                                height(),
+                            )
+                            .await
+                        {
+                            *ME.write() = Some(Some(my_profile));
+                        }
+                    }
+                }
+            },
 
             h2 { "HEADS UP!!" }
             p { class: "text-center", "These are not changeable later." }
@@ -144,7 +157,7 @@ pub fn BasicMe() -> Element {
                 },
             }
 
-            button { onclick: handle_submit, "💾 Save" }
+            button { "💾 Save" }
         }
 
     }
