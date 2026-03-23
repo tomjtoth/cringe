@@ -105,7 +105,7 @@ $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
 	"name" TEXT NOT NULL,
-	email TEXT NOT NULL,
+	email TEXT NOT NULL UNIQUE,
 	gender gender NOT NULL,
 	born DATE NOT NULL,
 	height SMALLINT NOT NULL CHECK (height BETWEEN 0 AND 255), -- u8 in Rust
