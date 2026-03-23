@@ -127,10 +127,8 @@ fn list(wants: Option<Decision>) -> Element {
                     ul { class: "h-full overflow-y-scroll p-2 pb-0 [&_>_*+*]:mt-2",
                         // class: if wants.is_none() { "[&_>_*+*]:hidden" },
                         for person in peeps {
-                            if let Some(id) = person.id {
-                                li { key: "{id}",
-                                    VPerson { person }
-                                }
+                            li {
+                                VPerson { person }
                             }
                         }
                     }

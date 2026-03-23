@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::{Gender, Person as MPerson},
+    models::person::Person as MPerson,
     views::people::person::{buttons::SkipButton, container::Container},
 };
 

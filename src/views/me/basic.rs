@@ -83,11 +83,8 @@ pub fn BasicMe() -> Element {
 
     let required = true;
 
-    // this really should be a form,
-    // but onsubmit's evt.prevent_default() did nothing...
     rsx! {
         form {
-
             class: "absolute top-1/2 left-1/2 -translate-1/2
                     flex flex-col gap-2 items-center",
 
