@@ -2,6 +2,7 @@ FROM lewimbes/dioxus AS builder
 WORKDIR /app
 
 ARG SERVER_TRIPLET=x86_64-unknown-linux-musl
+ARG APP_VER=prod
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends musl-tools && \
@@ -31,5 +32,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENV IP=0.0.0.0 \
     PORT=80 \
+    APP_VER=$APP_VER \
     SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENTRYPOINT ["/app/cringe"]

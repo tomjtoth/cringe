@@ -1,11 +1,24 @@
 use dioxus::prelude::*;
 
+#[get("/api/semver")]
+async fn get_semver() -> Result<String> {
+    Ok(std::env::var("APP_VER").unwrap_or("D.E.V".to_string()))
+}
+
 #[component]
 pub fn About() -> Element {
-    rsx! {
-        h1 { class: "capitalize", "disclaimer" }
+    let semver = use_server_future(get_semver)?;
 
-        p {
+    rsx! {
+        h1 {
+            "Cringe"
+
+            if let Some(Ok(triplet)) = semver() {
+                sup { "{triplet}" }
+            }
+        }
+
+        p { class: "p-2",
             "This is a "
             b { "Work-in-Progress & currently insecure" }
             " Hinge clone. Check out the source code "
