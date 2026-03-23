@@ -57,23 +57,19 @@ fn legal_age() -> NaiveDate {
 pub fn BasicMe() -> Element {
     let legal = legal_age();
 
-    let mut name = use_signal(|| None::<String>);
-    let mut gender = use_signal(|| None::<Gender>);
+    let mut name = use_signal(|| String::new());
+    let mut gender = use_signal(|| Gender::Male);
     let mut bday = use_signal(|| legal.to_string());
-    let mut height = use_signal(|| None::<u8>);
+    let mut height = use_signal(|| 180u8);
 
     let onsubmit = move |evt: Event<FormData>| async move {
         // should I actually? this could simply reload the page
         evt.prevent_default();
 
-        if let Some(name) = name() {
-            if let Some(sex) = gender() {
-                if let Some(h) = height() {
-                    if let Ok(dob) = NaiveDate::from_str(&bday()) {
-                        if let Ok(Some(my_profile)) = post_basics(name, sex, dob, h).await {
-                            *ME.write() = Some(Some(my_profile))
-                        }
-                    }
+        if name().len() > 0 {
+            if let Ok(dob) = NaiveDate::from_str(&bday()) {
+                if let Ok(Some(my_profile)) = post_basics(name(), gender(), dob, height()).await {
+                    *ME.write() = Some(Some(my_profile))
                 }
             }
         }
@@ -97,17 +93,13 @@ pub fn BasicMe() -> Element {
                 minlength: 2,
                 required,
 
-                onchange: move |evt| {
-                    if evt.value().len() > 0 {
-                        *name.write() = Some(evt.value());
-                    }
-                },
+                onchange: move |evt| *name.write() = evt.value(),
             }
 
             select {
                 required,
-                value: gender().map(|g| g as u8),
-                onchange: move |evt| *gender.write() = Some(Gender::from_numerical_str(evt.value())),
+                value: gender() as u8,
+                onchange: move |evt| *gender.write() = Gender::from_numerical_str(evt.value()),
 
                 option { value: "", disabled: true, "Your gender" }
                 option { value: Gender::Male as u8, "{Gender::Male}" }
@@ -133,7 +125,7 @@ pub fn BasicMe() -> Element {
                 value: height,
                 onchange: move |evt| {
                     if let Ok(h) = evt.value().parse::<u8>() {
-                        *height.write() = Some(h);
+                        *height.write() = h;
                     }
                 },
             }
