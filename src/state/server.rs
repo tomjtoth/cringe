@@ -26,13 +26,10 @@ async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
 }
 
 pub async fn get_session_id() -> Option<String> {
-    if let Some(cookies) = get_cookies().await {
-        if let Some(id) = cookies.get(COOKIE_NAME) {
-            return Some(String::from(id));
-        }
-    }
+    let cookies = get_cookies().await?;
+    let id = cookies.get(COOKIE_NAME)?;
 
-    None
+    Some(String::from(id))
 }
 
 fn parse_yaml() -> anyhow::Result<Vec<Person>> {
