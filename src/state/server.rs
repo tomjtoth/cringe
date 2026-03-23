@@ -23,13 +23,12 @@ pub async fn get_ctx() -> (Option<String>, sqlx::PgPool) {
 }
 
 async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
-    if let Ok(TypedHeader(cookies)) =
-        FullstackContext::extract::<TypedHeader<axum_extra::headers::Cookie>, _>().await
-    {
-        return Some(cookies);
-    }
+    let TypedHeader(cookies) =
+        FullstackContext::extract::<TypedHeader<axum_extra::headers::Cookie>, _>()
+            .await
+            .ok()?;
 
-    None
+    return Some(cookies);
 }
 
 async fn get_session_id() -> Option<String> {
