@@ -81,7 +81,7 @@ pub fn BasicMe() -> Element {
     let mut bday = use_signal(|| legal.to_string());
     let mut height = use_signal(|| 180u8);
 
-    let handle_submit = move || async move {
+    let handle_submit = move |_| async move {
         if name().len() > 0 {
             if let Ok(dob) = NaiveDate::from_str(&bday()) {
                 if let Ok(Some(my_profile)) = post_basics(name(), gender(), dob, height()).await {
@@ -94,17 +94,11 @@ pub fn BasicMe() -> Element {
     let required = true;
 
     rsx! {
-        form {
-            onsubmit: move |evt| async move {
-                evt.prevent_default();
-                handle_submit().await;
-            },
-
-            class: "absolute top-1/2 left-1/2 -translate-1/2
+        div { class: "absolute top-1/2 left-1/2 -translate-1/2
                     flex flex-col gap-2 items-center",
 
             h2 { "HEADS UP!!" }
-            p { class: "text-center", "These props are not changeable later." }
+            p { class: "text-center", "These are not changeable later." }
 
             input {
                 placeholder: "Your Name Here",
@@ -150,7 +144,7 @@ pub fn BasicMe() -> Element {
                 },
             }
 
-            button { "💾 Save" }
+            button { onclick: handle_submit, "💾 Save" }
         }
 
     }
