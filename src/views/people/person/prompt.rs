@@ -5,10 +5,10 @@ use crate::views::people::person::container::Container;
 
 #[component]
 
-pub fn Prompt(prompt: Option<PersonPrompt>, id: Option<i32>) -> Element {
+pub fn Prompt(prompt: Option<PersonPrompt>) -> Element {
     rsx! {
         if let Some(prompt) = prompt {
-            Container { id,
+            Container {
                 h3 { class: "p-2 pt-10", "{prompt.title}" }
                 p { class: "p-2 pb-20 text-2xl", "{prompt.body}" }
             }

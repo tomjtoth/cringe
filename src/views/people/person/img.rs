@@ -3,10 +3,10 @@ use dioxus::prelude::*;
 use crate::{models::person::Pic, views::people::person::container::Container};
 
 #[component]
-pub fn Image(src: Option<Pic>, id: Option<i32>) -> Element {
+pub fn Image(src: Option<Pic>) -> Element {
     rsx! {
         if let Some(pic) = src {
-            Container { id,
+            Container {
                 if let Some(prompt) = pic.prompt() {
                     p { class: "p-2 py-4 text-2xl",
 

@@ -34,8 +34,8 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
         div { class: "relative md:columns-3 *:mb-2 text-lg",
             h2 { "{person.name}" }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
             Container { class: "[&>*+*]:border-t [&>*+*]:p-2",
                 ul { class: "p-2 flex overflow-x-scroll [&>*+*]:ml-2 [&>*+*]:border-l *:p-2 text-nowrap",
@@ -133,20 +133,20 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
 
             }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
-            Image { id, src: pics.next() }
-            Prompt { id, prompt: prompts.next() }
+            Image { src: pics.next() }
+            Prompt { prompt: prompts.next() }
 
             SkipButton {}
         }
