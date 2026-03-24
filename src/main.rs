@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::client::{get_decisions, get_me, AuthResponse, DECISIONS, ME};
+use crate::state::client::init_client_state;
 
 #[cfg(feature = "server")]
 mod auth;
@@ -38,22 +38,7 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let mut initial_state =
-        use_server_future(|| async { futures::join!(get_decisions(), get_me()) })?;
-
-    if let Some((decisions, user)) = initial_state.write().as_mut() {
-        if let Ok(decisions) = decisions {
-            DECISIONS.write().extend(decisions.to_owned());
-        }
-
-        if let Ok(AuthResponse(authorized, profile)) = user {
-            *ME.write() = if authorized.to_owned() {
-                Some(profile.to_owned())
-            } else {
-                None
-            };
-        }
-    }
+    init_client_state()?;
 
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }

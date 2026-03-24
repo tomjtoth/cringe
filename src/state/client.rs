@@ -17,7 +17,7 @@ pub static ME: GlobalSignal<Option<Option<Person>>> = Signal::global(|| None);
 pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| HashMap::new());
 
 #[get("/api/decisions")]
-pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
+async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
     if let (Some(session_id), pool) = get_ctx().await {
         let decisions = sqlx::query_as::<_, (i32, Decision)>(
             "
@@ -39,7 +39,7 @@ pub async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
 }
 
 #[get("/api/me")]
-pub async fn get_me() -> Result<AuthResponse> {
+async fn get_me() -> Result<AuthResponse> {
     if let (Some(sess_id), pool) = get_ctx().await {
         let (authenticated, profile) =
             sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
@@ -172,7 +172,28 @@ struct Coords {
     lon: f64,
 }
 
-pub fn update_gps_pos() {
+pub fn init_client_state() -> std::result::Result<(), RenderError> {
+    let mut initial_state =
+        use_server_future(|| async { futures::join!(get_decisions(), get_me()) })?;
+
+    if let Some((decisions, user)) = initial_state.write().as_mut() {
+        if let Ok(decisions) = decisions {
+            DECISIONS.write().extend(decisions.to_owned());
+        }
+
+        if let Ok(AuthResponse(authorized, profile)) = user {
+            *ME.write() = if authorized.to_owned() {
+                Some(profile.to_owned())
+            } else {
+                None
+            };
+        }
+    }
+
+    Ok(())
+}
+
+fn update_gps_pos() {
     #[cfg(target_arch = "wasm32")]
     {
         use wasm_bindgen::{closure::Closure, JsCast};
