@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - cache-test
+      - cache-tester
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
