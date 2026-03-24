@@ -36,10 +36,18 @@ web-sys = { version = "0.3.91", optional = true, features = [
     "Navigator",
     "Window",
 ] }
+tracing-wasm = { version = "0.2", optional = true }
+tracing-subscriber = { version = "0.3", optional = true }
 
 [features]
 default = ["web"]
-web = ["dioxus/web", "dep:web-sys", "dep:wasm-bindgen"]
+web = [
+    "dioxus/web",
+    "dep:web-sys",
+    "dep:wasm-bindgen",
+    "dep:tracing-wasm",
+    "dep:tracing-subscriber",
+]
 server = [
     "dioxus/server",
     "dep:serde_yaml",
