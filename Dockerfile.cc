@@ -3,7 +3,7 @@ WORKDIR /app
 
 COPY . .
 RUN dx build --release --verbose && \
-    mv /app/target/dx/cringe/release/web /app.built && \
+    mv /app/target/dx/cringe/release/web/ /app.built/ && \
     cp -a /app/migrations/ /app.built/migrations/
 
 FROM gcr.io/distroless/cc
