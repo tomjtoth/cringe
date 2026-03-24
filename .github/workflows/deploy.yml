@@ -88,7 +88,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: cache-mount
-          key: cache-mount-arm64-${{ hashFiles('Dockerfile.cc', 'Cargo.lock', 'Cargo.toml', 'Dioxus.toml') }}
+          key: cache-mount-arm64-${{ hashFiles('Dockerfile', 'Cargo.lock', 'Cargo.toml', 'Dioxus.toml') }}
           restore-keys: |
             cache-mount-arm64-
 
@@ -111,9 +111,7 @@ jobs:
         with:
           push: true
           context: .
-          file: Dockerfile.cc
           build-args: |
-            SERVER_TRIPLET=aarch64-unknown-linux-musl
             APP_VER=${{ needs.gen-tags.outputs.first_tag }}
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
