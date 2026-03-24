@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - cache-test
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -116,7 +117,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v6
         env:
-          CACHE: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cringe:buildcache
+          CACHE: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cringe:${{ github.ref }}-buildcache
         with:
           push: true
           context: .
