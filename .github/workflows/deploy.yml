@@ -136,8 +136,8 @@ jobs:
         with:
           push: true
           context: .
+          file: Dockerfile.cc
           build-args: |
-            SERVER_TRIPLET=aarch64-unknown-linux-musl
             APP_VER=${{ needs.gen-tags.outputs.first_tag }}
           platforms: linux/arm64
           tags: |
