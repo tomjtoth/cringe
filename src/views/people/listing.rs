@@ -5,8 +5,7 @@ use crate::{
     views::{people::person::Person as VPerson, protector::NeedsLoginAndProfile},
 };
 
-// keep it as POST, otherwise cannot send pos. args
-#[post("/api/profiles")]
+#[get("/api/profiles?wants")]
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
         let profiles = sqlx::query_as::<_, Person>(&format!(
