@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "cringe"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "dioxus",
  "reqwest 0.13.2",
