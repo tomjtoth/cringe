@@ -104,8 +104,8 @@ jobs:
           platforms: linux/arm64
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
-          cache-from: ${CACHE}
-          cache-to: ${CACHE},mode=max
+          cache-from: ${{ env.CACHE }}
+          cache-to: ${{ env.CACHE }},mode=max
 
   gitops:
     name: Kustomize cluster
