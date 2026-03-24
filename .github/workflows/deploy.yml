@@ -90,8 +90,6 @@ jobs:
 
       - name: Build image
         uses: docker/build-push-action@v7
-        env:
-          CACHE: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cringe:${{ github.ref_name }}-buildcache
         with:
           push: true
           context: .
@@ -100,8 +98,6 @@ jobs:
             APP_VER=${{ needs.gen-tags.outputs.first_tag }}
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
-          cache-from: ${{ env.CACHE }}
-          cache-to: ${{ env.CACHE }},mode=max
 
   gitops:
     name: Kustomize cluster
