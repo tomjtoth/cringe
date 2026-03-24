@@ -94,7 +94,7 @@ jobs:
       - name: Build image
         uses: docker/build-push-action@v7
         env:
-          CACHE: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cringe:${{ github.ref }}-buildcache
+          CACHE: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cringe:${{ github.ref_name }}-buildcache
         with:
           push: true
           context: .
