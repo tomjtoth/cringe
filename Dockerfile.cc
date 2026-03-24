@@ -19,4 +19,5 @@ COPY --from=builder /app.built/ /app/
 ENV IP=0.0.0.0 \
     PORT=80 \
     APP_VER=$APP_VER
+    
 ENTRYPOINT ["/app/cringe"]
