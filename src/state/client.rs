@@ -113,6 +113,32 @@ pub async fn get_me() -> Result<AuthResponse> {
 #[derive(Serialize, Deserialize)]
 pub struct AuthResponse(pub bool, pub Option<Person>);
 
+#[post("/api/decide")]
+pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
+    if let (Some(sess_id), pool) = get_ctx().await {
+        let val = sqlx::query(
+            "
+            INSERT INTO user_decisions (actor_user_id, target_user_id, decision)
+            SELECT u.id, $2, $3
+            FROM auth_sessions a
+            INNER JOIN users u ON a.email = u.email
+            WHERE a.id = $1 AND csrf_token IS NULL AND expires_at > NOW()
+            ON CONFLICT (actor_user_id, target_user_id) DO UPDATE
+            SET decision = EXCLUDED.decision
+            ",
+        )
+        .bind(&sess_id)
+        .bind(target_id)
+        .bind(decision)
+        .execute(&pool)
+        .await?;
+
+        return Ok(val.rows_affected() > 0);
+    }
+
+    Ok(false)
+}
+
 #[post("/api/gps")]
 async fn post_gps(coords: Coords) -> Result<()> {
     if let (Some(sess_id), pool) = get_ctx().await {
