@@ -2,7 +2,10 @@ FROM lewimbes/dioxus AS builder
 WORKDIR /app
 
 COPY . .
-RUN dx build --release --verbose && \
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,id=cargo-git,target=/usr/local/cargo/git \
+    --mount=type=cache,id=cargo-target,target=/app/target \
+    dx build --release --verbose && \
     mv /app/target/dx/cringe/release/web/ /app.built/ && \
     cp -a /app/migrations/ /app.built/migrations/
 
