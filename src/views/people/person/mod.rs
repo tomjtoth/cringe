@@ -30,9 +30,8 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
     let mut prompts = person.prompts().clone().into_iter();
 
     rsx! {
-
-        div { class: "relative md:columns-3 *:mb-2 text-lg",
-            h2 { "{person.name}" }
+        div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
+            h2 { class: "m-0! p-2 sticky z-1 top-0 bg-background ", "{person.name}" }
 
             Image { src: pics.next() }
             Prompt { prompt: prompts.next() }
