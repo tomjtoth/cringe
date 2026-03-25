@@ -126,7 +126,7 @@ pub fn init_client_state() -> Result<(), RenderError> {
         }
     }
 
-    use_gps_watch();
+    // use_gps_watch();
 
     Ok(())
 }
