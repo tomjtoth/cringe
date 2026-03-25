@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use tracing_subscriber::{prelude::*, EnvFilter};
 
 use crate::state::client::init_client_state;
 
@@ -13,26 +14,37 @@ mod views;
 
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
-fn main() {
-    #[cfg(target_arch = "wasm32")]
-    {
-        use tracing_subscriber::{prelude::*, EnvFilter};
-
-        let filter = EnvFilter::new(
-            "info,\
+fn tracing_sub() {
+    let filter = EnvFilter::new(
+        "info,\
              dioxus=warn,\
              dioxus_core=warn,\
              dioxus_web=warn,\
              dioxus_signals=warn,\
              hyper=warn,\
-             mio=warn",
-        );
+             mio=warn,\
+             sqlx=warn",
+    );
 
-        tracing_subscriber::registry()
-            .with(filter)
-            .with(tracing_wasm::WASMLayer::default())
-            .init();
-    }
+    let layer = {
+        #[cfg(target_arch = "wasm32")]
+        {
+            tracing_wasm::WASMLayer::default()
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            tracing_subscriber::fmt::layer()
+        }
+    };
+
+    tracing_subscriber::registry()
+        .with(filter)
+        .with(layer)
+        .init();
+}
+
+fn main() {
+    tracing_sub();
 
     #[cfg(not(feature = "server"))]
     dioxus::launch(App);
