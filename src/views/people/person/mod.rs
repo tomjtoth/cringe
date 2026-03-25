@@ -2,10 +2,10 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
-    views::people::person::{buttons::SkipButton, container::Container},
+    views::people::person::{button::SkipButton, container::Container},
 };
 
-mod buttons;
+mod button;
 mod container;
 mod img;
 mod prompt;

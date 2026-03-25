@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::views::people::person::buttons::LikeButton;
+use crate::views::people::person::button::LikeButton;
 
 #[component]
 pub fn Container(children: Element, class: Option<String>, wo_button: Option<bool>) -> Element {
@@ -13,7 +13,7 @@ pub fn Container(children: Element, class: Option<String>, wo_button: Option<boo
         div { class,
             {children}
 
-            if !matches!(wo_button, Some(true)) {
+            if wo_button != Some(true) {
                 LikeButton {}
             }
         }
