@@ -14,6 +14,26 @@ mod views;
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
 fn main() {
+    #[cfg(target_arch = "wasm32")]
+    {
+        use tracing_subscriber::{prelude::*, EnvFilter};
+
+        let filter = EnvFilter::new(
+            "info,\
+             dioxus=warn,\
+             dioxus_core=warn,\
+             dioxus_web=warn,\
+             dioxus_signals=warn,\
+             hyper=warn,\
+             mio=warn",
+        );
+
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(tracing_wasm::WASMLayer::default())
+            .init();
+    }
+
     #[cfg(not(feature = "server"))]
     dioxus::launch(App);
 
@@ -26,15 +46,18 @@ fn main() {
         sqlx::migrate!().run(&pool).await?;
 
         if let Err(e) = crate::state::server::seed_bots(&pool).await {
-            eprintln!("Failed to load bots.yaml: {}", e);
+            error!("Failed to load bots.yaml: {}", e);
         }
 
         let app = dioxus::server::router(App)
             .merge(auth::routes(pool.clone())?)
             .layer(axum::Extension(pool));
+
         Ok(app)
     })
 }
+
+// TODO: refactor components under src/ui/{router.rs,navbar.rs,views/{swipe/mod.rs,me/mod.rs}} etc.
 
 #[component]
 fn App() -> Element {
