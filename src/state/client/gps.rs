@@ -41,8 +41,6 @@ pub(super) fn use_gps_watch() {
                 use wasm_bindgen::{closure::Closure, JsCast};
                 use web_sys::{window, GeolocationPosition, GeolocationPositionError};
 
-                use crate::state::client::post_gps;
-
                 struct GpsWatch {
                     geo: web_sys::Geolocation,
                     watch_id: i32,
