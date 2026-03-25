@@ -17,7 +17,7 @@ pub fn Navbar() -> Element {
             }
             li {
                 Link { to: Route::SkippedProfiles {},
-                    "💔🚫"
+                    "🚫"
                     span { "skipped" }
                 }
             }
