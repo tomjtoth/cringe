@@ -23,8 +23,8 @@ pub fn Navbar() -> Element {
             }
             li {
                 Link { to: Route::SwipeProfiles {},
-                    "🎉"
-                    span { "swipe" }
+                    "😬"
+                    span { "cringe" }
                 }
             }
             li {
