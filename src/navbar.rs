@@ -17,7 +17,7 @@ pub fn Navbar() -> Element {
             }
             li {
                 Link { to: Route::SkippedProfiles {},
-                    "💔"
+                    "💔🚫"
                     span { "skipped" }
                 }
             }
@@ -29,7 +29,7 @@ pub fn Navbar() -> Element {
             }
             li {
                 Link { to: Route::LikedProfiles {},
-                    "❤️"
+                    "✅"
                     span { "liked" }
                 }
             }
