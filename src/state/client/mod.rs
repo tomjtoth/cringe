@@ -3,40 +3,20 @@ use std::collections::HashMap;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::{Decision, Person};
+use crate::{
+    models::person::{Decision, Person},
+    state::client::gps::use_gps_watch,
+};
 
 #[cfg(feature = "server")]
 use crate::state::server::get_ctx;
+
+mod gps;
 
 /// **outer** option indicates an **authorized session**
 ///
 /// **inner** option holds the **user profile** if exists
 pub static ME: GlobalSignal<Option<Option<Person>>> = Signal::global(|| None);
-
-/// keeps track of unlogged users' decisions
-pub static DECISIONS: GlobalSignal<HashMap<i32, Decision>> = Signal::global(|| HashMap::new());
-
-#[get("/api/decisions")]
-async fn get_decisions() -> Result<Vec<(i32, Decision)>> {
-    if let (Some(session_id), pool) = get_ctx().await {
-        let decisions = sqlx::query_as::<_, (i32, Decision)>(
-            "
-                SELECT target_user_id, decision
-                FROM auth_sessions a
-                JOIN users u ON u.email = a.email
-                JOIN user_decisions d ON u.id = d.actor_user_id
-                WHERE a.id = $1 AND csrf_token IS NULL AND a.expires_at > NOW()
-                ",
-        )
-        .bind(&session_id)
-        .fetch_all(&pool)
-        .await?;
-
-        return Ok(decisions);
-    };
-
-    Ok(vec![])
-}
 
 #[get("/api/me")]
 async fn get_me() -> Result<AuthResponse> {
@@ -139,100 +119,16 @@ pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
     Ok(false)
 }
 
-#[post("/api/gps")]
-async fn post_gps(coords: Coords) -> Result<()> {
-    if let (Some(sess_id), pool) = get_ctx().await {
-        let res = sqlx::query(
-            "
-            UPDATE users u 
-            SET gps_lon = $1, gps_lat = $2
-            FROM auth_sessions a
-            WHERE a.id = $3 
-            AND u.email = a.email
-            AND expires_at > NOW()
-            ",
-        )
-        .bind(&coords.lon)
-        .bind(&coords.lat)
-        .bind(&sess_id)
-        .execute(&pool)
-        .await?;
+pub fn init_client_state() -> Result<(), RenderError> {
+    let initial_state = use_server_future(get_me)?;
 
-        if res.rows_affected() == 0 {
-            eprintln!("expired session \"{sess_id}\", nothing to update")
+    if let Some(Ok(AuthResponse(authorized, profile))) = initial_state.read().as_ref() {
+        if authorized.to_owned() {
+            *ME.write() = Some(profile.to_owned())
         }
     }
+
+    use_gps_watch();
 
     Ok(())
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-struct Coords {
-    lat: f64,
-    lon: f64,
-}
-
-pub fn init_client_state() -> std::result::Result<(), RenderError> {
-    let mut initial_state =
-        use_server_future(|| async { futures::join!(get_decisions(), get_me()) })?;
-
-    if let Some((decisions, user)) = initial_state.write().as_mut() {
-        if let Ok(decisions) = decisions {
-            DECISIONS.write().extend(decisions.to_owned());
-        }
-
-        if let Ok(AuthResponse(authorized, profile)) = user {
-            *ME.write() = if authorized.to_owned() {
-                Some(profile.to_owned())
-            } else {
-                None
-            };
-        }
-    }
-
-    Ok(())
-}
-
-fn update_gps_pos() {
-    #[cfg(target_arch = "wasm32")]
-    {
-        use wasm_bindgen::{closure::Closure, JsCast};
-        use web_sys::{window, GeolocationPosition, GeolocationPositionError};
-
-        let Some(win) = window() else {
-            eprintln!("No window object");
-            return;
-        };
-
-        let Ok(geo) = win.navigator().geolocation() else {
-            eprintln!("Geolocation unavailable");
-            return;
-        };
-
-        let success = Closure::wrap(Box::new(move |pos: GeolocationPosition| {
-            let c = pos.coords();
-            let coords = Coords {
-                lat: c.latitude(),
-                lon: c.longitude(),
-            };
-
-            spawn(async move {
-                if let Err(e) = post_gps(coords).await {
-                    eprintln!("Failed to post geolocation: {e}");
-                }
-            });
-        }) as Box<dyn FnMut(_)>);
-
-        let failure = Closure::wrap(Box::new(move |e: GeolocationPositionError| {
-            eprintln!("Geolocation error: {}", e.code());
-        }) as Box<dyn FnMut(_)>);
-
-        let _ = geo.get_current_position_with_error_callback(
-            success.as_ref().unchecked_ref(),
-            Some(failure.as_ref().unchecked_ref()),
-        );
-
-        success.forget();
-        failure.forget();
-    }
 }
