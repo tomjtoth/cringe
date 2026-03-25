@@ -37,22 +37,16 @@ web-sys = { version = "0.3.91", optional = true, features = [
     "Window",
 ] }
 tracing-wasm = { version = "0.2", optional = true }
-tracing-subscriber = { version = "0.3", optional = true }
+tracing-subscriber = "0.3"
 
 [features]
 default = ["web"]
-web = [
-    "dioxus/web",
-    "dep:web-sys",
-    "dep:wasm-bindgen",
-    "dep:tracing-wasm",
-    "dep:tracing-subscriber",
-]
+web = ["dioxus/web", "dep:web-sys", "dep:wasm-bindgen", "dep:tracing-wasm"]
+
 server = [
     "dioxus/server",
     "dep:serde_yaml",
     "dep:anyhow",
-
     "dep:axum",
     "dep:axum-extra",
     "dep:dotenvy",
