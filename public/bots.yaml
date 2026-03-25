@@ -1,3 +1,56 @@
+
+- name: Dexter
+  email: serially.single@dexter-noted.com
+  gender: male
+  born: 1971-02-01
+  height: 178
+  education: Forensics with an emphasis on 'keep it tidy'
+  occupation: Blood-spatter analyst / part-time complicated dude
+
+  hometown: Miami
+  location: Miami
+  gps:
+    lon: -80.1918
+    lat: 25.7617
+
+  kids:
+    has: 0
+    wants: 0
+
+  habits:
+    drinking: rarely
+    smoking: never
+    marijuana: never
+    drugs: never
+
+  prompts:
+    - title: Two truths and a lie
+      body: >
+        1️⃣ I keep to a strict routine
+        2️⃣ I enjoy quiet walks at night
+        3️⃣ I never keep trophies
+    - title: Favourite weekend
+      body: >
+        A morning shift, a late-night coffee, and a very tidy apartment.
+    - title: I'm weirdly good at
+      body: >
+        Arranging things so they'll never be found (in a good way).
+
+  pictures:
+    - https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp/250px-Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp.png
+
+    - prompt: Me relaxing
+      url: https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhXv2m8whj5Ksu_gsS3awGl0mqfkoiO3AiW7sGqEBqFv-n27HnwhEr4NFuP4tBXlZ0E30c3ltfuNDCbYqS8DLskecLNO_hXcMx_FHJrLMVonUdeYaFrmU1lLcRunr5wpOdYcoIhTPUVFSeW/s16000/footageseason9.png
+
+    - https://a1cf74336522e87f135f-2f21ace9a6cf0052456644b80fa06d4f.ssl.cf2.rackcdn.com/images/characters/large/800/Dexter-Morgan.Dexter.webp
+
+    - https://static0.srcdn.com/wordpress/wp-content/uploads/2025/07/dexter-morgan-looking-nervous-staring-up-at-a-figure-with-people-behind-him-in-dexter-season-2.jpg?w=1600&h=900&fit=crop
+
+    - prompt: This could be you
+      url: https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjr4nPRshc-WtlnbgbsqsYjRDeJLov_TOst4SKqF93eFsK63HozKbWUV5UzkfYTtfcqe_aBNDb_5og_E5LhMsnFtAyBq2cXoJFv90265c2oDjR3SzmRf1Vus3eRcqkC-Qp2S_435wIbyHO0woI1tlF1TlbjJxpJWD1We0WbQyMh29ey00E0LmbAKNwnNSe1/s1221/every-character-victims-dexter-resurrection-season-1.jpg
+
+    - https://www.telegraph.co.uk/multimedia/archive/02182/dexter_2182960b.jpg
+
 - name: Anakin
   email: vader@definitely-not-a-sith.com
   gender: male
