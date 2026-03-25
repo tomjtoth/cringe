@@ -37,7 +37,7 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
             Image { src: pics.next() }
             Prompt { prompt: prompts.next() }
 
-            Container { class: "[&>*+*]:border-t [&>*+*]:p-2",
+            Container { class: "[&>*+*]:border-t [&>*+*]:p-2", wo_button: true,
                 ul { class: "p-2 flex overflow-x-scroll [&>*+*]:ml-2 [&>*+*]:border-l *:p-2 text-nowrap",
 
                     if let Some(age) = person.age() {
