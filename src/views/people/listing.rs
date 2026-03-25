@@ -91,42 +91,66 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
 
 #[component]
 pub fn LikedProfiles() -> Element {
-    list(Some(Decision::Like))
+    rsx! {
+        ListProfiles { wants: Decision::Like }
+    }
 }
 
 #[component]
 pub fn SkippedProfiles() -> Element {
-    list(Some(Decision::Skip))
+    rsx! {
+        ListProfiles { wants: Decision::Skip }
+    }
 }
 
 #[component]
 pub fn SwipeProfiles() -> Element {
-    list(None)
+    rsx! {
+        ListProfiles {}
+    }
 }
 
 #[derive(Clone)]
-pub struct ListingCtx(pub Option<Decision>);
+pub struct ListingCtx {
+    pub wants: Option<Decision>,
+    pub retainer: Callback<i32>,
+}
 
-fn list(wants: Option<Decision>) -> Element {
-    let profiles = use_server_future(move || async move { get_profiles(wants).await })?;
+#[component]
+fn ListProfiles(wants: Option<Decision>) -> Element {
+    let from_server = use_server_future(move || async move { get_profiles(wants).await })?;
 
-    use_context_provider(|| Some(ListingCtx(wants)));
+    let mut profiles = use_signal(Vec::new);
+
+    use_effect(move || {
+        if let Some(Ok(peeps)) = from_server().to_owned() {
+            *profiles.write() = peeps;
+        }
+    });
+
+    let retainer = use_callback(move |id: i32| profiles.retain(|p| p.id != Some(id)));
+
+    use_context_provider(|| Some(ListingCtx { wants, retainer }));
 
     rsx! {
         NeedsLoginAndProfile {
-            if let Some(Ok(peeps)) = profiles().to_owned() {
-                if peeps.len() > 0 {
-                    ul { class: "h-full overflow-y-scroll p-2 pb-0 [&_>_*+*]:mt-2",
-                        // class: if wants.is_none() { "[&_>_*+*]:hidden" },
-                        for person in peeps {
-                            li {
+            if profiles().len() > 0 {
+                ul {
+                    class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
+
+                    // we're swiping, hide everything but the 1st child
+                    class: if wants.is_none() { "[&_>_*+*]:hidden" },
+
+                    for person in profiles().into_iter() {
+                        if let Some(id) = person.id {
+                            li { key: "{id}",
                                 VPerson { person }
                             }
                         }
                     }
-                } else {
-                    p { class: "absolute top-1/2 left-1/2 -translate-1/2", "Nobody here!" }
                 }
+            } else {
+                p { class: "absolute top-1/2 left-1/2 -translate-1/2", "Nobody here!" }
             }
         }
     }
