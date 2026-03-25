@@ -31,7 +31,7 @@ pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
 
     rsx! {
         div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
-            h2 { class: "m-0! p-2 sticky z-1 top-0 bg-background ", "{person.name}" }
+            h2 { class: "m-0! p-2 sticky z-2 top-0 bg-background ", "{person.name}" }
 
             Image { src: pics.next() }
             Prompt { prompt: prompts.next() }
