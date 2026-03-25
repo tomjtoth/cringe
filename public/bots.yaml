@@ -51,6 +51,52 @@
 
     - https://www.telegraph.co.uk/multimedia/archive/02182/dexter_2182960b.jpg
 
+- name: Andy Dufresne
+  email: andy@shawshank.legal
+  gender: male
+  born: 1958-10-16
+  height: 196
+  education: Degree in accounting, self-taught escape artist
+  occupation: Former banker / hopeful landscaper
+
+  hometown: Portland
+  location: Maine coast
+  gps:
+    lon: -70.2553
+    lat: 43.6615
+
+  kids:
+    has: 0
+    wants: 0
+
+  habits:
+    drinking: rarely
+    smoking: never
+    marijuana: never
+    drugs: never
+
+  prompts:
+    - title: Dream date
+      body: >
+        A quiet picnic by the sea, plotting tiny acts of concrete subversion.
+    - title: Hidden talent
+      body: >
+        I can make small tools out of unlikely things. Great for puzzles.
+    - title: Book I recommend
+      body: >
+        The better the escape plan, the better the story.
+
+  pictures:
+    - prompt: The moment I knew my carreer was over
+      url: https://static1.squarespace.com/static/5bf22c87cef3721b922ce9c0/t/5c1945b04d7a9c79a29f86c3/1545160118685/?format=1500w
+
+    - https://static.wikia.nocookie.net/p__/images/3/3b/AndyDufresne.jpg/revision/latest?cb=20210307052356&path-prefix=protagonist
+
+    - https://m.media-amazon.com/images/M/MV5BMTg0MDgwNjc5N15BMl5BanBnXkFtZTcwNjMxNDY3Mw@@._V1_.jpg
+
+    - prompt: A fan of mine drew this 🫶
+      url: https://preview.redd.it/fan-art-of-andy-dufresne-from-the-shawshank-redemption-1994-v0-z32rxqoswnxe1.jpeg?auto=webp&s=219c3981514b38e0dce42f377eaabb11aeb31265
+
 - name: Anakin
   email: vader@definitely-not-a-sith.com
   gender: male
