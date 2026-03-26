@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     navbar::Navbar,
-    views::{about::About, me::Me, people::listing::*},
+    views::{about::About, login::Login, me::Me, people::listing::*},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -19,6 +19,9 @@ pub enum Route {
 
     #[route("/")]
     SwipeProfiles {},
+
+    #[route("/login")]
+    Login {},
 
     #[route("/me")]
     Me {},
