@@ -47,8 +47,7 @@ pub fn Navbar() -> Element {
                         }
                     }
                 } else {
-                    Link { to: "/auth/discord",
-
+                    Link { to: Route::Login {},
                         "➜]"
                         span { "login" }
                     }
