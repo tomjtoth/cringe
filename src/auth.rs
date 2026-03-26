@@ -1,16 +1,6 @@
-//! Example OAuth (Discord) implementation.
-//!
-//! 1) Create a new application at <https://discord.com/developers/applications>
-//! 2) Visit the OAuth2 tab to get your AUTH_DISCORD_ID and AUTH_DISCORD_SECRET
-//! 3) Add a new redirect URI (for this example: `http://127.0.0.1:3000/auth/authorized`)
-//! 4) Run with the following (replacing values appropriately):
-//! ```not_rust
-//! AUTH_DISCORD_ID=REPLACE_ME AUTH_DISCORD_SECRET=REPLACE_ME cargo run -p example-oauth
-//! ```
-
 use anyhow::{anyhow, Context, Result};
 use axum::{
-    extract::{FromRef, Query, State},
+    extract::{Query, State},
     http::{header::SET_COOKIE, HeaderMap},
     response::{IntoResponse, Redirect, Response},
     routing::get,
@@ -23,12 +13,16 @@ use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EndpointNotSet, EndpointSet,
     RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 use sqlx::PgPool;
 use std::env;
 
 pub static COOKIE_NAME: &str = "SESSION";
-static REDIRECT_URL: &str = "http://127.0.0.1:8080/auth/authorized";
+
+static REDIRECT_URL: &str = "http://127.0.0.1:8080/api/auth/callback";
+static REDIRECT_URL_ENV: Lazy<String> =
+    Lazy::new(|| env::var("REDIRECT_URL").unwrap_or_else(|_| REDIRECT_URL.to_string()));
 
 type BasicClient = oauth2::basic::BasicClient<
     EndpointSet,
@@ -39,69 +33,164 @@ type BasicClient = oauth2::basic::BasicClient<
 >;
 
 pub fn routes(pool: PgPool) -> Result<Router> {
-    let oauth_client = oauth_client()?;
-    let app_state = AppState { oauth_client, pool };
+    let mut clients = std::collections::HashMap::new();
 
-    let auth_layer = Router::new()
-        .route("/auth/discord", get(discord_auth))
-        .route("/auth/authorized", get(login_authorized))
+    for p in [Provider::Discord, Provider::Google, Provider::Github] {
+        clients.insert(p, oauth_client(p)?);
+    }
+
+    let state = AppState { clients, pool };
+
+    Ok(Router::new()
+        .route("/api/auth/{provider}", get(auth_start))
+        .route("/api/auth/callback", get(auth_callback))
         .route("/logout", get(logout))
-        .with_state(app_state);
-
-    Ok(auth_layer)
+        .with_state(state))
 }
 
 #[derive(Clone)]
 struct AppState {
-    oauth_client: BasicClient,
+    clients: std::collections::HashMap<Provider, BasicClient>,
     pool: PgPool,
 }
 
-impl FromRef<AppState> for BasicClient {
-    fn from_ref(state: &AppState) -> Self {
-        state.oauth_client.clone()
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum Provider {
+    Discord,
+    Google,
+    Github,
+}
+
+impl Provider {
+    fn as_str(&self) -> &'static str {
+        match self {
+            Provider::Discord => "discord",
+            Provider::Google => "google",
+            Provider::Github => "github",
+        }
+    }
+
+    fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "discord" => Some(Self::Discord),
+            "google" => Some(Self::Google),
+            "github" => Some(Self::Github),
+            _ => None,
+        }
+    }
+
+    fn scopes(&self) -> Vec<Scope> {
+        match self {
+            Provider::Google => vec![
+                Scope::new("openid".into()),
+                Scope::new("email".into()),
+                Scope::new("profile".into()),
+            ],
+            Provider::Github => vec![Scope::new("user:email".into())],
+            Provider::Discord => vec![Scope::new("email".into())],
+        }
+    }
+
+    async fn fetch_email(
+        &self,
+        token: &str,
+        http_client: &oauth2::reqwest::Client,
+    ) -> Result<String> {
+        #[derive(Deserialize)]
+        struct ProviderResponse {
+            email: Option<String>,
+            verified: Option<bool>,
+            email_verified: Option<bool>,
+        }
+
+        let url = match self {
+            Provider::Discord => "https://discord.com/api/users/@me",
+            Provider::Google => "https://openidconnect.googleapis.com/v1/userinfo",
+            Provider::Github => "https://api.github.com/user",
+        };
+
+        let provider_response: ProviderResponse = http_client
+            .get(url)
+            .bearer_auth(token)
+            .header("User-Agent", "cringe-backend")
+            .send()
+            .await?
+            .json()
+            .await?;
+
+        match self {
+            Provider::Discord => {
+                if let ProviderResponse {
+                    email: Some(email),
+                    verified: Some(true),
+                    ..
+                } = provider_response
+                {
+                    return Ok(email);
+                }
+            }
+
+            Provider::Google => {
+                if let ProviderResponse {
+                    email: Some(email),
+                    email_verified: Some(true),
+                    ..
+                } = provider_response
+                {
+                    return Ok(email);
+                }
+            }
+
+            Provider::Github => {
+                if let ProviderResponse {
+                    email: Some(email), ..
+                } = provider_response
+                {
+                    return Ok(email);
+                }
+            }
+        };
+
+        Err(anyhow!("no verified email"))
     }
 }
 
-impl FromRef<AppState> for PgPool {
-    fn from_ref(state: &AppState) -> Self {
-        state.pool.clone()
-    }
-}
+fn oauth_client(provider: Provider) -> Result<BasicClient> {
+    let (id_env, secret_env, auth_url, token_url) = match provider {
+        Provider::Discord => (
+            "AUTH_DISCORD_ID",
+            "AUTH_DISCORD_SECRET",
+            "https://discord.com/api/oauth2/authorize",
+            "https://discord.com/api/oauth2/token",
+        ),
 
-fn oauth_client() -> Result<BasicClient> {
-    // Environment variables (* = required):
-    // *"AUTH_DISCORD_ID"     "REPLACE_ME";
-    // *"AUTH_DISCORD_SECRET" "REPLACE_ME";
-    //  "REDIRECT_URL"  "http://127.0.0.1:3000/auth/authorized";
-    //  "AUTH_URL"      "https://discord.com/api/oauth2/authorize?response_type=code";
-    //  "TOKEN_URL"     "https://discord.com/api/oauth2/token";
+        Provider::Google => (
+            "AUTH_GOOGLE_ID",
+            "AUTH_GOOGLE_SECRET",
+            "https://accounts.google.com/o/oauth2/v2/auth",
+            "https://oauth2.googleapis.com/token",
+        ),
 
-    let client_id = env::var("AUTH_DISCORD_ID").context("Missing AUTH_DISCORD_ID!")?;
-    let client_secret = env::var("AUTH_DISCORD_SECRET").context("Missing AUTH_DISCORD_SECRET!")?;
-    let redirect_url = env::var("REDIRECT_URL").unwrap_or_else(|_| REDIRECT_URL.to_string());
+        Provider::Github => (
+            "AUTH_GITHUB_ID",
+            "AUTH_GITHUB_SECRET",
+            "https://github.com/login/oauth/authorize",
+            "https://github.com/login/oauth/access_token",
+        ),
+    };
 
-    let auth_url = env::var("AUTH_DISCORD_URL").unwrap_or_else(|_| {
-        "https://discord.com/api/oauth2/authorize?response_type=code".to_string()
-    });
-
-    let token_url = env::var("TOKEN_URL")
-        .unwrap_or_else(|_| "https://discord.com/api/oauth2/token".to_string());
+    let client_id = env::var(id_env)?;
+    let client_secret = env::var(secret_env)?;
 
     Ok(oauth2::basic::BasicClient::new(ClientId::new(client_id))
         .set_client_secret(ClientSecret::new(client_secret))
-        .set_auth_uri(
-            AuthUrl::new(auth_url).context("failed to create new authorization server URL")?,
-        )
-        .set_token_uri(TokenUrl::new(token_url).context("failed to create new token endpoint URL")?)
-        .set_redirect_uri(
-            RedirectUrl::new(redirect_url).context("failed to create new redirection URL")?,
-        ))
+        .set_auth_uri(AuthUrl::new(auth_url.to_string())?)
+        .set_token_uri(TokenUrl::new(token_url.to_string())?)
+        .set_redirect_uri(RedirectUrl::new(REDIRECT_URL_ENV.to_owned())?))
 }
 
 fn build_session_cookie(session_id: &str) -> String {
-    let redirect_url = std::env::var("REDIRECT_URL").unwrap_or_else(|_| REDIRECT_URL.to_string());
-    let using_dev_url = redirect_url == REDIRECT_URL;
+    let using_dev_url = *REDIRECT_URL_ENV == REDIRECT_URL;
 
     format!(
         "{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly;{} Path=/",
@@ -109,59 +198,52 @@ fn build_session_cookie(session_id: &str) -> String {
     )
 }
 
-// Discord may omit email-related fields even when the email scope is requested.
-#[derive(Debug, Deserialize)]
-struct DiscordUser {
-    email: Option<String>,
-    verified: Option<bool>,
-}
-
-async fn discord_auth(
-    State(client): State<BasicClient>,
-    State(pool): State<PgPool>,
+async fn auth_start(
+    axum::extract::Path(provider): axum::extract::Path<String>,
+    State(state): State<AppState>,
 ) -> Result<impl IntoResponse, AppError> {
+    let provider = Provider::from_str(&provider).ok_or_else(|| anyhow!("invalid provider"))?;
+
+    let client = state.clients.get(&provider).unwrap();
+
     let (auth_url, csrf_token) = client
         .authorize_url(CsrfToken::new_random)
-        .add_scope(Scope::new("email".to_string()))
+        .add_scopes(provider.scopes())
         .url();
 
+    // 👇 encode provider into state
+    let combined_state = format!("{}:{}", provider.as_str(), csrf_token.secret());
+
     let session_id = CsrfToken::new_random().secret().to_string();
+
     sqlx::query(
-        "
-        INSERT INTO auth_sessions (id, csrf_token, email, expires_at)
-        VALUES ($1, $2, NULL, NOW() + INTERVAL '15 minutes')
-        ",
+        "INSERT INTO auth_sessions (id, csrf_token, email, expires_at)
+         VALUES ($1, $2, NULL, NOW() + INTERVAL '15 minutes')",
     )
     .bind(&session_id)
-    .bind(csrf_token.secret())
-    .execute(&pool)
-    .await
-    .context("failed to store csrf session")?;
+    .bind(&combined_state)
+    .execute(&state.pool)
+    .await?;
 
-    // Attach the session cookie to the response header
     let cookie = build_session_cookie(&session_id);
+
     let mut headers = HeaderMap::new();
-    headers.insert(
-        SET_COOKIE,
-        cookie.parse().context("failed to parse cookie")?,
-    );
+    headers.insert(SET_COOKIE, cookie.parse()?);
 
     Ok((headers, Redirect::to(auth_url.as_ref())))
 }
 
 async fn logout(
-    State(pool): State<PgPool>,
+    State(AppState { pool, .. }): State<AppState>,
     TypedHeader(cookies): TypedHeader<headers::Cookie>,
 ) -> Result<impl IntoResponse, AppError> {
-    let Some(cookie) = cookies.get(COOKIE_NAME) else {
-        return Ok(Redirect::to("/"));
+    if let Some(cookie) = cookies.get(COOKIE_NAME) {
+        sqlx::query("DELETE FROM auth_sessions WHERE id = $1")
+            .bind(cookie)
+            .execute(&pool)
+            .await
+            .context("failed to delete session")?;
     };
-
-    sqlx::query("DELETE FROM auth_sessions WHERE id = $1")
-        .bind(cookie)
-        .execute(&pool)
-        .await
-        .context("failed to delete session")?;
 
     Ok(Redirect::to("/"))
 }
@@ -175,109 +257,86 @@ struct AuthRequest {
 
 async fn csrf_token_validation_workflow(
     auth_request: &AuthRequest,
-    cookies: &headers::Cookie,
+    session_id: &str,
     pool: &PgPool,
-) -> Result<(), AppError> {
-    // Extract the cookie from the request
-    let cookie = cookies
-        .get(COOKIE_NAME)
-        .context("unexpected error getting cookie name")?
-        .to_string();
-
-    let stored_csrf_token: Option<String> = sqlx::query_scalar(
+) -> Result<Provider, AppError> {
+    let stored: String = sqlx::query_scalar(
         "SELECT csrf_token FROM auth_sessions WHERE id = $1 AND expires_at > NOW()",
     )
-    .bind(&cookie)
+    .bind(&session_id)
     .fetch_optional(pool)
-    .await
-    .context("failed to load csrf session")?;
+    .await?
+    .ok_or_else(|| anyhow!("session not found"))?;
 
-    let stored_csrf_token = stored_csrf_token.ok_or_else(|| anyhow!("Session not found"))?;
+    let (stored_provider, stored_csrf) = stored
+        .split_once(':')
+        .ok_or_else(|| anyhow!("invalid stored csrf"))?;
 
-    // Validate CSRF token is the same as the one in the auth request
-    if stored_csrf_token != auth_request.state {
+    if stored_csrf != auth_request.state {
         return Err(anyhow!("CSRF token mismatch").into());
     }
 
     sqlx::query("UPDATE auth_sessions SET csrf_token = NULL WHERE id = $1")
-        .bind(&cookie)
+        .bind(&session_id)
         .execute(pool)
-        .await
-        .context("failed to consume csrf token")?;
+        .await?;
 
-    Ok(())
+    let provider = Provider::from_str(stored_provider)
+        .ok_or_else(|| anyhow!("could not parse provider from str"))?;
+
+    Ok(provider)
 }
 
-async fn login_authorized(
+async fn auth_callback(
     Query(query): Query<AuthRequest>,
-    State(pool): State<PgPool>,
-    State(oauth_client): State<BasicClient>,
+    State(state): State<AppState>,
     TypedHeader(cookies): TypedHeader<headers::Cookie>,
 ) -> Result<impl IntoResponse, AppError> {
-    csrf_token_validation_workflow(&query, &cookies, &pool).await?;
-
-    let client = oauth2::reqwest::Client::new();
-
-    // Get an auth token
-    let token = oauth_client
-        .exchange_code(AuthorizationCode::new(query.code.clone()))
-        .request_async(&client)
-        .await
-        .context("failed in sending request request to authorization server")?;
-
-    // Fetch user data from discord
-    let user_data = client
-        // https://discord.com/developers/docs/resources/user#get-current-user
-        .get("https://discordapp.com/api/users/@me")
-        .bearer_auth(token.access_token().secret())
-        .send()
-        .await
-        .context("failed in sending request to target Url")?
-        .json::<DiscordUser>()
-        .await
-        .context("failed to deserialize response as JSON")?;
-
-    let email = user_data
-        .email
-        .ok_or_else(|| anyhow!("Discord account did not provide an email"))?;
-
-    if !user_data.verified.unwrap_or(false) {
-        return Err(anyhow!("Discord account email is not verified").into());
-    }
-
     let session_id = cookies
         .get(COOKIE_NAME)
-        .context("unexpected error getting cookie name")?;
+        .ok_or_else(|| anyhow!("missing cookie {COOKIE_NAME}"))?;
 
+    let provider = csrf_token_validation_workflow(&query, session_id, &state.pool).await?;
+
+    let oauth_client = state.clients.get(&provider).unwrap();
+    let http_client = oauth2::reqwest::Client::new();
+
+    let token = oauth_client
+        .exchange_code(AuthorizationCode::new(query.code))
+        .request_async(&http_client)
+        .await?;
+
+    let email = provider
+        .fetch_email(token.access_token().secret(), &http_client)
+        .await?;
+
+    persist_session(session_id, &state.pool, &email).await?;
+
+    let cookie = build_session_cookie(session_id);
+
+    let mut headers = HeaderMap::new();
+    headers.insert(SET_COOKIE, cookie.parse()?);
+
+    Ok((headers, Redirect::to("/")))
+}
+
+async fn persist_session(session_id: &str, pool: &PgPool, email: &str) -> Result<(), AppError> {
     let updated = sqlx::query(
-        "
-        UPDATE auth_sessions
-        SET
-            email = $2,
-            expires_at = NOW() + INTERVAL '30 days'
-        WHERE id = $1 AND expires_at > NOW()
-        ",
+        "UPDATE auth_sessions
+        SET email = $2, expires_at = NOW() + INTERVAL '30 days'
+        WHERE id = $1 AND expires_at > NOW()",
     )
     .bind(session_id)
-    .bind(&email)
-    .execute(&pool)
-    .await
-    .context("failed to persist user session")?
+    .bind(email)
+    .execute(pool)
+    .await?
     .rows_affected();
 
     if updated == 0 {
-        return Err(anyhow!("Session not found or expired").into());
+        return Err(anyhow!("Session expired").into());
     }
 
-    // Build and set the cookie
-    let cookie = build_session_cookie(session_id);
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        SET_COOKIE,
-        cookie.parse().context("failed to parse cookie")?,
-    );
-
-    Ok((headers, Redirect::to("/")))
+    Ok(())
 }
 
 // Use anyhow, define error and enable '?'
