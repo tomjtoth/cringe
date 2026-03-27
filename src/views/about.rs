@@ -11,7 +11,7 @@ pub fn About() -> Element {
 
     rsx! {
         h1 {
-            "Cringe"
+            "Cringe "
 
             if let Some(Ok(triplet)) = semver() {
                 sup { "{triplet}" }
