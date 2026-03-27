@@ -14,7 +14,7 @@ use oauth2::{
     RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
 use once_cell::sync::Lazy;
-use serde::Deserialize;
+use serde::{de::DeserializeOwned, Deserialize};
 use sqlx::PgPool;
 use std::env;
 
@@ -96,57 +96,77 @@ impl Provider {
         token: &str,
         http_client: &oauth2::reqwest::Client,
     ) -> Result<String> {
-        #[derive(Deserialize)]
-        struct ProviderResponse {
-            email: Option<String>,
-            verified: Option<bool>,
-            email_verified: Option<bool>,
+        async fn get<T: DeserializeOwned>(
+            client: &oauth2::reqwest::Client,
+            token: &str,
+            url: &str,
+        ) -> Result<T> {
+            Ok(client
+                .get(url)
+                .bearer_auth(token)
+                .header("User-Agent", "cringe-backend")
+                .send()
+                .await?
+                .json::<T>()
+                .await?)
         }
-
-        let url = match self {
-            Provider::Discord => "https://discord.com/api/users/@me",
-            Provider::Google => "https://openidconnect.googleapis.com/v1/userinfo",
-            Provider::Github => "https://api.github.com/user",
-        };
-
-        let provider_response: ProviderResponse = http_client
-            .get(url)
-            .bearer_auth(token)
-            .header("User-Agent", "cringe-backend")
-            .send()
-            .await?
-            .json()
-            .await?;
 
         match self {
             Provider::Discord => {
-                if let ProviderResponse {
+                #[derive(Deserialize)]
+                struct DiscordResponse {
+                    email: Option<String>,
+                    verified: bool,
+                }
+
+                let res: DiscordResponse =
+                    get(http_client, token, "https://discord.com/api/users/@me").await?;
+
+                if let DiscordResponse {
                     email: Some(email),
-                    verified: Some(true),
-                    ..
-                } = provider_response
+                    verified: true,
+                } = res
                 {
                     return Ok(email);
                 }
             }
 
             Provider::Google => {
-                if let ProviderResponse {
-                    email: Some(email),
-                    email_verified: Some(true),
-                    ..
-                } = provider_response
+                #[derive(Deserialize)]
+                struct GoogleResponse {
+                    email: String,
+                    email_verified: bool,
+                }
+
+                let res: GoogleResponse = get(
+                    http_client,
+                    token,
+                    "https://openidconnect.googleapis.com/v1/userinfo",
+                )
+                .await?;
+
+                if let GoogleResponse {
+                    email,
+                    email_verified: true,
+                } = res
                 {
                     return Ok(email);
                 }
             }
 
             Provider::Github => {
-                if let ProviderResponse {
-                    email: Some(email), ..
-                } = provider_response
-                {
-                    return Ok(email);
+                #[derive(Deserialize)]
+                struct GithubResponse {
+                    email: String,
+                    primary: bool,
+                    verified: bool,
+                }
+
+                let res: Vec<GithubResponse> =
+                    get(http_client, token, "https://api.github.com/user/emails").await?;
+
+                if let Some(primary) = res.into_iter().find(|e| e.primary && e.verified) {
+                    return Ok(primary.email);
                 }
             }
         };
