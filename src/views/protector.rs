@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{router::Route, state::client::ME};
+use crate::{router::Route, state::client::ME, views::login::Login};
 
 static CLASS: &str = "absolute top-1/2 left-1/2 -translate-1/2";
 
@@ -10,13 +10,7 @@ pub fn NeedsLogin(children: Element) -> Element {
         if ME().is_some() {
             {children}
         } else {
-            p { class: CLASS,
-                "You must log in first "
-                a { href: "/auth/discord", "here" }
-                ", your Discord profile "
-                b { "must have a verified email" }
-                "!"
-            }
+            Login {}
         }
     }
 }
