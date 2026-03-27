@@ -5,6 +5,10 @@ pub fn Login() -> Element {
     rsx! {
         div { class: "absolute left-1/2 top-1/2 -translate-1/2 border rounded",
 
+            h2 { class: "text-center", "Login" }
+
+            p { class: "p-2 max-w-60", "Use a provider with a verified email!" }
+
             ul {
                 class: format!(
                     "{} {} {}",
