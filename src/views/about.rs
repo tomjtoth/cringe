@@ -20,8 +20,10 @@ pub fn About() -> Element {
 
         p { class: "p-2",
             "This is a "
-            b { "Work-in-Progress & currently insecure" }
-            " Hinge clone. Check out the source code "
+            b { "Work-in-Progress" }
+            " Hinge clone. "
+            b { "Expect data loss" }
+            " below version 1.0.0! Check out the source code "
             a {
                 class: "pre-preflight",
                 href: "https://github.com/tomjtoth/cringe",
@@ -31,10 +33,5 @@ pub fn About() -> Element {
             "."
         }
 
-        // p {
-        //     b { "This app is invitation-only. There is no automated verification process. " }
-        //     "Instead you invite your friends and moderate their photos. "
-        //     "If your direct inviter deletes their account, their inviter will moderate your pics. "
-        // }
     }
 }
