@@ -366,7 +366,36 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         tracing::error!("Application error: {:#}", self.0);
 
-        (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong").into_response()
+        let body = format!(
+            r#"
+            <!doctype html>
+            <html>
+            <head>
+                <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta charset="UTF-8">               
+                <title>Error</title>
+                <link rel="stylesheet" href="{}"/>
+                <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E😱%3C/text%3E%3C/svg%3E">
+                <link rel="manifest" href="/manifest.json"/>
+            </head>
+            <body>
+                <div id="main">
+                    <div class="app-center text-center">
+                        <h1>Something went wrong!</h1>
+                        <p>Please try again later.</p>
+                    </div>
+                </div>
+            </body>
+            </html>"#,
+            crate::TAILWIND_CSS
+        );
+
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            axum::response::Html(body),
+        )
+            .into_response()
     }
 }
 
