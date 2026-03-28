@@ -70,8 +70,8 @@ fn legal_dob() -> NaiveDate {
 pub fn BasicMe() -> Element {
     let legal = legal_dob();
 
-    let mut name = use_signal(|| String::new());
-    let mut gender = use_signal(|| Gender::Male);
+    let mut name = use_signal(String::new);
+    let mut gender = use_signal(String::new);
     let mut bday = use_signal(|| legal.to_string());
     let mut height = use_signal(|| 180u8);
 
@@ -84,17 +84,14 @@ pub fn BasicMe() -> Element {
             onsubmit: move |evt| async move {
                 evt.prevent_default();
 
-                if name().len() > 0 {
-                    if let Ok(dob) = NaiveDate::from_str(&bday()) {
-                        if let Ok(Some(my_profile)) = post_basics(
-                                name(),
-                                gender(),
-                                dob,
-                                height(),
-                            )
-                            .await
-                        {
-                            *ME.write() = Some(Some(my_profile));
+                if let Some(sex) = Gender::from_label(&gender()) {
+                    if name().len() > 0 {
+                        if let Ok(dob) = NaiveDate::from_str(&bday()) {
+                            if let Ok(Some(my_profile)) = post_basics(name(), sex, dob, height())
+                                .await
+                            {
+                                *ME.write() = Some(Some(my_profile));
+                            }
                         }
                     }
                 }
@@ -115,12 +112,12 @@ pub fn BasicMe() -> Element {
 
             select {
                 required,
-                value: gender() as u8,
-                onchange: move |evt| *gender.write() = Gender::from_numerical_str(evt.value()),
+                value: gender(),
+                onchange: move |evt| *gender.write() = evt.value(),
 
                 option { value: "", disabled: true, "Your gender" }
-                option { value: Gender::Male as u8, "{Gender::Male}" }
-                option { value: Gender::Female as u8, "{Gender::Female}" }
+                option { value: "{Gender::Male}", "{Gender::Male}" }
+                option { value: "{Gender::Female}", "{Gender::Female}" }
             }
 
             input {

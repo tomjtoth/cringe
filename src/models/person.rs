@@ -17,22 +17,24 @@ pub enum Gender {
 }
 
 impl Gender {
-    pub fn from_numerical_str(str: String) -> Self {
-        match str.as_str() {
-            "1" => Gender::Female,
-            _ => Gender::Male,
+    /// Display trait calls this too
+    const fn label(&self) -> &'static str {
+        match self {
+            Gender::Male => "♂️ Man",
+            Gender::Female => "♀️ Woman",
         }
+    }
+
+    pub fn from_label(s: &str) -> Option<Self> {
+        [Gender::Male, Gender::Female]
+            .into_iter()
+            .find(|g| g.label() == s)
     }
 }
 
 impl std::fmt::Display for Gender {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = match self {
-            Gender::Male => "♂️ Man",
-            Gender::Female => "♀️ Woman",
-        };
-
-        f.write_str(label)
+        f.write_str(self.label())
     }
 }
 
