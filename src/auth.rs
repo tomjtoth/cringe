@@ -280,31 +280,28 @@ async fn csrf_token_validation_workflow(
     session_id: &str,
     pool: &PgPool,
 ) -> Result<Provider, AppError> {
-    let stored: String = sqlx::query_scalar(
-        "SELECT csrf_token FROM auth_sessions WHERE id = $1 AND expires_at > NOW()",
+    let osp = sqlx::query_scalar::<_, String>(
+        r#"
+        UPDATE auth_sessions
+        SET csrf_token = NULL
+        WHERE id = $1
+        AND expires_at > NOW()
+        AND split_part(csrf_token, ':', 2) = $2
+        RETURNING split_part(csrf_token, ':', 1)
+        "#,
     )
-    .bind(&session_id)
+    .bind(session_id)
+    .bind(&auth_request.state)
     .fetch_optional(pool)
-    .await?
-    .ok_or_else(|| anyhow!("session not found"))?;
+    .await?;
 
-    let (stored_provider, stored_csrf) = stored
-        .split_once(':')
-        .ok_or_else(|| anyhow!("invalid stored csrf"))?;
-
-    if stored_csrf != auth_request.state {
-        return Err(anyhow!("CSRF token mismatch").into());
+    if let Some(sp) = osp {
+        if let Some(p) = Provider::from_str(&sp) {
+            return Ok(p);
+        }
     }
 
-    sqlx::query("UPDATE auth_sessions SET csrf_token = NULL WHERE id = $1")
-        .bind(&session_id)
-        .execute(pool)
-        .await?;
-
-    let provider = Provider::from_str(stored_provider)
-        .ok_or_else(|| anyhow!("could not parse provider from str"))?;
-
-    Ok(provider)
+    Err(anyhow!("CSRF token validation failed!").into())
 }
 
 async fn auth_callback(
