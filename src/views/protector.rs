@@ -2,8 +2,6 @@ use dioxus::prelude::*;
 
 use crate::{router::Route, state::client::ME, views::login::Login};
 
-static CLASS: &str = "absolute top-1/2 left-1/2 -translate-1/2";
-
 #[component]
 pub fn NeedsLogin(children: Element) -> Element {
     rsx! {
@@ -21,7 +19,7 @@ pub fn NeedsProfile(children: Element) -> Element {
         if let Some(Some(_)) = ME() {
             {children}
         } else {
-            p { class: CLASS,
+            p { class: "app-center",
                 "Create a profile first "
                 Link { to: Route::Me {}, "here" }
                 "!"

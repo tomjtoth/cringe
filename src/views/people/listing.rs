@@ -150,7 +150,7 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
                     }
                 }
             } else {
-                p { class: "absolute top-1/2 left-1/2 -translate-1/2", "Nobody here!" }
+                p { class: "app-center", "Nobody here!" }
             }
         }
     }

@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 #[component]
 pub fn Login() -> Element {
     rsx! {
-        div { class: "absolute left-1/2 top-1/2 -translate-1/2 border rounded",
+        div { class: "app-center border rounded",
 
             h2 { class: "text-center", "Login" }
 

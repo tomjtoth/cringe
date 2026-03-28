@@ -52,3 +52,9 @@ select {
 button {
   @apply p-2 border rounded cursor-pointer;
 }
+
+@layer components {
+  .app-center {
+    @apply absolute top-1/2 left-1/2 -translate-1/2;
+  }
+}

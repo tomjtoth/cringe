@@ -18,7 +18,7 @@ async fn post_basics(
     use dioxus::logger::tracing;
 
     tracing::info!(
-        r#"ℹ️ Attempting to insert " {} ", " {} ", " {} ", " {} " into users"#,
+        r#"ℹ️ Attempting to insert "{}", "{}", "{}", "{}" into users"#,
         name,
         sex,
         dob,
@@ -79,8 +79,7 @@ pub fn BasicMe() -> Element {
 
     rsx! {
         form {
-            class: "absolute top-1/2 left-1/2 -translate-1/2
-                    flex flex-col gap-2 items-center",
+            class: "app-center flex flex-col gap-2 items-center",
 
             onsubmit: move |evt| async move {
                 evt.prevent_default();
