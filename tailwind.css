@@ -57,4 +57,24 @@ button {
   .app-center {
     @apply absolute top-1/2 left-1/2 -translate-1/2;
   }
+
+  a.pre-preflight {
+    @apply text-blue-700 dark:text-blue-300;
+
+    &:hover {
+      @apply text-blue-600 dark:text-blue-400 underline;
+    }
+
+    &:visited {
+      @apply text-purple-700 dark:text-purple-300;
+    }
+
+    &:active {
+      @apply text-orange-700 dark:text-orange-300;
+    }
+
+    &:focus {
+      @apply outline-yellow-700 dark:outline-yellow-300;
+    }
+  }
 }

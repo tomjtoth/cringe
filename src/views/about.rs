@@ -22,7 +22,12 @@ pub fn About() -> Element {
             "This is a "
             b { "Work-in-Progress & currently insecure" }
             " Hinge clone. Check out the source code "
-            a { href: "https://github.com/tomjtoth/cringe", target: "_blank", "here" }
+            a {
+                class: "pre-preflight",
+                href: "https://github.com/tomjtoth/cringe",
+                target: "_blank",
+                "here"
+            }
             "."
         }
 
