@@ -16,10 +16,7 @@ async fn get_db() -> sqlx::PgPool {
 }
 
 pub async fn get_ctx() -> (Option<String>, sqlx::PgPool) {
-    let session_id = get_session_id().await;
-    let pool = get_db().await;
-
-    (session_id, pool)
+    futures::join!(get_session_id(), get_db())
 }
 
 async fn get_cookies() -> Option<axum_extra::headers::Cookie> {
