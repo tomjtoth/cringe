@@ -21,7 +21,7 @@ pub fn NeedsProfile(children: Element) -> Element {
         } else {
             p { class: "app-center",
                 "Create a profile first "
-                Link { to: Route::Me {}, "here" }
+                Link { class: "pre-preflight", to: Route::Me {}, "here" }
                 "!"
             }
         }

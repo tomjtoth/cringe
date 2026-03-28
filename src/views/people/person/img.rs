@@ -11,7 +11,7 @@ pub fn Image(src: Option<Pic>) -> Element {
                     p { class: "p-2 py-4 text-2xl",
 
                         sub {
-                            class: "pr-2 text-4xl",
+                            class: "pr-2 text-4xl select-none",
                             style: "font-family: 'Times New Roman',serif;font-size:36px;",
                             "”"
                         }
