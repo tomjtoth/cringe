@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tags: ${{ steps.set_tags.outputs.tags }}
-      first_tag: ${{ steps.set_tags.outputs.first_tag }}
 
     if: >
       github.event_name == 'push'
@@ -51,15 +50,11 @@ jobs:
               echo 'EOF'
             } >> $GITHUB_OUTPUT
 
-            # also expose the first tag as a single-line output
-            echo "first_tag=${TAGS[0]}" >> $GITHUB_OUTPUT
-
             printf '%s\n' \
               "✅ Generated tags:" \
               "  ${TAGS[*]}"
           else
             echo "tags=" >> $GITHUB_OUTPUT
-            echo "first_tag=" >> $GITHUB_OUTPUT
 
             printf '%s\n' \
               "❌ No tags generated:" \
@@ -133,8 +128,6 @@ jobs:
         with:
           push: true
           context: .
-          build-args: |
-            APP_VER=${{ needs.gen-tags.outputs.first_tag }}
           tags: |
             ${{ needs.gen-tags.outputs.tags }}
           cache-from: type=gha,scope=cringe

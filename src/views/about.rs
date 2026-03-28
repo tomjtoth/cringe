@@ -1,21 +1,14 @@
 use dioxus::prelude::*;
 
-#[get("/api/semver")]
-async fn get_semver() -> Result<String> {
-    Ok(std::env::var("APP_VER").unwrap_or("D.E.V".to_string()))
-}
-
 #[component]
 pub fn About() -> Element {
-    let semver = use_server_future(get_semver)?;
+    let semver = env!("CARGO_PKG_VERSION");
 
     rsx! {
         h1 {
             "Cringe "
 
-            if let Some(Ok(triplet)) = semver() {
-                sup { "{triplet}" }
-            }
+            sup { "{semver}" }
         }
 
         p { class: "p-2",

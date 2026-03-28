@@ -12,11 +12,9 @@ RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
 FROM gcr.io/distroless/cc
 WORKDIR /app
 
-ARG APP_VER=prod
 COPY --from=builder /app.built/ /app/
 
 ENV IP=0.0.0.0 \
-    PORT=80 \
-    APP_VER=$APP_VER
+    PORT=80
 
 ENTRYPOINT ["/app/cringe"]
