@@ -287,7 +287,7 @@ async fn csrf_token_validation_workflow(
         WHERE id = $1
         AND expires_at > NOW()
         AND split_part(csrf_token, ':', 2) = $2
-        RETURNING split_part(csrf_token, ':', 1)
+        RETURNING split_part(old.csrf_token, ':', 1)
         "#,
     )
     .bind(session_id)
