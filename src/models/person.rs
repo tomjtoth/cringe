@@ -68,13 +68,17 @@ type THabits = Habits;
 #[serde(untagged)]
 pub enum Pic {
     Url(String),
+
     Advanced {
+        id: Option<i32>,
         url: String,
         prompt: Option<String>,
         #[serde(default)]
         position: Option<i16>,
     },
+
     Uploaded {
+        id: Option<i32>,
         bytes: Vec<u8>,
         mime_type: String,
         prompt: Option<String>,
@@ -84,6 +88,13 @@ pub enum Pic {
 }
 
 impl Pic {
+    pub fn id(&self) -> Option<i32> {
+        match self {
+            Self::Url(_) => None,
+            Self::Advanced { id, .. } | Self::Uploaded { id, .. } => id.clone(),
+        }
+    }
+
     pub fn prompt(&self) -> Option<&str> {
         match self {
             Self::Url(_) => None,
@@ -218,6 +229,9 @@ impl std::fmt::Display for RelationshipType {
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PersonPrompt {
+    pub id: Option<i32>,
+    pub user_id: Option<i32>,
+    pub position: Option<i16>,
     pub title: String,
     pub body: String,
 }
