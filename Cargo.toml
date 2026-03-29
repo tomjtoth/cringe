@@ -39,6 +39,7 @@ web-sys = { version = "0.3.91", optional = true, features = [
 tracing-wasm = { version = "0.2", optional = true }
 tracing-subscriber = "0.3"
 once_cell = { version = "1.21", optional = true }
+serde_json = { version = "1.0.149", optional = true }
 
 [features]
 default = ["web"]
@@ -47,6 +48,7 @@ web = ["dioxus/web", "dep:web-sys", "dep:wasm-bindgen", "dep:tracing-wasm"]
 server = [
     "dioxus/server",
     "dep:serde_yaml",
+    "dep:serde_json",
     "dep:anyhow",
     "dep:axum",
     "dep:axum-extra",
@@ -56,6 +58,7 @@ server = [
     "dep:sqlx",
     "dep:once_cell",
 ]
+serde_json = ["dep:serde_json"]
 
 [dev-dependencies]
 reqwest = { version = "0.13.2", features = ["blocking"] }
