@@ -3,7 +3,10 @@ use dioxus::prelude::*;
 use crate::{
     models::person::Decision,
     state::client::decide,
-    views::people::{listing::ListingCtx, person::PersonCtx},
+    views::people::{
+        listing::ListingCtx,
+        person::{PersonCtx, ResourceCtx},
+    },
 };
 
 #[component]
@@ -21,19 +24,15 @@ pub fn SkipButton() -> Element {
 }
 
 #[component]
-pub fn EditButton() -> Element {
-    rsx! {
-        Button {}
-    }
-}
-
-#[component]
 fn Button(decision: Option<Decision>) -> Element {
-    let pc = use_context::<PersonCtx>();
-    let olc = use_context::<Option<ListingCtx>>();
+    let pcx = use_context::<PersonCtx>();
+    let olcx = use_context::<Option<ListingCtx>>();
+
+    // This might be a Prompt, a Picture or the whole Personal data section
+    let mut rcx = use_context::<ResourceCtx>();
 
     let class = format!(
-        "{} z-1 bottom-5 p-3! bg-background select-none",
+        "{} z-1 bottom-5 border-2! bg-background select-none",
         if decision == Some(Decision::Skip) {
             "sticky mt-2 left-5 rounded-full!"
         } else {
@@ -42,16 +41,21 @@ fn Button(decision: Option<Decision>) -> Element {
     );
 
     rsx! {
-        // we're on a listing, but the profile is Skipped and this is a Like button
+        // we're on a listing, but the profile is:
+        // - either Skipped and this is a Like button
+        // - or Liked and this is a Skip button
+
         // _dx_wants -> syntax highlight/complainer issue
-        if let Some(ListingCtx { wants: _dx_wants, retainer }) = olc {
+        if let Some(ListingCtx { wants: _dx_wants, retainer }) = olcx {
 
             if decision != _dx_wants {
-                if let Some(id) = pc.person.id {
+                if let Some(id) = (pcx.person)().id {
                     button {
                         class,
 
-                        onclick: move |_| async move {
+                        onclick: move |evt| async move {
+                            evt.prevent_default();
+
                             if let Some(buttons_decision) = decision {
                                 if let Ok(true) = decide(id, buttons_decision).await {
                                     retainer(id);
@@ -69,7 +73,13 @@ fn Button(decision: Option<Decision>) -> Element {
                 }
             }
         } else {
-            button { class, onclick: move |_| {}, "✏️" }
+            button { class, onclick: move |_| rcx.next_state(),
+                if rcx.editing() {
+                    "💾"
+                } else {
+                    "✏️"
+                }
+            }
         }
     }
 }
