@@ -229,7 +229,8 @@ impl std::fmt::Display for RelationshipType {
 }
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "server", derive(sqlx::FromRow))]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PersonPrompt {
     pub id: Option<i32>,
     pub user_id: Option<i32>,
