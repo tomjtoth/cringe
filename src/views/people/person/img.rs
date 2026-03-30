@@ -1,9 +1,25 @@
 use dioxus::prelude::*;
 
-use crate::{models::person::Pic, views::people::person::container::Container};
+use crate::views::people::{
+    listing::ListingCtx,
+    person::{container::Container, PersonCtx, ResourceCtx},
+};
 
 #[component]
-pub fn Image(src: Option<Pic>) -> Element {
+pub fn Image(idx: usize) -> Element {
+    let olcx = use_context::<Option<ListingCtx>>();
+
+    let (src, show_adder) = {
+        let pcx = use_context::<PersonCtx>();
+        let person = (pcx.person)();
+        let pics = person.pics();
+        let op = pics.get(idx);
+
+        (op.cloned(), idx == pics.len())
+    };
+
+    let rcx = ResourceCtx::provide();
+
     rsx! {
         if let Some(pic) = src {
             Container {
@@ -15,6 +31,7 @@ pub fn Image(src: Option<Pic>) -> Element {
                             style: "font-family: 'Times New Roman',serif;font-size:36px;",
                             "”"
                         }
+
                         "{prompt}"
                     }
                 }
