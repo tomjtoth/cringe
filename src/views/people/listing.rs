@@ -62,12 +62,12 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
 
                     (
                         SELECT coalesce(
-                            json_agg(row_to_json(up) ORDER BY up.position),
+                            json_agg(row_to_json(ui) ORDER BY ui.position),
                             '[]'
                         )
-                        FROM user_pictures up
-                        WHERE up.user_id = u.id
-                    ) AS pictures
+                        FROM user_images ui
+                        WHERE ui.user_id = u.id
+                    ) AS images
 
                 FROM users u
                 CROSS JOIN me

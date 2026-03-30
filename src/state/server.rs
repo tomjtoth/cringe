@@ -127,14 +127,14 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
             .await?;
         }
 
-        for (position, pic) in bot.pictures.iter().enumerate() {
+        for (position, img) in bot.images.iter().enumerate() {
             sqlx::query(
-                "INSERT INTO user_pictures (user_id, position, url, prompt) VALUES ($1, $2, $3, $4)",
+                "INSERT INTO user_images (user_id, position, url, prompt) VALUES ($1, $2, $3, $4)",
             )
             .bind(&bot.id)
             .bind(position as i32)
-            .bind(pic.src())
-            .bind(&pic.prompt())
+            .bind(img.src())
+            .bind(&img.prompt())
             .execute(&mut *tx)
             .await?;
         }
@@ -156,7 +156,7 @@ fn no_broken_bot_img_urls() {
     let pps = parse_yaml().unwrap();
 
     for pp in pps {
-        for (idx, img) in pp.pictures.iter().enumerate() {
+        for (idx, img) in pp.images.iter().enumerate() {
             let src = &img.src();
 
             // check only 3rd party links

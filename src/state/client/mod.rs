@@ -60,14 +60,14 @@ async fn get_me() -> Result<AuthResponse> {
                                 WHERE pp.user_id = u.id
                             ) as prompts,
 
-                            (
-                                SELECT coalesce(
-                                    json_agg(row_to_json(up) ORDER BY up.position),
-                                    '[]'
-                                )
-                                FROM user_pictures up
-                                WHERE up.user_id = u.id
-                            ) AS pictures
+                    (
+                        SELECT coalesce(
+                            json_agg(row_to_json(ui) ORDER BY ui.position),
+                            '[]'
+                        )
+                        FROM user_images ui
+                        WHERE ui.user_id = u.id
+                    ) AS images
 
                         FROM auth a
                         JOIN users u ON a.email = u.email

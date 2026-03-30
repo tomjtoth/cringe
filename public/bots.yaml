@@ -36,7 +36,7 @@
       body: >
         Arranging things so they'll never be found (in a good way).
 
-  pictures:
+  images:
     - https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp/250px-Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp.png
 
     - prompt: Me relaxing
@@ -86,7 +86,7 @@
       body: >
         The better the escape plan, the better the story.
 
-  pictures:
+  images:
     - prompt: The moment I knew my carreer was over
       url: https://static1.squarespace.com/static/5bf22c87cef3721b922ce9c0/t/5c1945b04d7a9c79a29f86c3/1545160118685/?format=1500w
 
@@ -143,7 +143,7 @@
       body: >
         The Force is strong with me 😉
 
-  pictures:
+  images:
     - prompt: The moment I knew my modeling career was over
       url: https://static.wikia.nocookie.net/starwarsuniverse/images/f/fd/Anakin_Skywalker_%28ep._3%29.jpg/revision/latest?cb=20200315161841
 
@@ -180,7 +180,7 @@
       body: >
         I have a lot of *talents*, like impersonating others and forging signatures
 
-  pictures:
+  images:
     - https://m.media-amazon.com/images/M/MV5BMjMwMDU4NzMyNl5BMl5BanBnXkFtZTgwNDY0NTA2MjI@._V1_.jpg
 
     - prompt: Being a 3rd wheel
@@ -231,7 +231,7 @@
       body: >
         M.C. Hammer - U can't touch this
 
-  pictures:
+  images:
     - prompt: I stare more intensely, than your *ex*
       url: https://static0.srcdn.com/wordpress/wp-content/uploads/2017/09/Thor-Ragnarok-Glowing-Eyes-Lightning.jpg?w=1200&h=675&fit=crop
 
@@ -281,9 +281,11 @@
 
         Just a few emojis I can relate to: 🔫🚀🌚🕺
 
-  pictures:
+  images:
     - https://cdn11.bigcommerce.com/s-ydriczk/images/stencil/1500x1500/products/86573/86126/lifesize_cardboard_cutout_of_Han_Solo_buy_Star_Wars_cutouts_at_starstills__25679__84175.1394515397.jpg?c=2
+
     - https://lumiere-a.akamaihd.net/v1/images/han-solo-main_a4c8ff79.jpeg?region=0%2C0%2C1920%2C960
+
     - https://i.etsystatic.com/17350622/r/il/e2f58e/5552510342/il_fullxfull.5552510342_of11.jpg
 
 - name: Leia
@@ -333,7 +335,7 @@
         I'll silently judge your piloting skills, steal your jacket, and
         probably nab your dessert. Extra points if you can out-sass Chewbacca 🐻✨
 
-  pictures:
+  images:
     - https://static.wikia.nocookie.net/fictupedia/images/1/1d/Leia-princess-leia-organa-solo-skywalker-9301321-576-1010.jpg/revision/latest?cb=20170120065805
 
     - https://images.photowall.com/products/62286/princess-leia-carrie-fisher.jpg?h=699&q=85
@@ -375,7 +377,7 @@
     - title: I won't shut up
       body: and yell ho-ho-ho while landing on every single rooftop
 
-  pictures:
+  images:
     - https://parade.com/.image/c_fill,w_1200,h_1200,g_faces:center/MTkwNTgxMDYyNDUyNTIwODI4/santa-facts-jpg.jpg
     - https://as2.ftcdn.net/v2/jpg/04/78/81/13/1000_F_478811316_jT4TcE6IAslepJ7FNgTJw36zvCnt62Z0.jpg
     - https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_1_1200x1200/public/field_blog_entry_teaser_image/2021-10/8479cdc2ae06a65f3218ce179ab6-1611309.jpg?itok=um5T3MJC
@@ -408,7 +410,7 @@
       body: >
         Someone with a sense of humor, adventurous taste in music, and appreciation for sequins.
 
-  pictures:
+  images:
     - https://content.api.news/v3/images/bin/81a6d9fb987259902c22e3810744765e
 
     - prompt: Work hard, party harder
@@ -445,7 +447,7 @@
       body: >
         Someone confident, kind, and up for spontaneous dance-offs on the sand.
 
-  pictures:
+  images:
     - prompt: Low-key flex
       url: https://static.wikia.nocookie.net/baywatch/images/7/7c/Pamela-anderson-cj-parker.jpg/revision/latest/scale-to-width-down/1200?cb=20151229045935
 

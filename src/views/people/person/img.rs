@@ -12,7 +12,7 @@ pub fn Image(idx: usize) -> Element {
     let (src, show_adder) = {
         let pcx = use_context::<PersonCtx>();
         let person = (pcx.person)();
-        let pics = person.pics();
+        let pics = person.images();
         let op = pics.get(idx);
 
         (op.cloned(), idx == pics.len())
@@ -21,9 +21,9 @@ pub fn Image(idx: usize) -> Element {
     let rcx = ResourceCtx::provide();
 
     rsx! {
-        if let Some(pic) = src {
+        if let Some(image) = src {
             Container {
-                if let Some(prompt) = pic.prompt() {
+                if let Some(prompt) = image.prompt() {
                     p { class: "p-2 py-4 text-2xl",
 
                         sub {
@@ -36,7 +36,7 @@ pub fn Image(idx: usize) -> Element {
                     }
                 }
 
-                img { class: "object-cover w-full", src: pic.src() }
+                img { class: "object-cover w-full", src: image.src() }
             }
         }
     }

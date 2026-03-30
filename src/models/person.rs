@@ -68,7 +68,7 @@ type THabits = Habits;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum Pic {
+pub enum Image {
     Url(String),
 
     Advanced {
@@ -89,7 +89,7 @@ pub enum Pic {
     },
 }
 
-impl Pic {
+impl Image {
     pub fn id(&self) -> Option<i32> {
         match self {
             Self::Url(_) => None,
@@ -120,10 +120,9 @@ impl Pic {
 }
 
 #[cfg(feature = "server")]
-type TPics = Json<Vec<Pic>>;
+type TImages = Json<Vec<Image>>;
 #[cfg(not(feature = "server"))]
-type TPics = Vec<Pic>;
-
+type TImages = Vec<Image>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -359,7 +358,7 @@ pub struct Person {
     #[serde(default)]
     pub habits: Option<THabits>,
     pub prompts: TPrompts,
-    pub pictures: TPics,
+    pub images: TImages,
 }
 
 #[cfg(feature = "server")]
@@ -412,7 +411,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             Err(e) => return Err(e),
         };
 
-        let pictures = match row.try_get::<TPics, _>("pictures") {
+        let images = match row.try_get::<TImages, _>("images") {
             Ok(v) => v,
             Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
             Err(e) => return Err(e),
@@ -438,7 +437,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             kids,
             habits,
             prompts,
-            pictures,
+            images,
         })
     }
 }
@@ -476,14 +475,14 @@ impl Person {
         })
     }
 
-    pub fn pics(&self) -> &Vec<Pic> {
+    pub fn images(&self) -> &Vec<Image> {
         #[cfg(feature = "server")]
         {
-            self.pictures.as_ref()
+            self.images.as_ref()
         }
 
         #[cfg(not(feature = "server"))]
-        &self.pictures
+        &self.images
     }
 
     pub fn prompts(&self) -> &Vec<PersonPrompt> {

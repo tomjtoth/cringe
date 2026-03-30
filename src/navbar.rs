@@ -36,10 +36,10 @@ pub fn Navbar() -> Element {
             li {
                 if let Some(logged_in) = ME() {
                     Link { to: Route::Me {},
-                        if let Some(pic) = logged_in.as_ref().and_then(|p| p.pics().get(0)) {
+                        if let Some(image) = logged_in.as_ref().and_then(|p| p.images().get(0)) {
                             img {
                                 class: "w-6 border rounded-full",
-                                src: pic.src(),
+                                src: image.src(),
                             }
                         } else {
                             "🧑"
