@@ -48,135 +48,57 @@ impl ResourceCtx {
 }
 
 #[component]
-pub fn Person(person: MPerson, editing: Option<bool>) -> Element {
-    let ctx = use_context_provider(move || PersonCtx { person });
+pub fn Person(person: MPerson) -> Element {
+    let olcx = use_context::<Option<ListingCtx>>();
 
-    let person = ctx.person;
-
-    let mut already_has_kids = false;
-
-    let mut pics = person.pics().clone().into_iter();
-    let mut prompts = person.prompts().clone().into_iter();
+    let person = use_signal(|| person);
+    use_context_provider(move || PersonCtx { person });
 
     rsx! {
         div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
-            h2 { class: "m-0! p-2 sticky z-2 top-0 bg-background ", "{person.name}" }
+            div {
+                class: format!(
+                    "{} {}",
+                    "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
+                    "flex justify-between items-center",
+                ),
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+                span { class: "text-2xl", "{person().name}" }
 
-            Container { class: "[&>*+*]:border-t [&>*+*]:p-2", wo_button: true,
-                ul { class: "p-2 flex overflow-x-scroll [&>*+*]:ml-2 [&>*+*]:border-l *:p-2 text-nowrap",
+                if olcx.is_none() {
+                    button { onclick: move |evt| {}, "Edit" }
 
-                    if let Some(age) = person.age() {
-                        li { "🎂 {age}" }
-                    }
-
-                    if let Some(dist) = person.distance() {
-                        li { "{dist}" }
-                    }
-
-                    li { "{person.gender}" }
-
-                    li { "📏 {person.height} cm" }
-
-                    if let Some(city) = &person.location {
-                        li { "📍 {city}" }
-                    }
-
-                    if let Some(kids) = &person.kids {
-                        if let Some(has) = kids.has {
-                            li {
-                                "🧑‍🧒‍🧒 "
-                                if has > 0 {
-                                    "Has {has}"
-                                    {already_has_kids = true}
-                                } else {
-                                    "No"
-                                }
-                                " kids"
-                            }
-                        }
-
-                        if let Some(wants) = kids.wants {
-                            li {
-                                "🍼 "
-                                if wants > 0 {
-                                    "Wants {wants}"
-                                } else if wants == 0 {
-                                    "Doesn't want"
-                                } else {
-                                    "Doesn't know if wants any"
-                                }
-                                if already_has_kids {
-                                    " more"
-                                }
-                                " kids"
-                            }
-                        }
-                    }
-
-                    if let Some(sign) = person.zodiac_sign() {
-                        li { "{sign}" }
-                    }
-
-                    if let Some(habits) = &person.habits {
-                        if let Some(drinking) = habits.drinking {
-                            li { "🍷 {drinking}" }
-                        }
-
-                        if let Some(smoking) = habits.smoking {
-                            li { "🚬 {smoking}" }
-                        }
-
-                        if let Some(marijuana) = habits.marijuana {
-                            li { title: "marijuana", "🚬🥦 {marijuana}" }
-                        }
-
-                        if let Some(drugs) = habits.drugs {
-                            li { title: "drugs", "💊💉 {drugs}" }
-                        }
+                    a {
+                        class: "border rounded p-2 cursor-pointer select-none",
+                        href: "/logout",
+                        "logout [➜"
                     }
                 }
-
-                if let Some(job) = &person.occupation {
-                    p { "💼 {job}" }
-                }
-
-                if let Some(edu) = &person.education {
-                    p { "🎓 {edu}" }
-                }
-
-                if let Some(city) = &person.hometown {
-                    p { "🏠 {city}" }
-                }
-
-                if let Some(seeking) = &person.seeking {
-                    p { "{seeking}" }
-                }
-
-                if let Some(relationship_type) = &person.relationship_type {
-                    p { "{relationship_type}" }
-                }
-
             }
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+            Image { idx: 0 }
+            Prompt { idx: 0 }
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+            PersonalData {}
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+            Image { idx: 1 }
+            Prompt { idx: 1 }
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+            Image { idx: 2 }
+            Prompt { idx: 2 }
 
-            Image { src: pics.next() }
-            Prompt { prompt: prompts.next() }
+            Image { idx: 3 }
+            Prompt { idx: 3 }
 
-            SkipButton {}
+            Image { idx: 4 }
+            Prompt { idx: 4 }
+
+            Image { idx: 5 }
+            Prompt { idx: 5 }
+
+            if olcx.is_some() {
+                SkipButton {}
+            }
         }
 
     }
