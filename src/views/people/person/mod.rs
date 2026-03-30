@@ -2,12 +2,16 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
-    views::people::person::{button::SkipButton, container::Container},
+    views::people::{
+        listing::ListingCtx,
+        person::{button::SkipButton, personal_data::PersonalData},
+    },
 };
 
 mod button;
 mod container;
 mod img;
+mod personal_data;
 mod prompt;
 
 use img::Image;
