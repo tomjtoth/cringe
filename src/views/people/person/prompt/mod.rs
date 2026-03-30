@@ -1,17 +1,25 @@
 use dioxus::prelude::*;
 
-use crate::models::person::PersonPrompt as MPrompt;
-
 use crate::views::people::listing::ListingCtx;
-use crate::views::people::person::prompt::editor::PromptEditor;
-use crate::views::people::person::{container::Container, ResourceCtx};
+use crate::views::people::person::{
+    container::Container, prompt::editor::PromptEditor, PersonCtx, ResourceCtx,
+};
 
 mod editor;
 
 #[component]
-pub fn Prompt(src: Option<MPrompt>) -> Element {
+pub fn Prompt(idx: usize) -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
     let mut rcx = ResourceCtx::provide();
+
+    let (src, show_adder) = {
+        let pcx = use_context::<PersonCtx>();
+        let person = (pcx.person)();
+        let prompts = person.prompts();
+        let op = prompts.get(idx);
+
+        (op.cloned(), idx == prompts.len())
+    };
 
     rsx! {
         if let Some(prompt) = &src {
@@ -24,7 +32,7 @@ pub fn Prompt(src: Option<MPrompt>) -> Element {
                 }
             }
         } else {
-            if olcx.is_none() {
+            if olcx.is_none() && show_adder {
                 if rcx.editing() {
                     PromptEditor {}
                 } else {
