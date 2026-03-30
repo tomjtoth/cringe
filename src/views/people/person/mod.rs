@@ -18,8 +18,33 @@ use img::Image;
 use prompt::Prompt;
 
 #[derive(Clone)]
-pub struct PersonCtx {
-    pub person: MPerson,
+struct PersonCtx {
+    person: Signal<MPerson>,
+}
+
+#[derive(Clone)]
+struct ResourceCtx {
+    state: Signal<u8>,
+}
+
+impl ResourceCtx {
+    fn provide() -> Self {
+        let state = use_signal(|| 0);
+        use_context_provider(|| ResourceCtx { state })
+    }
+
+    fn editing(&self) -> bool {
+        (self.state)() >= 1
+    }
+
+    fn next_state(&mut self) {
+        let curr = (self.state)();
+        *(self.state).write() = if curr == 2 { 0 } else { curr + 1 };
+    }
+
+    fn submitting(&self) -> bool {
+        (self.state)() == 2
+    }
 }
 
 #[component]
