@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "cringe"
+title = "Cringe | the dating bots"
 
 # include `assets` in web platform
 [web.resource]
