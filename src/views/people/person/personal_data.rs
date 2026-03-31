@@ -9,8 +9,7 @@ use crate::views::people::{
 pub fn PersonalData() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
     let person = use_context::<PersonCtx>().person;
-
-    let rcx = ResourceCtx::provide();
+    let _rcx = use_context::<ResourceCtx>();
 
     let mut already_has_kids = false;
 

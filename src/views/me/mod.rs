@@ -18,7 +18,7 @@ pub fn Me() -> Element {
     rsx! {
         NeedsLogin {
             if let Some(Some(person)) = ME() {
-                div { class: "relative h-full overflow-y-scroll",
+                div { class: "relative h-full overflow-y-scroll px-2",
                     Person { person }
                 }
             } else {

@@ -27,8 +27,6 @@ pub fn SkipButton() -> Element {
 fn Button(decision: Option<Decision>) -> Element {
     let pcx = use_context::<PersonCtx>();
     let olcx = use_context::<Option<ListingCtx>>();
-
-    // This might be a Prompt, a Picture or the whole Personal data section
     let mut rcx = use_context::<ResourceCtx>();
 
     let class = format!(

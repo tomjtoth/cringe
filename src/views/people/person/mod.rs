@@ -22,6 +22,7 @@ struct PersonCtx {
     person: Signal<MPerson>,
 }
 
+/// This might be a Prompt, an Image or the whole Personal data section
 #[derive(Clone)]
 struct ResourceCtx {
     state: Signal<u8>,
@@ -54,6 +55,9 @@ pub fn Person(person: MPerson) -> Element {
     let person = use_signal(|| person);
     use_context_provider(move || PersonCtx { person });
 
+    // for the SkipButton and PersonalData
+    let _rcx = ResourceCtx::provide();
+
     rsx! {
         div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
             div {
@@ -66,7 +70,7 @@ pub fn Person(person: MPerson) -> Element {
                 span { class: "text-2xl", "{person().name}" }
 
                 if olcx.is_none() {
-                    button { onclick: move |evt| {}, "Edit" }
+                    button { onclick: move |_| {}, "Edit" }
 
                     a {
                         class: "border rounded p-2 cursor-pointer select-none",
