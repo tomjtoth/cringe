@@ -1,9 +1,8 @@
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::{Person, Prompt};
-use crate::state::client::AUTH_CTE;
-use crate::views::people::person::PersonCtx;
+use crate::models::person::Prompt;
+use crate::state::client::{AUTH_CTE, ME};
 use crate::views::people::person::{container::Container, ResourceCtx};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -120,28 +119,31 @@ async fn mod_prompt(
 
 #[component]
 pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
-    let pcx = use_context::<PersonCtx>();
     let rcx = use_context::<ResourceCtx>();
 
     let mut sig = use_signal(|| src.unwrap_or(Prompt::default()));
 
-    let max = (pcx.person)().prompts().len() + {
-        // only a new prompt can be added as additional
-        if sig().id.is_none() {
-            1
-        } else {
-            0
-        }
-    };
+    let max = ME
+        .read()
+        .profile
+        .as_ref()
+        .map(|p| p.prompts().len())
+        .unwrap_or(0)
+        + {
+            // only a new prompt can be added as additional
+            if sig().id.is_none() {
+                1
+            } else {
+                0
+            }
+        };
 
     // this is the submit handler I failed to attach to the Container's would-be form tag
     use_resource({
         let rcx = rcx.clone();
-        let pcx = pcx.clone();
 
         move || {
             let mut rcx = rcx.clone();
-            let pcx = pcx.clone();
 
             async move {
                 if rcx.submitting() {
@@ -153,7 +155,13 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                     };
 
                     // getting a detached clone of the whole array to accommodate changes
-                    let mut draft = (pcx.person)().prompts().clone();
+                    let mut draft = ME
+                        .read()
+                        .profile
+                        .as_ref()
+                        .map(|p| p.prompts().clone())
+                        .unwrap_or(vec![]);
+
                     let mut positions = vec![];
 
                     let prompt_id = sig().id;
@@ -197,11 +205,11 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                             rcx.next_state();
 
                             // sync state
-                            let mut msp = pcx.person;
-                            msp.with_mut(|p| {
-                                let Person { prompts: state, .. } = p;
-                                state.truncate(0);
-                                state.append(&mut draft);
+                            ME.with_mut(|p| {
+                                p.profile.as_mut().map(|p| {
+                                    p.prompts.truncate(0);
+                                    p.prompts.append(&mut draft);
+                                });
                             });
 
                             return;

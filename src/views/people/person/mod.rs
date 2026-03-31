@@ -19,7 +19,7 @@ use prompt::Prompt;
 
 #[derive(Clone)]
 struct PersonCtx {
-    person: Signal<MPerson>,
+    person: ReadSignal<MPerson>,
 }
 
 /// This might be a Prompt, an Image or the whole Personal data section
@@ -49,10 +49,9 @@ impl ResourceCtx {
 }
 
 #[component]
-pub fn Person(person: MPerson) -> Element {
+pub fn Person(person: ReadSignal<MPerson>) -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
 
-    let person = use_signal(|| person);
     use_context_provider(move || PersonCtx { person });
 
     // for the SkipButton and PersonalData
