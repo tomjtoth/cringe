@@ -70,8 +70,6 @@ pub fn Person(person: MPerson) -> Element {
                 span { class: "text-2xl", "{person().name}" }
 
                 if olcx.is_none() {
-                    button { onclick: move |_| {}, "Edit" }
-
                     a {
                         class: "border rounded p-2 cursor-pointer select-none",
                         href: "/logout",
