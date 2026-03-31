@@ -14,7 +14,7 @@ mod gps;
 pub static ME: GlobalSignal<Me> = Signal::global(Me::default);
 
 /// Uses `$1` and needs the `session_id` as the 1st bound param
-const AUTH_CTE: &str = "\
+pub const AUTH_CTE: &str = "\
 auth AS (
     UPDATE auth_sessions SET
         expires_at = NOW() + INTERVAL '30 days'
@@ -45,6 +45,7 @@ async fn get_me() -> Result<Me> {
                     occupation,
                     location,
                     hometown,
+                    
                     seeking,
                     relationship_type,
 
@@ -107,17 +108,18 @@ pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
     let mut res = false;
 
     if let (Some(sess_id), pool) = get_ctx().await {
-        let db_res = sqlx::query(
+        let db_res = sqlx::query(&format!(
             "
+            WITH {AUTH_CTE}
+
             INSERT INTO user_decisions (actor_user_id, target_user_id, decision)
             SELECT u.id, $2, $3
-            FROM auth_sessions a
+            FROM auth a
             INNER JOIN users u ON a.email = u.email
-            WHERE a.id = $1 AND csrf_token IS NULL AND expires_at > NOW()
             ON CONFLICT (actor_user_id, target_user_id) DO UPDATE
             SET decision = EXCLUDED.decision
-            ",
-        )
+            "
+        ))
         .bind(&sess_id)
         .bind(target_id)
         .bind(decision)

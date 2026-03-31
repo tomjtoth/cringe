@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::models::person::{Person, Prompt};
+use crate::state::client::AUTH_CTE;
 use crate::views::people::person::PersonCtx;
 use crate::views::people::person::{container::Container, ResourceCtx};
 
@@ -30,15 +31,13 @@ async fn mod_prompt(
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
         let (ids, positions): (Vec<Option<i32>>, Vec<Option<i16>>) = positions.into_iter().unzip();
 
-        Json(res) = sqlx::query_scalar::<_, Json<PromptUpdater>>(
+        Json(res) = sqlx::query_scalar::<_, Json<PromptUpdater>>(&format!(
             r"
-            WITH me AS (
-                SELECT u.id
-                FROM auth_sessions a
+            WITH {AUTH_CTE},
+            
+            me AS (
+                SELECT u.id FROM auth a
                 JOIN users u ON a.email = u.email
-                WHERE a.id = $1
-                AND a.csrf_token IS NULL
-                AND a.expires_at > NOW()
             ),
 
             arg_prompt AS (
@@ -106,8 +105,8 @@ async fn mod_prompt(
                 'updated_prompt', (SELECT count(*) > 0 FROM updated_prompt),
                 'inserted_prompt_id', (SELECT id FROM inserted_prompt LIMIT 1)
             )
-            ",
-        )
+            "
+        ))
         .bind(&sess_id)
         .bind(Json(&prompt))
         .bind(&ids)

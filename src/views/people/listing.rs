@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::{Decision, Person},
+    state::client::AUTH_CTE,
     views::{people::person::Person as VPerson, protector::NeedsLoginAndProfile},
 };
 
@@ -12,13 +13,14 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
         res = sqlx::query_as::<_, Person>(&format!(
                 r#"
-                WITH me AS (
+                WITH {AUTH_CTE},
+                
+                me AS (
                     SELECT
                         u.id, gps_lon, gps_lat
                         -- TODO: expand later with other filters, such as distance, age_min, age_max, gender
-                    FROM auth_sessions a
+                    FROM auth a
                     JOIN users u on a.email = u.email
-                    WHERE a.id = $1 AND expires_at > NOW() AND csrf_token IS NULL
                 )
 
                 SELECT

@@ -2,24 +2,24 @@ use std::rc::Rc;
 
 use dioxus::prelude::*;
 
-use crate::models::person::Gps;
+use crate::{models::person::Gps, state::client::AUTH_CTE};
 
 #[post("/api/gps")]
 async fn post_gps(coords: Gps) -> Result<()> {
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-        let res = sqlx::query(
+        let res = sqlx::query(&format!(
             "
+            WITH {AUTH_CTE}
+        
             UPDATE users u 
-            SET gps_lon = $1, gps_lat = $2
-            FROM auth_sessions a
-            WHERE a.id = $3 
-            AND u.email = a.email
-            AND expires_at > NOW()
-            ",
-        )
+            SET gps_lon = $2, gps_lat = $3
+            FROM auth a
+            WHERE u.email = a.email
+            "
+        ))
+        .bind(&sess_id)
         .bind(&coords.lon)
         .bind(&coords.lat)
-        .bind(&sess_id)
         .execute(&pool)
         .await?;
 

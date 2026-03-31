@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::{Gender, Person},
-    state::client::ME,
+    state::client::{AUTH_CTE, ME},
 };
 
 #[post("/api/me")]
@@ -16,7 +16,7 @@ async fn post_basics(
     height: u8,
 ) -> Result<Option<Person>> {
     info!(
-        r#"ℹ️ Attempting to insert "{}", "{}", "{}", "{}" into users"#,
+        r#"ℹ️  Attempting to insert "{}", "{}", "{}", "{}" into users"#,
         name, sex, dob, height
     );
 
@@ -24,17 +24,17 @@ async fn post_basics(
 
     if let Some(age) = legal_dob().years_since(dob) {
         debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
-
         if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            res = sqlx::query_as::<_, Person>(
+            res = sqlx::query_as::<_, Person>(&format!(
                 r#"
-                INSERT INTO users (name, email, gender, born, height)
-                    SELECT $2, a.email, $3, $4, $5
-                    FROM auth_sessions a
-                    WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
+                WITH {AUTH_CTE}
+
+                INSERT INTO users (email, name, gender, born, height)
+                    SELECT a.email, $2, $3, $4, $5
+                    FROM auth a
                 RETURNING *
-                "#,
-            )
+                "#
+            ))
             .bind(&sess_id)
             .bind(&name)
             .bind(&sex)
