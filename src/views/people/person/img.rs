@@ -7,9 +7,9 @@ use crate::views::people::{
 
 #[component]
 pub fn Image(idx: usize) -> Element {
-    let olcx = use_context::<Option<ListingCtx>>();
+    let _olcx = use_context::<Option<ListingCtx>>();
 
-    let (src, show_adder) = {
+    let (src, _show_adder) = {
         let pcx = use_context::<PersonCtx>();
         let person = (pcx.person)();
         let pics = person.images();
@@ -18,7 +18,7 @@ pub fn Image(idx: usize) -> Element {
         (op.cloned(), idx == pics.len())
     };
 
-    let rcx = ResourceCtx::provide();
+    let _rcx = ResourceCtx::provide();
 
     rsx! {
         if let Some(image) = src {
