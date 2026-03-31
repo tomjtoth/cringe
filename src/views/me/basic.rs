@@ -8,57 +8,55 @@ use crate::{
     state::client::ME,
 };
 
-#[post("/api/me")]
+#[post("/api/me/basics")]
 async fn post_basics(
     name: String,
     sex: Gender,
     dob: NaiveDate,
     height: u8,
 ) -> Result<Option<Person>> {
-    use dioxus::logger::tracing;
-
-    tracing::info!(
+    info!(
         r#"ℹ️ Attempting to insert "{}", "{}", "{}", "{}" into users"#,
-        name,
-        sex,
-        dob,
-        height
+        name, sex, dob, height
     );
 
-    if let Some(age) = legal_dob().years_since(dob) {
-        tracing::debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
+    let mut res = None;
 
-        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            let profile = sqlx::query_as::<_, Person>(
-                r#"
+    #[cfg(feature = "server")]
+    {
+        if let Some(age) = legal_dob().years_since(dob) {
+            debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
+
+            if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+                res = sqlx::query_as::<_, Person>(
+                    r#"
                     INSERT INTO users (name, email, gender, born, height)
                         SELECT $2, a.email, $3, $4, $5
                         FROM auth_sessions a
                         WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
                     RETURNING *
                     "#,
-            )
-            .bind(&sess_id)
-            .bind(&name)
-            .bind(&sex)
-            .bind(&dob)
-            .bind(height as i16)
-            .fetch_optional(&pool)
-            .await?;
-
-            let [emoji, txt] = if profile.is_some() {
-                ["✅", "succeeded"]
-            } else {
-                ["🚫", "failed"]
-            };
-
-            tracing::info!(r#"{emoji} INSERT {txt}!"#,);
-
-            return Ok(profile);
+                )
+                .bind(&sess_id)
+                .bind(&name)
+                .bind(&sex)
+                .bind(&dob)
+                .bind(height as i16)
+                .fetch_optional(&pool)
+                .await?;
+            }
         }
     }
 
-    Ok(None)
+    let [emoji, txt] = if res.is_some() {
+        ["✅", "succeeded"]
+    } else {
+        ["🚫", "failed"]
+    };
+
+    info!(r#"{emoji} INSERT {txt}!"#,);
+
+    Ok(res)
 }
 
 fn legal_dob() -> NaiveDate {

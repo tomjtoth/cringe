@@ -28,69 +28,72 @@ auth AS (
 async fn get_me() -> Result<Me> {
     let mut me = Me::default();
 
-    if let (Some(sess_id), pool) = get_ctx().await {
-        use sqlx::types::Json;
+    #[cfg(feature = "server")]
+    {
+        if let (Some(sess_id), pool) = get_ctx().await {
+            use sqlx::types::Json;
 
-        Json(me) = sqlx::query_scalar::<_, Json<Me>>(&format!(
-            r#"
-            WITH {AUTH_CTE},
+            Json(me) = sqlx::query_scalar::<_, Json<Me>>(&format!(
+                r#"
+                WITH {AUTH_CTE},
 
-            profile AS (
-                SELECT
-                    name,
-                    gender,
-                    born,
-                    height,
-                    education,
-                    occupation,
-                    location,
-                    hometown,
-                    seeking,
-                    relationship_type,
+                profile AS (
+                    SELECT
+                        name,
+                        gender,
+                        born,
+                        height,
+                        education,
+                        occupation,
+                        location,
+                        hometown,
+                        seeking,
+                        relationship_type,
 
-                    json_build_object(
-                        'has',      kids_has,
-                        'wants',    kids_wants
-                    ) AS kids,
+                        json_build_object(
+                            'has',      kids_has,
+                            'wants',    kids_wants
+                        ) AS kids,
 
-                    json_build_object(
-                        'drinking',     habits_drinking,
-                        'smoking',      habits_smoking,
-                        'marijuana',    habits_marijuana,
-                        'drugs',        habits_drugs
-                    ) AS habits,
+                        json_build_object(
+                            'drinking',     habits_drinking,
+                            'smoking',      habits_smoking,
+                            'marijuana',    habits_marijuana,
+                            'drugs',        habits_drugs
+                        ) AS habits,
 
-                    (
-                        SELECT coalesce(
-                            json_agg(row_to_json(pp) ORDER BY pp.position),
-                            '[]'
-                        )
-                        FROM user_prompts pp
-                        WHERE pp.user_id = u.id
-                    ) as prompts,
+                        (
+                            SELECT coalesce(
+                                json_agg(row_to_json(pp) ORDER BY pp.position),
+                                '[]'
+                            )
+                            FROM user_prompts pp
+                            WHERE pp.user_id = u.id
+                        ) as prompts,
 
-                    (
-                        SELECT coalesce(
-                            json_agg(row_to_json(ui) ORDER BY ui.position),
-                            '[]'
-                        )
-                        FROM user_images ui
-                        WHERE ui.user_id = u.id
-                    ) AS images
+                        (
+                            SELECT coalesce(
+                                json_agg(row_to_json(ui) ORDER BY ui.position),
+                                '[]'
+                            )
+                            FROM user_images ui
+                            WHERE ui.user_id = u.id
+                        ) AS images
 
-                FROM auth a
-                JOIN users u ON a.email = u.email
-            )
+                    FROM auth a
+                    JOIN users u ON a.email = u.email
+                )
 
-            SELECT jsonb_build_object(
-                'authenticated', (SELECT count(*) > 0 FROM auth),
-                'profile', (SELECT row_to_json(p) FROM profile AS p)
-            )
-            "#
-        ))
-        .bind(&sess_id)
-        .fetch_one(&pool)
-        .await?;
+                SELECT jsonb_build_object(
+                    'authenticated', (SELECT count(*) > 0 FROM auth),
+                    'profile', (SELECT row_to_json(p) FROM profile AS p)
+                )
+                "#
+            ))
+            .bind(&sess_id)
+            .fetch_one(&pool)
+            .await?;
+        }
     }
 
     Ok(me)
@@ -104,28 +107,33 @@ pub struct Me {
 
 #[post("/api/decide")]
 pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
-    if let (Some(sess_id), pool) = get_ctx().await {
-        let val = sqlx::query(
-            "
-            INSERT INTO user_decisions (actor_user_id, target_user_id, decision)
-            SELECT u.id, $2, $3
-            FROM auth_sessions a
-            INNER JOIN users u ON a.email = u.email
-            WHERE a.id = $1 AND csrf_token IS NULL AND expires_at > NOW()
-            ON CONFLICT (actor_user_id, target_user_id) DO UPDATE
-            SET decision = EXCLUDED.decision
-            ",
-        )
-        .bind(&sess_id)
-        .bind(target_id)
-        .bind(decision)
-        .execute(&pool)
-        .await?;
+    let mut res = false;
 
-        return Ok(val.rows_affected() > 0);
+    #[cfg(feature = "server")]
+    {
+        if let (Some(sess_id), pool) = get_ctx().await {
+            let val = sqlx::query(
+                "
+                INSERT INTO user_decisions (actor_user_id, target_user_id, decision)
+                SELECT u.id, $2, $3
+                FROM auth_sessions a
+                INNER JOIN users u ON a.email = u.email
+                WHERE a.id = $1 AND csrf_token IS NULL AND expires_at > NOW()
+                ON CONFLICT (actor_user_id, target_user_id) DO UPDATE
+                SET decision = EXCLUDED.decision
+                ",
+            )
+            .bind(&sess_id)
+            .bind(target_id)
+            .bind(decision)
+            .execute(&pool)
+            .await?;
+
+            res = val.rows_affected() > 0;
+        }
     }
 
-    Ok(false)
+    Ok(res)
 }
 
 pub fn init_client_state() -> Result<(), RenderError> {
