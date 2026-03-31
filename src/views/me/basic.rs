@@ -91,55 +91,55 @@ pub fn BasicMe() -> Element {
                     }
                 }
             },
+
+            h2 { "HEADS UP!!" }
+            p { class: "text-center", "These are not changeable later." }
+
+            input {
+                placeholder: "Your Name Here",
+                class: "placeholder:text-center w-40 text-center",
+                value: name,
+                minlength: 2,
+                required,
+
+                onchange: move |evt| *name.write() = evt.value(),
+            }
+
+            select {
+                required,
+                value: gender(),
+                onchange: move |evt| *gender.write() = evt.value(),
+
+                option { value: "", disabled: true, "Your gender" }
+                option { value: "{Gender::Male}", "{Gender::Male}" }
+                option { value: "{Gender::Female}", "{Gender::Female}" }
+            }
+
+            input {
+                required,
+                r#type: "date",
+                value: bday,
+                max: legal.to_string(),
+                onchange: move |evt| *bday.write() = evt.value(),
+            }
+
+            input {
+                required,
+                r#type: "number",
+                placeholder: "📏 height",
+                class: "w-30",
+                min: u8::MIN,
+                max: u8::MAX,
+
+                value: height,
+                onchange: move |evt| {
+                    if let Ok(h) = evt.value().parse::<u8>() {
+                        *height.write() = h;
+                    }
+                },
+            }
+
+            button { "💾 Save" }
         }
-
-        h2 { "HEADS UP!!" }
-        p { class: "text-center", "These are not changeable later." }
-
-        input {
-            placeholder: "Your Name Here",
-            class: "placeholder:text-center w-40 text-center",
-            value: name,
-            minlength: 2,
-            required,
-
-            onchange: move |evt| *name.write() = evt.value(),
-        }
-
-        select {
-            required,
-            value: gender(),
-            onchange: move |evt| *gender.write() = evt.value(),
-
-            option { value: "", disabled: true, "Your gender" }
-            option { value: "{Gender::Male}", "{Gender::Male}" }
-            option { value: "{Gender::Female}", "{Gender::Female}" }
-        }
-
-        input {
-            required,
-            r#type: "date",
-            value: bday,
-            max: legal.to_string(),
-            onchange: move |evt| *bday.write() = evt.value(),
-        }
-
-        input {
-            required,
-            r#type: "number",
-            placeholder: "📏 height",
-            class: "w-30",
-            min: u8::MIN,
-            max: u8::MAX,
-
-            value: height,
-            onchange: move |evt| {
-                if let Ok(h) = evt.value().parse::<u8>() {
-                    *height.write() = h;
-                }
-            },
-        }
-
-        button { "💾 Save" }
     }
 }
