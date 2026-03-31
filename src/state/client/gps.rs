@@ -37,7 +37,7 @@ pub(super) fn use_gps_watch() {
         {
             use crate::{models::person::Gps, state::client::ME};
 
-            if ME.with(|auth| auth.as_ref().is_some_and(|profile| profile.is_some())) {
+            if ME.with(|me| me.authenticated && me.profile.is_some()) {
                 use wasm_bindgen::{closure::Closure, JsCast};
                 use web_sys::{window, GeolocationPosition, GeolocationPositionError};
 
@@ -77,12 +77,8 @@ pub(super) fn use_gps_watch() {
 
                     info!("GPS update: {}, {}", coords.lat, coords.lon);
 
-                    ME.with_mut(|oop| {
-                        if let Some(op) = oop.as_mut() {
-                            if let Some(p) = op.as_mut() {
-                                p.gps = Some(coords.clone())
-                            }
-                        }
+                    ME.with_mut(|me| {
+                        me.profile.as_mut().map(|p| p.gps = Some(coords.clone()));
                     });
 
                     spawn(async move {

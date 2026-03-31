@@ -5,7 +5,7 @@ use crate::{router::Route, state::client::ME, views::login::Login};
 #[component]
 pub fn NeedsLogin(children: Element) -> Element {
     rsx! {
-        if ME().is_some() {
+        if ME.read().authenticated {
             {children}
         } else {
             Login {}
@@ -16,7 +16,7 @@ pub fn NeedsLogin(children: Element) -> Element {
 #[component]
 pub fn NeedsProfile(children: Element) -> Element {
     rsx! {
-        if let Some(Some(_)) = ME() {
+        if ME.read().profile.is_some() {
             {children}
         } else {
             p { class: "app-center",

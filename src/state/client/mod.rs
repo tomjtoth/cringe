@@ -11,54 +11,63 @@ use crate::state::server::get_ctx;
 
 mod gps;
 
-/// **outer** option indicates an **authorized session**
-///
-/// **inner** option holds the **user profile** if exists
-pub static ME: GlobalSignal<Option<Option<Person>>> = Signal::global(|| None);
+pub static ME: GlobalSignal<Me> = Signal::global(Me::default);
+
+/// Uses `$1` and needs the `session_id` as the 1st bound param
+const AUTH_CTE: &str = "\
+auth AS (
+    UPDATE auth_sessions SET
+        expires_at = NOW() + INTERVAL '30 days'
+    WHERE id = $1
+    AND expires_at > NOW()
+    AND csrf_token IS NULL
+    RETURNING email
+)";
 
 #[get("/api/me")]
-async fn get_me() -> Result<AuthResponse> {
+async fn get_me() -> Result<Me> {
+    let mut me = Me::default();
+
     if let (Some(sess_id), pool) = get_ctx().await {
-        let (authenticated, profile) =
-            sqlx::query_as::<_, (bool, Option<sqlx::types::Json<Person>>)>(
-                r#"
-                    WITH auth AS (
-                        SELECT email FROM auth_sessions 
-                        WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
-                    ),
-                    profile AS (
-                        SELECT
-                            name,
-                            gender,
-                            born,
-                            height,
-                            education,
-                            occupation,
-                            location,
-                            hometown,
-                            seeking,
-                            relationship_type,
+        use sqlx::types::Json;
 
-                            json_build_object(
-                                'has',      kids_has,
-                                'wants',    kids_wants
-                            ) AS kids,
+        Json(me) = sqlx::query_scalar::<_, Json<Me>>(&format!(
+            r#"
+            WITH {AUTH_CTE},
 
-                            json_build_object(
-                                'drinking',     habits_drinking,
-                                'smoking',      habits_smoking,
-                                'marijuana',    habits_marijuana,
-                                'drugs',        habits_drugs
-                            ) AS habits,
+            profile AS (
+                SELECT
+                    name,
+                    gender,
+                    born,
+                    height,
+                    education,
+                    occupation,
+                    location,
+                    hometown,
+                    seeking,
+                    relationship_type,
 
-                            (
-                                SELECT coalesce(
-                                    json_agg(row_to_json(pp) ORDER BY pp.position),
-                                    '[]'
-                                )
-                                FROM user_prompts pp
-                                WHERE pp.user_id = u.id
-                            ) as prompts,
+                    json_build_object(
+                        'has',      kids_has,
+                        'wants',    kids_wants
+                    ) AS kids,
+
+                    json_build_object(
+                        'drinking',     habits_drinking,
+                        'smoking',      habits_smoking,
+                        'marijuana',    habits_marijuana,
+                        'drugs',        habits_drugs
+                    ) AS habits,
+
+                    (
+                        SELECT coalesce(
+                            json_agg(row_to_json(pp) ORDER BY pp.position),
+                            '[]'
+                        )
+                        FROM user_prompts pp
+                        WHERE pp.user_id = u.id
+                    ) as prompts,
 
                     (
                         SELECT coalesce(
@@ -69,27 +78,29 @@ async fn get_me() -> Result<AuthResponse> {
                         WHERE ui.user_id = u.id
                     ) AS images
 
-                        FROM auth a
-                        JOIN users u ON a.email = u.email
-                    )
-
-                    SELECT 
-                        (SELECT count(*) > 0 FROM auth),
-                        (SELECT row_to_json(profile) FROM profile)
-                    "#,
+                FROM auth a
+                JOIN users u ON a.email = u.email
             )
-            .bind(&sess_id)
-            .fetch_one(&pool)
-            .await?;
 
-        return Ok(AuthResponse(authenticated, profile.map(|s| s.0)));
+            SELECT jsonb_build_object(
+                'authenticated', (SELECT count(*) > 0 FROM auth),
+                'profile', (SELECT row_to_json(p) FROM profile AS p)
+            )
+            "#
+        ))
+        .bind(&sess_id)
+        .fetch_one(&pool)
+        .await?;
     }
 
-    Ok(AuthResponse(false, None))
+    Ok(me)
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct AuthResponse(pub bool, pub Option<Person>);
+#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+pub struct Me {
+    pub authenticated: bool,
+    pub profile: Option<Person>,
+}
 
 #[post("/api/decide")]
 pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
@@ -120,10 +131,11 @@ pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
 pub fn init_client_state() -> Result<(), RenderError> {
     let initial_state = use_server_future(get_me)?;
 
-    if let Some(Ok(AuthResponse(authorized, profile))) = initial_state.read().as_ref() {
-        if authorized.to_owned() {
-            *ME.write() = Some(profile.to_owned())
-        }
+    #[cfg(feature = "server")]
+    info!("GET /api/me returns: {initial_state:?}");
+
+    if let Some(Ok(me)) = initial_state() {
+        *ME.write() = me;
     }
 
     // use_gps_watch();
