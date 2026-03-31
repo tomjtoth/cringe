@@ -6,28 +6,25 @@ use crate::models::person::Gps;
 
 #[post("/api/gps")]
 async fn post_gps(coords: Gps) -> Result<()> {
-    #[cfg(feature = "server")]
-    {
-        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            let res = sqlx::query(
-                "
-                UPDATE users u 
-                SET gps_lon = $1, gps_lat = $2
-                FROM auth_sessions a
-                WHERE a.id = $3 
-                AND u.email = a.email
-                AND expires_at > NOW()
-                ",
-            )
-            .bind(&coords.lon)
-            .bind(&coords.lat)
-            .bind(&sess_id)
-            .execute(&pool)
-            .await?;
+    if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+        let res = sqlx::query(
+            "
+            UPDATE users u 
+            SET gps_lon = $1, gps_lat = $2
+            FROM auth_sessions a
+            WHERE a.id = $3 
+            AND u.email = a.email
+            AND expires_at > NOW()
+            ",
+        )
+        .bind(&coords.lon)
+        .bind(&coords.lat)
+        .bind(&sess_id)
+        .execute(&pool)
+        .await?;
 
-            if res.rows_affected() == 0 {
-                error!("expired session \"{sess_id}\", nothing to update")
-            }
+        if res.rows_affected() == 0 {
+            error!("expired session \"{sess_id}\", nothing to update")
         }
     }
 

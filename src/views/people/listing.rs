@@ -9,10 +9,8 @@ use crate::{
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
     let mut res = vec![];
 
-    #[cfg(feature = "server")]
-    {
-        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            res = sqlx::query_as::<_, Person>(&format!(
+    if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+        res = sqlx::query_as::<_, Person>(&format!(
                 r#"
                 WITH me AS (
                     SELECT
@@ -86,7 +84,6 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
             .bind(&wants)
             .fetch_all(&pool)
             .await?;
-        }
     }
 
     Ok(res)

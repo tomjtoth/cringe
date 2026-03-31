@@ -8,7 +8,7 @@ use crate::{
     state::client::ME,
 };
 
-#[post("/api/me/basics")]
+#[post("/api/me")]
 async fn post_basics(
     name: String,
     sex: Gender,
@@ -22,29 +22,26 @@ async fn post_basics(
 
     let mut res = None;
 
-    #[cfg(feature = "server")]
-    {
-        if let Some(age) = legal_dob().years_since(dob) {
-            debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
+    if let Some(age) = legal_dob().years_since(dob) {
+        debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
 
-            if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-                res = sqlx::query_as::<_, Person>(
-                    r#"
-                    INSERT INTO users (name, email, gender, born, height)
-                        SELECT $2, a.email, $3, $4, $5
-                        FROM auth_sessions a
-                        WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
-                    RETURNING *
-                    "#,
-                )
-                .bind(&sess_id)
-                .bind(&name)
-                .bind(&sex)
-                .bind(&dob)
-                .bind(height as i16)
-                .fetch_optional(&pool)
-                .await?;
-            }
+        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+            res = sqlx::query_as::<_, Person>(
+                r#"
+                INSERT INTO users (name, email, gender, born, height)
+                    SELECT $2, a.email, $3, $4, $5
+                    FROM auth_sessions a
+                    WHERE id = $1 AND expires_at > NOW() AND csrf_token IS NULL
+                RETURNING *
+                "#,
+            )
+            .bind(&sess_id)
+            .bind(&name)
+            .bind(&sex)
+            .bind(&dob)
+            .bind(height as i16)
+            .fetch_optional(&pool)
+            .await?;
         }
     }
 

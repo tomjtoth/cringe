@@ -21,103 +21,99 @@ async fn mod_prompt(
     prompt: Prompt,
     positions: Vec<(Option<i32>, Option<i16>)>,
 ) -> Result<PromptUpdater> {
+    use sqlx::types::Json;
+
     info!("Received {prompt:?} {positions:?}");
 
     let mut res = PromptUpdater::default();
 
-    #[cfg(feature = "server")]
-    {
-        use sqlx::types::Json;
+    if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+        let (ids, positions): (Vec<Option<i32>>, Vec<Option<i16>>) = positions.into_iter().unzip();
 
-        if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            let (ids, positions): (Vec<Option<i32>>, Vec<Option<i16>>) =
-                positions.into_iter().unzip();
+        Json(res) = sqlx::query_scalar::<_, Json<PromptUpdater>>(
+            r"
+            WITH me AS (
+                SELECT u.id
+                FROM auth_sessions a
+                JOIN users u ON a.email = u.email
+                WHERE a.id = $1
+                AND a.csrf_token IS NULL
+                AND a.expires_at > NOW()
+            ),
 
-            Json(res) = sqlx::query_scalar::<_, Json<PromptUpdater>>(
-                r"
-                WITH me AS (
-                    SELECT u.id
-                    FROM auth_sessions a
-                    JOIN users u ON a.email = u.email
-                    WHERE a.id = $1
-                    AND a.csrf_token IS NULL
-                    AND a.expires_at > NOW()
-                ),
-
-                arg_prompt AS (
-                    SELECT * FROM jsonb_to_record($2) as _x(
-                        id int,
-                        user_id int,
-                        position smallint,
-                        title text,
-                        body text
-                    )
-                ),
-
-                arg_positions AS (
-                    SELECT * FROM unnest($3::int[], $4::smallint[]) 
-                    AS _x(id, position)
-                ),
-
-                updated_pos AS (
-                    UPDATE user_prompts AS up
-                    SET position = pos.position
-                    FROM arg_positions pos
-                    CROSS JOIN me
-                    WHERE up.user_id = me.id
-                    AND up.id = pos.id
-                    RETURNING up.id
-                ),
-
-                deleted_prompt AS (
-                    DELETE FROM user_prompts AS up
-                    USING arg_prompt AS p
-                    CROSS JOIN me
-                    WHERE up.user_id = me.id 
-                    AND up.id = p.id AND (p.title = '' OR p.body = '')
-                    RETURNING up.id
-                ),
-
-                inserted_prompt AS (
-                    INSERT INTO user_prompts AS up
-                        (user_id, position, title, body)
-                    SELECT
-                        me.id, p.position, p.title, p.body
-                    FROM arg_prompt p 
-                    CROSS JOIN me
-                    WHERE p.id IS NULL
-                    RETURNING new.id
-                ),
-
-                updated_prompt AS (
-                    UPDATE user_prompts AS up
-                    SET 
-                        position = p.position,
-                        title = p.title,
-                        body = p.body
-                    FROM arg_prompt AS p
-                    CROSS JOIN me
-                    WHERE up.user_id = me.id AND up.id = p.id
-                    AND NOT (p.title = '' OR p.body = '')
-                    RETURNING up.id
+            arg_prompt AS (
+                SELECT * FROM jsonb_to_record($2) as _x(
+                    id int,
+                    user_id int,
+                    position smallint,
+                    title text,
+                    body text
                 )
+            ),
 
-                SELECT jsonb_build_object(
-                    'authorized', (SELECT count(*) > 0 FROM me),
-                    'updated_positions', (SELECT count(*) > 0 FROM updated_pos),
-                    'deleted_prompt', (SELECT count(*) > 0 FROM deleted_prompt),
-                    'updated_prompt', (SELECT count(*) > 0 FROM updated_prompt),
-                    'inserted_prompt_id', (SELECT id FROM inserted_prompt LIMIT 1)
-                )
-                ",
+            arg_positions AS (
+                SELECT * FROM unnest($3::int[], $4::smallint[]) 
+                AS _x(id, position)
+            ),
+
+            updated_pos AS (
+                UPDATE user_prompts AS up
+                SET position = pos.position
+                FROM arg_positions pos
+                CROSS JOIN me
+                WHERE up.user_id = me.id
+                AND up.id = pos.id
+                RETURNING up.id
+            ),
+
+            deleted_prompt AS (
+                DELETE FROM user_prompts AS up
+                USING arg_prompt AS p
+                CROSS JOIN me
+                WHERE up.user_id = me.id 
+                AND up.id = p.id AND (p.title = '' OR p.body = '')
+                RETURNING up.id
+            ),
+
+            inserted_prompt AS (
+                INSERT INTO user_prompts AS up
+                    (user_id, position, title, body)
+                SELECT
+                    me.id, p.position, p.title, p.body
+                FROM arg_prompt p 
+                CROSS JOIN me
+                WHERE p.id IS NULL
+                RETURNING new.id
+            ),
+
+            updated_prompt AS (
+                UPDATE user_prompts AS up
+                SET 
+                    position = p.position,
+                    title = p.title,
+                    body = p.body
+                FROM arg_prompt AS p
+                CROSS JOIN me
+                WHERE up.user_id = me.id AND up.id = p.id
+                AND NOT (p.title = '' OR p.body = '')
+                RETURNING up.id
             )
-            .bind(&sess_id)
-            .bind(Json(&prompt))
-            .bind(&ids)
-            .bind(&positions)
-            .fetch_one(&pool)
-            .await?;
-        }
+
+            SELECT jsonb_build_object(
+                'authorized', (SELECT count(*) > 0 FROM me),
+                'updated_positions', (SELECT count(*) > 0 FROM updated_pos),
+                'deleted_prompt', (SELECT count(*) > 0 FROM deleted_prompt),
+                'updated_prompt', (SELECT count(*) > 0 FROM updated_prompt),
+                'inserted_prompt_id', (SELECT id FROM inserted_prompt LIMIT 1)
+            )
+            ",
+        )
+        .bind(&sess_id)
+        .bind(Json(&prompt))
+        .bind(&ids)
+        .bind(&positions)
+        .fetch_one(&pool)
+        .await?;
     }
 
     Ok(res)
