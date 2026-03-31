@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use sqlx::types::Json;
 
-use crate::models::person::{Person, PersonPrompt as Prompt};
+use crate::models::person::{Person, Prompt};
 use crate::views::people::person::PersonCtx;
 use crate::views::people::person::{container::Container, ResourceCtx};
 

@@ -230,7 +230,7 @@ impl std::fmt::Display for RelationshipType {
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(feature = "server", derive(sqlx::FromRow))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct PersonPrompt {
+pub struct Prompt {
     pub id: Option<i32>,
     pub user_id: Option<i32>,
     pub position: Option<i16>,
@@ -239,9 +239,9 @@ pub struct PersonPrompt {
 }
 
 #[cfg(feature = "server")]
-type TPrompts = Json<Vec<PersonPrompt>>;
+type TPrompts = Json<Vec<Prompt>>;
 #[cfg(not(feature = "server"))]
-type TPrompts = Vec<PersonPrompt>;
+type TPrompts = Vec<Prompt>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -405,7 +405,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let kids = try_opt!(TKids, "kids");
         let habits = try_opt!(THabits, "habits");
 
-        let prompts: Json<Vec<PersonPrompt>> = match row.try_get::<TPrompts, _>("prompts") {
+        let prompts = match row.try_get::<TPrompts, _>("prompts") {
             Ok(v) => v,
             Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
             Err(e) => return Err(e),
@@ -485,10 +485,10 @@ impl Person {
         &self.images
     }
 
-    pub fn prompts(&self) -> &Vec<PersonPrompt> {
+    pub fn prompts(&self) -> &Vec<Prompt> {
         #[cfg(feature = "server")]
         {
-            self.prompts.as_ref()
+            self.prompts.0.as_ref()
         }
 
         #[cfg(not(feature = "server"))]
