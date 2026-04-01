@@ -106,7 +106,12 @@ pub(super) fn Kids(sig: Signal<Person>, editing: bool) -> Element {
                     li {
                         "🧑‍🧒‍🧒 "
                         if has > 0 {
-                            "Has {has}"
+                            "Has "
+                            if has == i8::MAX {
+                                b { "{has} or more" }
+                            } else {
+                                "{has}"
+                            }
                         } else {
                             "No"
                         }
@@ -127,11 +132,12 @@ pub(super) fn Kids(sig: Signal<Person>, editing: bool) -> Element {
 
                         if wants == i8::MAX {
                             b { " or more" }
-                        } else {
-                            if already_has_kids {
-                                " more"
-                            }
                         }
+
+                        if already_has_kids {
+                            " additional"
+                        }
+
                         " kids"
                     }
                 }
