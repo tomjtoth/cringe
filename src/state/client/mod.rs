@@ -136,7 +136,7 @@ pub fn init_client_state() -> Result<(), RenderError> {
     let initial_state = use_server_future(get_me)?;
 
     #[cfg(feature = "server")]
-    info!("GET /api/me returns: {initial_state:?}");
+    info!("GET /api/me returns: {:?}", initial_state.value());
 
     if let Some(Ok(me)) = initial_state() {
         *ME.write() = me;
