@@ -131,7 +131,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         .unwrap_or(0)
         + {
             // only a new prompt can be added as additional
-            if sig().id.is_none() {
+            if sig.read().id.is_none() {
                 1
             } else {
                 0
@@ -147,9 +147,9 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
 
             async move {
                 if rcx.submitting() {
-                    info!("Submitting prompt: {:?}", sig());
+                    info!("Submitting prompt: {:?}", sig.read());
 
-                    let Some(prompt_pos) = sig().position else {
+                    let Some(prompt_pos) = sig.read().position else {
                         // position must be defined
                         return;
                     };
@@ -168,7 +168,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                     draft.retain(|pp| pp.id != prompt_id);
 
                     // DELETE by not re-inserting at desired position
-                    if !(sig().title == "" || sig().body == "") {
+                    if !(sig.read().title == "" || sig.read().body == "") {
                         draft.insert(prompt_pos as usize, sig());
                     }
 
@@ -229,7 +229,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 class: "p-2 m-2 mr-0 text-xl min-w-30",
                 placeholder: "Title",
                 disabled,
-                value: sig().title,
+                value: sig.read().title.clone(),
                 onchange: move |evt| sig.with_mut(|p| p.title = evt.value()),
             }
 
@@ -239,7 +239,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 min: 1,
                 max,
                 r#type: "number",
-                value: sig().position.map(|p| p + 1),
+                value: sig.read().position.map(|p| p + 1),
                 onchange: move |evt| {
                     if let Ok(pos) = evt.value().parse::<i16>() {
                         if 0 <= pos && pos <= (max as i16) {
@@ -253,7 +253,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 class: "border rounded p-2 col-span-2 text-2xl",
                 placeholder: "Body",
                 disabled,
-                value: sig().body,
+                value: sig.read().body.clone(),
                 onchange: move |evt| sig.with_mut(|p| p.body = evt.value()),
             }
         }

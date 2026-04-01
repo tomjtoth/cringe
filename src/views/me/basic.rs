@@ -80,8 +80,8 @@ pub fn BasicMe() -> Element {
                 evt.prevent_default();
 
                 if let Some(sex) = Gender::from_label(&gender()) {
-                    if name().len() > 0 {
-                        if let Ok(dob) = NaiveDate::from_str(&bday()) {
+                    if name.read().len() > 0 {
+                        if let Ok(dob) = NaiveDate::from_str(&bday.read()) {
                             if let Ok(Some(my_profile)) = post_basics(name(), sex, dob, height())
                                 .await
                             {

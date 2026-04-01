@@ -136,7 +136,7 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
 
     rsx! {
         NeedsLoginAndProfile {
-            if profiles().len() > 0 {
+            if profiles.read().len() > 0 {
                 ul {
                     class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
 
