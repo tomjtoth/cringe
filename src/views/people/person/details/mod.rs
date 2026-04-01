@@ -122,10 +122,15 @@ pub fn PersonalData() -> Element {
     let editing = olcx.is_none() && rcx.editing();
 
     let class_container = format!(
-        "px-2 [&>*+*]:border-t [&>*+*]:p-2 {} {} {}{}",
-        "[&_input]:border-none! [&>div>input]:w-full [&>div]:nth-last-2:mb-20",
+        "px-2 [&>*+*]:border-t [&>*+*]:p-2 {} {} {}{}{}",
+        "[&_input]:border-none! [&>div>input]:w-full",
         "[&_select]:border-none! [&>div>select]:px-0! [&>div>select]:w-full",
         "[&>div]:flex [&>div]:gap-2 [&>div]:items-center",
+        if editing {
+            " [&>div]:nth-last-2:mb-20"
+        } else {
+            ""
+        },
         if olcx.is_none() && values_under_ul == 0 {
             // the edit button has bottom-5 and its top border is not even visible,
             // overriding from here to complicate things less (?)
