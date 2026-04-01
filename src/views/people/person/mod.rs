@@ -4,14 +4,14 @@ use crate::{
     models::person::Person as MPerson,
     views::people::{
         listing::ListingCtx,
-        person::{button::SkipButton, personal_data::PersonalData},
+        person::{button::SkipButton, details::PersonalData},
     },
 };
 
 mod button;
 mod container;
+mod details;
 mod img;
-mod personal_data;
 mod prompt;
 
 use img::Image;
