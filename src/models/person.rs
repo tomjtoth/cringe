@@ -186,15 +186,36 @@ pub enum Seeking {
     StillFiguringItOut,
 }
 
+impl Seeking {
+    pub fn parts(&self) -> (&str, &str) {
+        match self {
+            Self::ShortTermFun => ("🎉", "Short-term fun"),
+            Self::ShortTermOpenToLong => ("🪄", "Short-term, open to long"),
+            Self::LongTermOpenToShort => ("🍷", "Long-term, open to short"),
+            Self::LongTerm => ("❤️", "Long-term"),
+            Self::StillFiguringItOut => ("🤔", "Still figuring it out"),
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        let parts = s.split_once(" ")?;
+
+        [
+            Self::ShortTermFun,
+            Self::ShortTermOpenToLong,
+            Self::LongTermOpenToShort,
+            Self::LongTerm,
+            Self::StillFiguringItOut,
+        ]
+        .into_iter()
+        .find(|g| g.parts() == parts)
+    }
+}
+
 impl std::fmt::Display for Seeking {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = match self {
-            Self::ShortTermFun => "🎉 Short-term fun",
-            Self::ShortTermOpenToLong => "🪄 Short-term, open to long",
-            Self::LongTermOpenToShort => "🍷 Long-term, open to short",
-            Self::LongTerm => "❤️ Long-term",
-            Self::StillFiguringItOut => "🤔 Still figuring it out",
-        };
+        let (emoji, text) = self.parts();
+        let label = &format!("{emoji} {text}",);
 
         f.write_str(label)
     }
