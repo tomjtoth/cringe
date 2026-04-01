@@ -236,14 +236,32 @@ pub enum RelationshipType {
     FiguringOutMyRelationshipType,
 }
 
+impl RelationshipType {
+    pub fn parts(&self) -> (&str, &str) {
+        match self {
+            Self::Monogamy => ("💍", "Monogamy"),
+            Self::NonMonogamy => ("🌈", "Non-monogamy"),
+            Self::FiguringOutMyRelationshipType => ("🧭", "Figuring out my relationship type"),
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        let parts = s.split_once(" ")?;
+
+        [
+            Self::Monogamy,
+            Self::NonMonogamy,
+            Self::FiguringOutMyRelationshipType,
+        ]
+        .into_iter()
+        .find(|g| g.parts() == parts)
+    }
+}
+
 impl std::fmt::Display for RelationshipType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = match self {
-            Self::Monogamy => "💍 Monogamy",
-            Self::NonMonogamy => "🌈 Non-monogamy",
-            Self::FiguringOutMyRelationshipType => "🧭 Figuring out my relationship type",
-        };
-
+        let (emoji, text) = self.parts();
+        let label = &format!("{emoji} {text}");
         f.write_str(label)
     }
 }
