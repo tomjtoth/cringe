@@ -4,11 +4,11 @@ use crate::models::person::{Frequency, Person};
 
 #[component]
 pub(super) fn Marijuana(sig: Signal<Person>, editing: bool) -> Element {
-    let value = sig
-        .read()
-        .habits
-        .as_ref()
-        .and_then(|h| h.drinking.map(|d| d.to_string()));
+    let tmp = &sig.read().habits;
+    let r = tmp.as_ref();
+    let value = r
+        .and_then(|h| h.marijuana.map(|d| d.to_string()))
+        .unwrap_or_default();
 
     rsx! {
         if editing {
@@ -16,7 +16,7 @@ pub(super) fn Marijuana(sig: Signal<Person>, editing: bool) -> Element {
                 "🌿🚬"
 
                 select {
-                    class: if value == None { "text-gray-500" },
+                    class: if value == "" { "text-gray-500" },
                     value,
 
                     onchange: move |evt| {
@@ -44,10 +44,8 @@ pub(super) fn Marijuana(sig: Signal<Person>, editing: bool) -> Element {
                 }
             }
         } else {
-            if let Some(habits) = sig.read().habits.as_ref() {
-                if let Some(marijuana) = habits.marijuana {
-                    li { title: "marijuana", "🌿🚬 {marijuana}" }
-                }
+            if let Some(marijuana) = r.and_then(|h| h.marijuana.as_ref()) {
+                li { title: "marijuana", "🌿🚬 {marijuana}" }
             }
         }
     }
