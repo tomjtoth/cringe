@@ -39,7 +39,7 @@ impl std::fmt::Display for Gender {
 }
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Kids {
     pub has: Option<i8>,
     pub wants: Option<i8>,
@@ -52,7 +52,7 @@ type TKids = Json<Kids>;
 type TKids = Kids;
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Habits {
     pub drinking: Option<Frequency>,
     pub smoking: Option<Frequency>,
