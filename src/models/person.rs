@@ -152,16 +152,26 @@ pub enum Frequency {
     YesPlease,
 }
 
-impl std::fmt::Display for Frequency {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = match self {
+impl Frequency {
+    fn label(&self) -> &str {
+        match self {
             Self::Never => "Never",
             Self::Rarely => "Rarely",
             Self::Often => "Often",
             Self::YesPlease => "Yes, please!",
-        };
+        }
+    }
 
-        f.write_str(label)
+    pub fn from_str(s: &str) -> Option<Self> {
+        [Self::Never, Self::Rarely, Self::Often, Self::YesPlease]
+            .into_iter()
+            .find(|freq| freq.label() == s)
+    }
+}
+
+impl std::fmt::Display for Frequency {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.label())
     }
 }
 
