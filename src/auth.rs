@@ -176,31 +176,26 @@ impl Provider {
 }
 
 fn oauth_client(provider: Provider) -> Result<BasicClient> {
-    let (id_env, secret_env, auth_url, token_url) = match provider {
+    let (auth_url, token_url) = match provider {
         Provider::Discord => (
-            "AUTH_DISCORD_ID",
-            "AUTH_DISCORD_SECRET",
             "https://discord.com/api/oauth2/authorize",
             "https://discord.com/api/oauth2/token",
         ),
 
         Provider::Google => (
-            "AUTH_GOOGLE_ID",
-            "AUTH_GOOGLE_SECRET",
             "https://accounts.google.com/o/oauth2/v2/auth",
             "https://oauth2.googleapis.com/token",
         ),
 
         Provider::Github => (
-            "AUTH_GITHUB_ID",
-            "AUTH_GITHUB_SECRET",
             "https://github.com/login/oauth/authorize",
             "https://github.com/login/oauth/access_token",
         ),
     };
 
-    let client_id = env::var(id_env)?;
-    let client_secret = env::var(secret_env)?;
+    let uppercase = provider.as_str().to_uppercase();
+    let client_id = env::var(format!("AUTH_{}_ID", &uppercase))?;
+    let client_secret = env::var(format!("AUTH_{}_SECRET", &uppercase))?;
 
     Ok(oauth2::basic::BasicClient::new(ClientId::new(client_id))
         .set_client_secret(ClientSecret::new(client_secret))
