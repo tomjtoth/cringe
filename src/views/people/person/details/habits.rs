@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 #[cfg(not(feature = "server"))]
-use crate::models::person::Habits;
+use crate::models::person::Habits as MHabits;
 
 use crate::models::person::{Frequency, Person};
 
@@ -28,7 +28,7 @@ pub(super) fn Habits(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.habits = Some(Habits {
+                                    p.habits = Some(MHabits {
                                         drinking,
                                         ..Default::default()
                                     });
@@ -64,7 +64,7 @@ pub(super) fn Habits(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.habits = Some(Habits {
+                                    p.habits = Some(MHabits {
                                         smoking,
                                         ..Default::default()
                                     });
@@ -100,7 +100,7 @@ pub(super) fn Habits(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.habits = Some(Habits {
+                                    p.habits = Some(MHabits {
                                         marijuana,
                                         ..Default::default()
                                     });
@@ -136,7 +136,7 @@ pub(super) fn Habits(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.habits = Some(Habits {
+                                    p.habits = Some(MHabits {
                                         drugs,
                                         ..Default::default()
                                     });

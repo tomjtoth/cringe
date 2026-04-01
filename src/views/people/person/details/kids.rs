@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 #[cfg(not(feature = "server"))]
-use crate::models::person::Kids;
+use crate::models::person::Kids as MKids;
 
 use crate::models::person::Person;
 
@@ -27,7 +27,7 @@ pub(super) fn Kids(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.kids = Some(Kids { has, wants: None });
+                                    p.kids = Some(MKids { has, wants: None });
                                 }
                             }
                         });
@@ -48,7 +48,7 @@ pub(super) fn Kids(sig: Signal<Person>, editing: bool) -> Element {
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.kids = Some(Kids {
+                                    p.kids = Some(MKids {
                                         wants,
                                         ..Default::default()
                                     });
