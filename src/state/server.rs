@@ -1,18 +1,27 @@
 use dioxus::{
     fullstack::TypedHeader,
-    logger::tracing,
-    prelude::dioxus_fullstack::{extract::Extension as FullstackExtension, FullstackContext},
+    prelude::{
+        dioxus_fullstack::{extract::Extension, FullstackContext},
+        *,
+    },
 };
 
 use crate::{auth::COOKIE_NAME, models::person::Person};
 
 async fn get_db() -> sqlx::PgPool {
-    let FullstackExtension(pool) =
-        FullstackContext::extract::<FullstackExtension<sqlx::PgPool>, _>()
-            .await
-            .expect("PgPool extension is missing from server context");
+    let Extension(pool) = FullstackContext::extract::<Extension<sqlx::PgPool>, _>()
+        .await
+        .expect("PgPool extension is missing from server context");
 
     pool
+}
+
+#[get("/api/healthz")]
+async fn healthz() -> Result<()> {
+    let pool = get_db().await;
+    sqlx::query("SELECT 1").execute(&pool).await?;
+
+    Ok(())
 }
 
 pub async fn get_ctx() -> (Option<String>, sqlx::PgPool) {
@@ -141,7 +150,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
     }
 
     tx.commit().await?;
-    tracing::info!("Loaded and seeded {} profiles from bots.yaml", bots_len);
+    info!("Loaded and seeded {} profiles from bots.yaml", bots_len);
     Ok(())
 }
 
