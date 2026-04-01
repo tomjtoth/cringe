@@ -25,4 +25,12 @@ pub enum Route {
 
     #[route("/me")]
     Me {},
+
+    #[route("/:..segments")]
+    CatchAll { segments: Vec<String> },
+}
+
+#[component]
+fn CatchAll(segments: Vec<String>) -> Element {
+    About()
 }

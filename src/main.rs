@@ -61,8 +61,8 @@ fn main() {
             error!("Failed to load bots.yaml: {}", e);
         }
 
-        let app = dioxus::server::router(App)
-            .merge(auth::routes(pool.clone())?)
+        let app = auth::routes(pool.clone())?
+            .fallback_service(dioxus::server::router(App))
             .layer(axum::Extension(pool));
 
         Ok(app)
