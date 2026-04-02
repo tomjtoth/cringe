@@ -38,16 +38,15 @@ pub(super) fn Has(sig: Signal<Person>, editing: bool, already_has_kids: bool) ->
         } else {
             if let Some(has) = sig.read().kids.as_ref().and_then(|k| k.has) {
                 li {
-                    "🧑‍🧒‍🧒 "
+                    "🧑‍🧒‍🧒 Has "
                     if has > 0 {
-                        "Has "
                         if has == i8::MAX {
                             b { "{has} or more" }
                         } else {
                             "{has}"
                         }
                     } else {
-                        "No"
+                        " no"
                     }
                     " kids"
                 }
