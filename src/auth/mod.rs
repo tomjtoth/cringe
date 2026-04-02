@@ -37,6 +37,9 @@ pub fn routes(pool: PgPool) -> Result<Router> {
     let mut clients = std::collections::HashMap::new();
 
     for p in Provider::iter() {
+        if p == Provider::Strava {
+            continue;
+        }
         clients.insert(p, p.oauth_client()?);
     }
 
