@@ -41,6 +41,12 @@ pub fn Login() -> Element {
                     }
                 }
 
+                li {
+                    a { href: "/api/auth/strava",
+                        span { "Strava" }
+                        img { src: "https://authjs.dev/img/providers/strava.svg" }
+                    }
+                }
             }
         }
     }
