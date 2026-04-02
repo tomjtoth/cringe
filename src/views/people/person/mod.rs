@@ -11,10 +11,10 @@ use crate::{
 mod button;
 mod container;
 mod details;
-mod img;
+mod image;
 mod prompt;
 
-use img::Image;
+use image::Image;
 use prompt::Prompt;
 
 #[derive(Clone)]
