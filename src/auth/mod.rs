@@ -9,14 +9,15 @@ use axum::{
 use axum_extra::{headers, TypedHeader};
 use dioxus::logger::tracing;
 use http::StatusCode;
-use oauth2::{
-    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, EndpointNotSet, EndpointSet,
-    RedirectUrl, Scope, TokenResponse, TokenUrl,
-};
+use oauth2::{CsrfToken, EndpointNotSet, EndpointSet};
 use once_cell::sync::Lazy;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::Deserialize;
 use sqlx::PgPool;
 use std::env;
+use strum::IntoEnumIterator;
+
+mod providers;
+use providers::Provider;
 
 pub static COOKIE_NAME: &str = "SESSION";
 
@@ -35,8 +36,8 @@ type BasicClient = oauth2::basic::BasicClient<
 pub fn routes(pool: PgPool) -> Result<Router> {
     let mut clients = std::collections::HashMap::new();
 
-    for p in [Provider::Discord, Provider::Google, Provider::Github] {
-        clients.insert(p, oauth_client(p)?);
+    for p in Provider::iter() {
+        clients.insert(p, p.oauth_client()?);
     }
 
     let state = AppState { clients, pool };
@@ -52,156 +53,6 @@ pub fn routes(pool: PgPool) -> Result<Router> {
 struct AppState {
     clients: std::collections::HashMap<Provider, BasicClient>,
     pool: PgPool,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum Provider {
-    Discord,
-    Google,
-    Github,
-}
-
-impl Provider {
-    fn as_str(&self) -> &'static str {
-        match self {
-            Provider::Discord => "discord",
-            Provider::Google => "google",
-            Provider::Github => "github",
-        }
-    }
-
-    fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "discord" => Some(Self::Discord),
-            "google" => Some(Self::Google),
-            "github" => Some(Self::Github),
-            _ => None,
-        }
-    }
-
-    fn scopes(&self) -> Vec<Scope> {
-        match self {
-            Provider::Google => vec![
-                Scope::new("openid".into()),
-                Scope::new("email".into()),
-                Scope::new("profile".into()),
-            ],
-            Provider::Github => vec![Scope::new("user:email".into())],
-            Provider::Discord => vec![Scope::new("email".into())],
-        }
-    }
-
-    async fn fetch_email(
-        &self,
-        token: &str,
-        http_client: &oauth2::reqwest::Client,
-    ) -> Result<String> {
-        async fn get<T: DeserializeOwned>(
-            client: &oauth2::reqwest::Client,
-            token: &str,
-            url: &str,
-        ) -> Result<T> {
-            Ok(client
-                .get(url)
-                .bearer_auth(token)
-                .header("User-Agent", "cringe-backend")
-                .send()
-                .await?
-                .json::<T>()
-                .await?)
-        }
-
-        match self {
-            Provider::Discord => {
-                #[derive(Deserialize)]
-                struct DiscordResponse {
-                    email: Option<String>,
-                    verified: bool,
-                }
-
-                let res: DiscordResponse =
-                    get(http_client, token, "https://discord.com/api/users/@me").await?;
-
-                if let DiscordResponse {
-                    email: Some(email),
-                    verified: true,
-                } = res
-                {
-                    return Ok(email);
-                }
-            }
-
-            Provider::Google => {
-                #[derive(Deserialize)]
-                struct GoogleResponse {
-                    email: String,
-                    email_verified: bool,
-                }
-
-                let res: GoogleResponse = get(
-                    http_client,
-                    token,
-                    "https://openidconnect.googleapis.com/v1/userinfo",
-                )
-                .await?;
-
-                if let GoogleResponse {
-                    email,
-                    email_verified: true,
-                } = res
-                {
-                    return Ok(email);
-                }
-            }
-
-            Provider::Github => {
-                #[derive(Deserialize)]
-                struct GithubResponse {
-                    email: String,
-                    primary: bool,
-                    verified: bool,
-                }
-
-                let res: Vec<GithubResponse> =
-                    get(http_client, token, "https://api.github.com/user/emails").await?;
-
-                if let Some(primary) = res.into_iter().find(|e| e.primary && e.verified) {
-                    return Ok(primary.email);
-                }
-            }
-        };
-
-        Err(anyhow!("no verified email"))
-    }
-}
-
-fn oauth_client(provider: Provider) -> Result<BasicClient> {
-    let (auth_url, token_url) = match provider {
-        Provider::Discord => (
-            "https://discord.com/api/oauth2/authorize",
-            "https://discord.com/api/oauth2/token",
-        ),
-
-        Provider::Google => (
-            "https://accounts.google.com/o/oauth2/v2/auth",
-            "https://oauth2.googleapis.com/token",
-        ),
-
-        Provider::Github => (
-            "https://github.com/login/oauth/authorize",
-            "https://github.com/login/oauth/access_token",
-        ),
-    };
-
-    let uppercase = provider.as_str().to_uppercase();
-    let client_id = env::var(format!("AUTH_{}_ID", &uppercase))?;
-    let client_secret = env::var(format!("AUTH_{}_SECRET", &uppercase))?;
-
-    Ok(oauth2::basic::BasicClient::new(ClientId::new(client_id))
-        .set_client_secret(ClientSecret::new(client_secret))
-        .set_auth_uri(AuthUrl::new(auth_url.to_string())?)
-        .set_token_uri(TokenUrl::new(token_url.to_string())?)
-        .set_redirect_uri(RedirectUrl::new(REDIRECT_URL_ENV.to_owned())?))
 }
 
 fn build_session_cookie(session_id: &str) -> String {
@@ -227,7 +78,7 @@ async fn auth_start(
         .url();
 
     // 👇 encode provider into state
-    let combined_state = format!("{}:{}", provider.as_str(), csrf_token.secret());
+    let combined_state = format!("{}:{}", provider.as_ref(), csrf_token.secret());
 
     let session_id = CsrfToken::new_random().secret().to_string();
 
@@ -264,7 +115,6 @@ async fn logout(
 }
 
 #[derive(Debug, Deserialize)]
-#[allow(dead_code)]
 struct AuthRequest {
     code: String,
     state: String,
@@ -311,16 +161,8 @@ async fn auth_callback(
     let provider = csrf_token_validation_workflow(&query, session_id, &state.pool).await?;
 
     let oauth_client = state.clients.get(&provider).unwrap();
-    let http_client = oauth2::reqwest::Client::new();
 
-    let token = oauth_client
-        .exchange_code(AuthorizationCode::new(query.code))
-        .request_async(&http_client)
-        .await?;
-
-    let email = provider
-        .fetch_email(token.access_token().secret(), &http_client)
-        .await?;
+    let email = provider.fetch_user_info(&query.code, oauth_client).await?;
 
     persist_session(session_id, &state.pool, &email).await?;
 
