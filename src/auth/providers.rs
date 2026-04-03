@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context, Result};
-use dioxus::logger::tracing;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
@@ -157,21 +156,12 @@ impl Provider {
             }
 
             Provider::Facebook => {
-                #[derive(Deserialize, Debug)]
+                #[derive(Deserialize)]
                 struct ContactInfo {
                     email: Option<String>,
-                    email_verified: Option<bool>,
-                    verified: Option<bool>,
                 }
 
-                let res = res.json::<ContactInfo>().await?;
-
-                tracing::info!("{res:?}");
-
-                if let ContactInfo {
-                    email: Some(email), ..
-                } = res
-                {
+                if let ContactInfo { email: Some(email) } = res.json::<ContactInfo>().await? {
                     return Ok(email);
                 }
             }
