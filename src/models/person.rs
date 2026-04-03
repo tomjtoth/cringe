@@ -4,24 +4,12 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "server")]
 use sqlx::types::Json;
 
-#[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct Kids {
-    pub has: Option<i8>,
-    pub wants: Option<i8>,
-}
-
 use crate::models::{
     gender::Gender,
     image::{Image, TImages},
+    kids::TKids,
     seeking::Seeking,
 };
-
-#[cfg(feature = "server")]
-type TKids = Json<Kids>;
-
-#[cfg(not(feature = "server"))]
-type TKids = Kids;
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
