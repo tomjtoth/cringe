@@ -59,11 +59,22 @@ struct AppState {
 }
 
 fn build_session_cookie(session_id: &str) -> String {
-    let using_dev_url = *REDIRECT_URL_ENV == REDIRECT_URL;
+    let (scheme, env_rest) = REDIRECT_URL_ENV.split_once("://").unwrap();
+    let (_, redir_rest) = REDIRECT_URL.split_once("://").unwrap();
 
     format!(
-        "{COOKIE_NAME}={session_id}; SameSite=Lax; HttpOnly;{} Path=/",
-        if using_dev_url { "" } else { " Secure;" }
+        "{COOKIE_NAME}={session_id}; SameSite={}; HttpOnly;{} Path=/",
+        // caddy does reverse-proxy
+        if env_rest == redir_rest && scheme == "https" {
+            "None"
+        } else {
+            "Lax"
+        },
+        if env_rest == redir_rest && scheme == "http" {
+            ""
+        } else {
+            " Secure;"
+        }
     )
 }
 
