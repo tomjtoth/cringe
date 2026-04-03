@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context, Result};
+use dioxus::logger::tracing;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
@@ -46,6 +47,14 @@ pub(super) enum Provider {
         scopes = "user:email"
     ))]
     Github,
+
+    #[strum(props(
+        AUTH_URL = "https://accounts.snapchat.com/login/oauth2/authorize",
+        TOKEN_URL = "https://accounts.snapchat.com/login/oauth2/access_token",
+        PROFILE_URL = "https://adsapi.snapchat.com/v1/me",
+        scopes = "snapchat-profile-api"
+    ))]
+    Snapchat,
 
     #[strum(props(
         AUTH_URL = "https://www.strava.com/oauth/authorize",
@@ -197,6 +206,31 @@ impl Provider {
                     .find(|e| e.primary && e.verified)
                 {
                     return Ok(primary.email);
+                }
+            }
+
+            Provider::Snapchat => {
+                #[derive(Deserialize, Debug)]
+                struct Inner {
+                    email: Option<String>,
+                }
+
+                #[derive(Deserialize, Debug)]
+                struct Outer {
+                    email: Option<String>,
+                    me: Option<Inner>,
+                }
+
+                let res = res.json::<Outer>().await?;
+
+                tracing::info!("Snapchat returned: {res:?}");
+
+                if let Outer {
+                    me: Some(Inner { email: Some(email) }),
+                    ..
+                } = res
+                {
+                    return Ok(email);
                 }
             }
 
