@@ -14,6 +14,7 @@ pub struct Kids {
 use crate::models::{
     gender::Gender,
     image::{Image, TImages},
+    seeking::Seeking,
 };
 
 #[cfg(feature = "server")]
@@ -66,7 +67,7 @@ pub enum Frequency {
 }
 
 impl Frequency {
-    fn label(&self) -> &str {
+    const fn label(&self) -> &str {
         match self {
             Self::Never => "Never",
             Self::Rarely => "Rarely",
@@ -85,62 +86,6 @@ impl Frequency {
 impl std::fmt::Display for Frequency {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.label())
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[cfg_attr(feature = "server", sqlx(type_name = "seeking"))]
-pub enum Seeking {
-    #[serde(rename = "short-term fun")]
-    #[cfg_attr(feature = "server", sqlx(rename = "short-term fun"))]
-    ShortTermFun,
-    #[serde(rename = "short-term, open to long")]
-    #[cfg_attr(feature = "server", sqlx(rename = "short-term, open to long"))]
-    ShortTermOpenToLong,
-    #[serde(rename = "long-term, open to short")]
-    #[cfg_attr(feature = "server", sqlx(rename = "long-term, open to short"))]
-    LongTermOpenToShort,
-    #[serde(rename = "long-term")]
-    #[cfg_attr(feature = "server", sqlx(rename = "long-term"))]
-    LongTerm,
-    #[serde(rename = "still figuring it out")]
-    #[cfg_attr(feature = "server", sqlx(rename = "still figuring it out"))]
-    StillFiguringItOut,
-}
-
-impl Seeking {
-    pub fn parts(&self) -> (&str, &str) {
-        match self {
-            Self::ShortTermFun => ("🎉", "Short-term fun"),
-            Self::ShortTermOpenToLong => ("🪄", "Short-term, open to long"),
-            Self::LongTermOpenToShort => ("🍷", "Long-term, open to short"),
-            Self::LongTerm => ("❤️", "Long-term"),
-            Self::StillFiguringItOut => ("🤔", "Still figuring it out"),
-        }
-    }
-
-    pub fn from_str(s: &str) -> Option<Self> {
-        let parts = s.split_once(" ")?;
-
-        [
-            Self::ShortTermFun,
-            Self::ShortTermOpenToLong,
-            Self::LongTermOpenToShort,
-            Self::LongTerm,
-            Self::StillFiguringItOut,
-        ]
-        .into_iter()
-        .find(|g| g.parts() == parts)
-    }
-}
-
-impl std::fmt::Display for Seeking {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let (emoji, text) = self.parts();
-        let label = &format!("{emoji} {text}",);
-
-        f.write_str(label)
     }
 }
 
