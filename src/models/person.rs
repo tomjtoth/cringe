@@ -45,6 +45,8 @@ pub struct Kids {
     pub wants: Option<i8>,
 }
 
+use crate::models::image::{Image, TImages};
+
 #[cfg(feature = "server")]
 type TKids = Json<Kids>;
 
@@ -65,64 +67,6 @@ type THabits = Json<Habits>;
 
 #[cfg(not(feature = "server"))]
 type THabits = Habits;
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Image {
-    Url(String),
-
-    Advanced {
-        id: Option<i32>,
-        url: String,
-        prompt: Option<String>,
-        #[serde(default)]
-        position: Option<i16>,
-    },
-
-    Uploaded {
-        id: Option<i32>,
-        bytes: Vec<u8>,
-        mime_type: String,
-        prompt: Option<String>,
-        #[serde(default)]
-        position: Option<i16>,
-    },
-}
-
-impl Image {
-    pub fn id(&self) -> Option<i32> {
-        match self {
-            Self::Url(_) => None,
-            Self::Advanced { id, .. } | Self::Uploaded { id, .. } => id.clone(),
-        }
-    }
-
-    pub fn prompt(&self) -> Option<&str> {
-        match self {
-            Self::Url(_) => None,
-            Self::Advanced { prompt, .. } | Self::Uploaded { prompt, .. } => prompt.as_deref(),
-        }
-    }
-
-    pub fn src(&self) -> String {
-        match self {
-            Self::Url(src) => src.clone(),
-            Self::Advanced { url, .. } => url.clone(),
-            Self::Uploaded {
-                bytes, mime_type, ..
-            } => {
-                use base64::{engine::general_purpose::STANDARD, Engine as _};
-
-                format!("data:{mime_type};base64,{}", STANDARD.encode(bytes))
-            }
-        }
-    }
-}
-
-#[cfg(feature = "server")]
-type TImages = Json<Vec<Image>>;
-#[cfg(not(feature = "server"))]
-type TImages = Vec<Image>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
