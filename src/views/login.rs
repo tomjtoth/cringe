@@ -18,16 +18,16 @@ pub fn Login() -> Element {
                 ),
 
                 li {
-                    a { href: "/api/auth/google",
-                        span { "Google" }
-                        img { src: "https://authjs.dev/img/providers/google.svg" }
+                    a { href: "/api/auth/discord",
+                        span { "Discord" }
+                        img { src: "https://authjs.dev/img/providers/discord.svg" }
                     }
                 }
 
                 li {
-                    a { href: "/api/auth/discord",
-                        span { "Discord" }
-                        img { src: "https://authjs.dev/img/providers/discord.svg" }
+                    a { href: "/api/auth/facebook",
+                        span { "Facebook" }
+                        img { src: "https://authjs.dev/img/providers/facebook.svg" }
                     }
                 }
 
@@ -38,6 +38,13 @@ pub fn Login() -> Element {
                             class: "dark:invert",
                             src: "https://authjs.dev/img/providers/github.svg",
                         }
+                    }
+                }
+
+                li {
+                    a { href: "/api/auth/google",
+                        span { "Google" }
+                        img { src: "https://authjs.dev/img/providers/google.svg" }
                     }
                 }
 

@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context, Result};
+use dioxus::logger::tracing;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };
@@ -22,6 +23,14 @@ pub(super) enum Provider {
         scopes = "email"
     ))]
     Discord,
+
+    #[strum(props(
+        AUTH_URL = "https://www.facebook.com/v25.0/dialog/oauth",
+        TOKEN_URL = "https://graph.facebook.com/v25.0/oauth/access_token",
+        PROFILE_URL = "https://graph.facebook.com/me?fields=email",
+        scopes = "email"
+    ))]
+    Facebook,
 
     #[strum(props(
         AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth",
@@ -142,6 +151,26 @@ impl Provider {
                     email: Some(email),
                     verified: true,
                 } = res.json::<ContactInfo>().await?
+                {
+                    return Ok(email);
+                }
+            }
+
+            Provider::Facebook => {
+                #[derive(Deserialize, Debug)]
+                struct ContactInfo {
+                    email: Option<String>,
+                    email_verified: Option<bool>,
+                    verified: Option<bool>,
+                }
+
+                let res = res.json::<ContactInfo>().await?;
+
+                tracing::info!("{res:?}");
+
+                if let ContactInfo {
+                    email: Some(email), ..
+                } = res
                 {
                     return Ok(email);
                 }
