@@ -1,9 +1,6 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use serde::{de::Error as _, Deserialize, Serialize};
 
-#[cfg(feature = "server")]
-use sqlx::types::Json;
-
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
@@ -121,6 +118,6 @@ where
 }
 
 #[cfg(feature = "server")]
-pub(super) type TImages = Json<Vec<Image>>;
+pub type TImages = sqlx::types::Json<Vec<Image>>;
 #[cfg(not(feature = "server"))]
-pub(super) type TImages = Vec<Image>;
+pub type TImages = Vec<Image>;
