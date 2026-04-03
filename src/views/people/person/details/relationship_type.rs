@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::models::person::{Person, RelationshipType as ERT};
+use crate::models::{person::Person, relationship_type::RelationshipType as ERT};
 
 #[component]
 pub(super) fn RelationshipType(sig: Signal<Person>, editing: bool) -> Element {

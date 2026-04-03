@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::models::person::{Person, Seeking as ES};
+use crate::models::{person::Person, seeking::Seeking as ES};
 
 #[component]
 pub(super) fn Seeking(sig: Signal<Person>, editing: bool) -> Element {

@@ -4,7 +4,7 @@ use chrono::{Local, Months, NaiveDate};
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::{Gender, Person},
+    models::{gender::Gender, person::Person},
     state::client::{AUTH_CTE, ME},
 };
 
