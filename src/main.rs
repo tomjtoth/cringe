@@ -63,7 +63,8 @@ fn main() {
 
         let app = auth::routes(pool.clone())?
             .fallback_service(dioxus::server::router(App))
-            .layer(axum::Extension(pool));
+            .layer(axum::Extension(pool))
+            .layer(axum::extract::DefaultBodyLimit::max(20 * 1024 * 1024));
 
         Ok(app)
     })
