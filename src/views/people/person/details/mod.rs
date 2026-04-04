@@ -78,14 +78,16 @@ pub fn PersonalData() -> Element {
 
     let sig = use_signal(|| person());
 
-    use_resource({
+    let onsubmit = use_callback({
         let rcx = rcx.clone();
 
-        move || {
-            let mut rcx = rcx.clone();
+        move |_: Event<FormData>| {
+            spawn({
+                let mut rcx = rcx.clone();
 
-            async move {
-                if rcx.submitting() {
+                async move {
+                    rcx.next_state();
+
                     if let Ok(true) = update_me({
                         let mut wo_prompts_and_images = sig();
                         wo_prompts_and_images.prompts.truncate(0);
@@ -95,8 +97,6 @@ pub fn PersonalData() -> Element {
                     })
                     .await
                     {
-                        rcx.next_state();
-
                         ME.with_mut(|me| me.profile = Some(sig()));
 
                         return;
@@ -104,7 +104,7 @@ pub fn PersonalData() -> Element {
 
                     rcx.next_state();
                 }
-            }
+            });
         }
     });
 
@@ -152,7 +152,7 @@ pub fn PersonalData() -> Element {
     );
 
     rsx! {
-        Container { class: class_container, wo_button: olcx.is_some(),
+        Container { class: class_container, wo_button: olcx.is_some(), onsubmit,
             ul { class: class_ul,
 
                 if let Some(age) = &sig.read().age() {
