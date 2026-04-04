@@ -8,6 +8,7 @@ use crate::{
     },
 };
 
+mod adder;
 mod button;
 mod container;
 mod details;
