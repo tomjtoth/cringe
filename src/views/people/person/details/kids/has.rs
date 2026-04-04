@@ -25,7 +25,7 @@ pub(super) fn Has(sig: Signal<Person>, editing: bool, already_has_kids: bool) ->
                             } else {
                                 #[cfg(not(feature = "server"))]
                                 {
-                                    p.kids = Some(crate::models::person::Kids {
+                                    p.kids = Some(crate::models::kids::Kids {
                                         has,
                                         wants: None,
                                     });
