@@ -5,11 +5,107 @@ use dioxus::{
         *,
     },
 };
+use sqlx::PgPool;
+use tokio::sync::mpsc::{channel, Sender};
 
 use crate::{auth::COOKIE_NAME, models::person::Person};
 
+type Job = (i32, Vec<u8>);
+
+pub fn init_converter(pool: PgPool) -> Sender<Job> {
+    let (tx, mut rx) = channel::<Job>(1000);
+
+    tokio::task::spawn_blocking(move || {
+        while let Some((id, bytes)) = rx.blocking_recv() {
+            info!("Starting #{id}");
+
+            let bytes = match convert(bytes) {
+                Ok(converted) => {
+                    info!("Converted #{id}");
+                    converted
+                }
+                Err(e) => {
+                    error!("Failed #{id}: {e:?}");
+                    continue;
+                }
+            };
+
+            let pool = pool.clone();
+            tokio::spawn(async move {
+                if let Err(e) = sqlx::query(
+                    r#"
+                    WITH job AS (
+                        UPDATE user_images ui
+                        SET
+                            url = NULL,
+                            bytes = $2::bytea
+                        WHERE id = $1::int
+                        RETURNING id
+                    ),
+
+                    queue AS (
+                        SELECT 
+                            id,
+                            placeholder_url(
+                                row_number() OVER (ORDER BY id)
+                            ) AS url
+                        FROM user_images
+                        WHERE user_id > 0 AND bytes IS NULL
+                    ),
+
+                    updated_queue AS (
+                        UPDATE user_images ui
+                        SET url = q.url
+                        FROM queue q
+                        WHERE ui.id = q.id
+                        RETURNING ui.id
+                    )
+
+                    SELECT 
+                        (SELECT count(*) > 0 FROM job),
+                        (SELECT count(*) > 0 FROM updated_queue)
+                    "#,
+                )
+                .bind(&id)
+                .bind(bytes)
+                .execute(&pool)
+                .await
+                {
+                    error!("Failed #{id}: {e:?}",);
+                } else {
+                    info!("Finished #{id}");
+                }
+            });
+        }
+    });
+
+    tx
+}
+
+fn convert(bytes: Vec<u8>) -> Result<Vec<u8>> {
+    let img = image::load_from_memory(bytes.as_slice())?;
+
+    let resized = img.thumbnail(1920, 1920);
+
+    let mut preview = Vec::new();
+    resized.write_to(
+        &mut std::io::Cursor::new(&mut preview),
+        image::ImageFormat::Jpeg,
+    )?;
+
+    Ok(preview)
+}
+
+pub async fn converter_tx() -> Result<Sender<Job>> {
+    let Extension(tx) = FullstackContext::extract()
+        .await
+        .expect("failed to extract converter daemon's tx");
+
+    Ok(tx)
+}
+
 async fn get_db() -> sqlx::PgPool {
-    let Extension(pool) = FullstackContext::extract::<Extension<sqlx::PgPool>, _>()
+    let Extension(pool) = FullstackContext::extract()
         .await
         .expect("PgPool extension is missing from server context");
 

@@ -51,19 +51,24 @@ fn main() {
 
     #[cfg(feature = "server")]
     dioxus::serve(|| async {
+        use crate::state::server::{init_converter, seed_bots};
+
         dotenvy::dotenv().ok();
 
         let pool = sqlx::PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
 
         sqlx::migrate!().run(&pool).await?;
 
-        if let Err(e) = crate::state::server::seed_bots(&pool).await {
+        if let Err(e) = seed_bots(&pool).await {
             error!("Failed to load bots.yaml: {}", e);
         }
+
+        let tx = init_converter(pool.clone());
 
         let app = auth::routes(pool.clone())?
             .fallback_service(dioxus::server::router(App))
             .layer(axum::Extension(pool))
+            .layer(axum::Extension(tx))
             .layer(axum::extract::DefaultBodyLimit::max(20 * 1024 * 1024));
 
         Ok(app)
