@@ -56,6 +56,15 @@ impl Image {
         }
     }
 
+    pub fn set_prompt(&mut self, val: String) {
+        match self {
+            Self::Url(_) => (),
+            Self::Advanced { prompt, .. } | Self::Uploaded { prompt, .. } => {
+                *prompt = if val == "" { None } else { Some(val) }
+            }
+        }
+    }
+
     pub fn src(&self) -> String {
         match self {
             Self::Url(src) => src.clone(),
