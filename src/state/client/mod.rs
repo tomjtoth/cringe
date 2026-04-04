@@ -68,7 +68,7 @@ async fn get_me() -> Result<Me> {
                         )
                         FROM user_prompts pp
                         WHERE pp.user_id = u.id
-                    ) as prompts,
+                    ) AS prompts,
 
                     (
                         SELECT coalesce(
@@ -135,11 +135,11 @@ pub async fn decide(target_id: i32, decision: Decision) -> Result<bool> {
 pub fn init_client_state() -> Result<(), RenderError> {
     let initial_state = use_server_future(get_me)?;
 
-    #[cfg(feature = "server")]
-    info!("GET /api/me returns: {:?}", initial_state.value());
-
     if let Some(Ok(me)) = initial_state() {
         *ME.write() = me;
+    } else {
+        #[cfg(feature = "server")]
+        error!("GET /api/me returned: {:?}", initial_state.value());
     }
 
     // use_gps_watch();
