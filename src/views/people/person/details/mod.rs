@@ -71,7 +71,7 @@ async fn update_me(me: Person) -> Result<bool> {
 }
 
 #[component]
-pub fn PersonalData() -> Element {
+pub fn Details() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
     let person = use_context::<PersonCtx>().person;
     let rcx = use_context::<ResourceCtx>();

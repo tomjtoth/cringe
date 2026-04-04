@@ -4,7 +4,7 @@ use crate::{
     models::person::Person as MPerson,
     views::people::{
         listing::ListingCtx,
-        person::{button::SkipButton, details::PersonalData},
+        person::{button::SkipButton, details::Details},
     },
 };
 
@@ -81,7 +81,7 @@ pub fn Person(person: ReadSignal<MPerson>) -> Element {
             Image { idx: 0 }
             Prompt { idx: 0 }
 
-            PersonalData {}
+            Details {}
 
             Image { idx: 1 }
             Prompt { idx: 1 }
