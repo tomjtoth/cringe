@@ -27,7 +27,7 @@ pub fn SkipButton() -> Element {
 fn Button(decision: Option<Decision>) -> Element {
     let pcx = use_context::<PersonCtx>();
     let olcx = use_context::<Option<ListingCtx>>();
-    let rcx = use_context::<ResourceCtx>();
+    let mut rcx = use_context::<ResourceCtx>();
 
     let class = format!(
         "{} z-1 bottom-5 border-2! bg-background select-none",
@@ -71,7 +71,7 @@ fn Button(decision: Option<Decision>) -> Element {
                 }
             }
         } else {
-            button { class,
+            button { class, onclick: move |_| rcx.next_state(),
                 if rcx.editing() {
                     "💾"
                 } else {
