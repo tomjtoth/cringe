@@ -18,7 +18,6 @@ pub enum Image {
         id: Option<i32>,
         #[serde(serialize_with = "vec_to_base64", deserialize_with = "bytes_from_json")]
         bytes: Vec<u8>,
-        mime_type: String,
         prompt: Option<String>,
         #[serde(default)]
         position: Option<i16>,
@@ -69,12 +68,10 @@ impl Image {
         match self {
             Self::Url(src) => src.clone(),
             Self::Advanced { url, .. } => url.clone(),
-            Self::Uploaded {
-                bytes, mime_type, ..
-            } => {
+            Self::Uploaded { bytes, .. } => {
                 use base64::{engine::general_purpose::STANDARD, Engine as _};
 
-                format!("data:{mime_type};base64,{}", STANDARD.encode(bytes))
+                format!("data:image/jpeg;base64,{}", STANDARD.encode(bytes))
             }
         }
     }
