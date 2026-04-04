@@ -33,6 +33,22 @@ impl Image {
         }
     }
 
+    pub fn pos(&self) -> &Option<i16> {
+        match self {
+            Self::Url(_) => &None,
+            Self::Advanced { position, .. } | Self::Uploaded { position, .. } => position,
+        }
+    }
+
+    pub fn set_pos(&mut self, pos: Option<i16>) {
+        match self {
+            Self::Url(_) => (),
+            Self::Advanced { position, .. } | Self::Uploaded { position, .. } => {
+                *position = pos;
+            }
+        };
+    }
+
     pub fn prompt(&self) -> Option<&str> {
         match self {
             Self::Url(_) => None,
