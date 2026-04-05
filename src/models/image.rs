@@ -32,6 +32,15 @@ impl Image {
         }
     }
 
+    pub fn set_id(&mut self, id: Option<i32>) {
+        let other_id = id;
+
+        match self {
+            Self::Url(_) => (),
+            Self::Advanced { id, .. } | Self::Uploaded { id, .. } => *id = other_id,
+        }
+    }
+
     pub fn pos(&self) -> &Option<i16> {
         match self {
             Self::Url(_) => &None,
@@ -72,6 +81,16 @@ impl Image {
                 use base64::{engine::general_purpose::STANDARD, Engine as _};
 
                 format!("data:image/jpeg;base64,{}", STANDARD.encode(bytes))
+            }
+        }
+    }
+
+    pub fn set_url(&mut self, url: Option<String>) {
+        if let Some(new_url) = url {
+            match self {
+                Self::Advanced { url, .. } => *url = new_url,
+                // idc about the others
+                _ => (),
             }
         }
     }
