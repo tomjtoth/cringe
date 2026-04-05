@@ -8,7 +8,6 @@ use crate::{
     },
 };
 
-mod adder;
 mod button;
 mod container;
 mod details;
@@ -42,10 +41,6 @@ impl ResourceCtx {
     fn next_state(&mut self) {
         let curr = (self.state)();
         *(self.state).write() = if curr == 2 { 0 } else { curr + 1 };
-    }
-
-    fn submitting(&self) -> bool {
-        (self.state)() == 2
     }
 }
 

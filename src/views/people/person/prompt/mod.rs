@@ -1,7 +1,6 @@
 use dioxus::prelude::*;
 
 use crate::views::people::listing::ListingCtx;
-use crate::views::people::person::adder::Adder;
 use crate::views::people::person::{
     container::Container, prompt::editor::PromptEditor, PersonCtx, ResourceCtx,
 };
@@ -37,7 +36,9 @@ pub fn Prompt(idx: usize) -> Element {
                 if rcx.editing() {
                     PromptEditor {}
                 } else {
-                    Adder { what: "a prompt" }
+                    Container { class: "p-2 px-5 flex gap-2 justify-between items-center",
+                        "Add a new prompt"
+                    }
                 }
             }
         }

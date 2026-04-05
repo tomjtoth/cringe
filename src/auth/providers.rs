@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Context, Result};
-use dioxus::logger::tracing;
 use oauth2::{
     AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, Scope, TokenResponse, TokenUrl,
 };

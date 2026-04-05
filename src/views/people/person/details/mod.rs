@@ -98,8 +98,6 @@ pub fn Details() -> Element {
                     .await
                     {
                         ME.with_mut(|me| me.profile = Some(sig()));
-
-                        return;
                     }
 
                     rcx.next_state();
