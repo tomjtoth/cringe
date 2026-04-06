@@ -4,7 +4,7 @@ use serde::{de::Error as _, Deserialize, Serialize};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
-    Url(String),
+    UrlOnly(String),
 
     Uploaded {
         id: Option<i32>,
@@ -26,7 +26,7 @@ pub enum Image {
 impl Image {
     pub fn id(&self) -> Option<i32> {
         match self {
-            Self::Url(_) => None,
+            Self::UrlOnly(_) => None,
             Self::Uploaded { id, .. } => id.clone(),
         }
     }
@@ -35,21 +35,21 @@ impl Image {
         let other_id = id;
 
         match self {
-            Self::Url(_) => (),
+            Self::UrlOnly(_) => (),
             Self::Uploaded { id, .. } => *id = other_id,
         }
     }
 
     pub fn pos(&self) -> &Option<i16> {
         match self {
-            Self::Url(_) => &None,
+            Self::UrlOnly(_) => &None,
             Self::Uploaded { position, .. } => position,
         }
     }
 
     pub fn set_pos(&mut self, pos: Option<i16>) {
         match self {
-            Self::Url(_) => (),
+            Self::UrlOnly(_) => (),
             Self::Uploaded { position, .. } => {
                 *position = pos;
             }
@@ -58,21 +58,21 @@ impl Image {
 
     pub fn prompt(&self) -> Option<&str> {
         match self {
-            Self::Url(_) => None,
+            Self::UrlOnly(_) => None,
             Self::Uploaded { prompt, .. } => prompt.as_deref(),
         }
     }
 
     pub fn set_prompt(&mut self, val: String) {
         match self {
-            Self::Url(_) => (),
+            Self::UrlOnly(_) => (),
             Self::Uploaded { prompt, .. } => *prompt = if val == "" { None } else { Some(val) },
         }
     }
 
     pub fn src(&self) -> String {
         match self {
-            Self::Url(src) => src.clone(),
+            Self::UrlOnly(src) => src.clone(),
             Self::Uploaded { url, bytes, .. } => {
                 if let Some(u) = url {
                     return u.clone();
