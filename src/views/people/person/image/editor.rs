@@ -205,55 +205,63 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         };
 
     let mut sig = use_signal(|| {
-        (
-            src.unwrap_or(Image::Uploaded {
-                id: None,
-                bytes: None,
-                url: None,
-                prompt: None,
-                position: Some(max - 1),
-            }),
-            ME.read()
-                .profile
-                .as_ref()
-                .map(|p| p.images().clone())
-                .unwrap_or_default(),
-            vec![],
-        )
-    });
-
-    let sorter = use_callback(move |pos: Option<i16>| {
-        sig.with_mut(|(image, draft, positions)| {
-            image.set_pos(pos);
-
-            // rm and reinsert at proper pos in the vec
-            // achieve DELETE by not reinserting
-            draft.retain(|img| img.id() != image.id());
-            if let Some(pos) = pos {
-                draft.insert(pos as usize, image.clone());
-            };
-
-            positions.truncate(0);
-            for (idx, img) in draft.iter_mut().enumerate() {
-                let idx = Some(idx as i16);
-
-                if *img.pos() != idx {
-                    img.set_pos(idx);
-                    positions.push((img.id(), idx));
-                }
-            }
+        src.unwrap_or(Image::Uploaded {
+            id: None,
+            bytes: None,
+            url: None,
+            prompt: None,
+            position: Some(max - 1),
         })
     });
 
-    let onsubmit = use_callback({
-        let rcx = rcx.clone();
+    let (existing, new_but_empty, to_be_deleted) = sig.with(|img| {
+        let has_id = img.id().is_some();
+        (
+            has_id,
+            !has_id && !img.has_bytes(),
+            has_id && img.pos().is_none(),
+        )
+    });
 
+    // Since I rely on the HTML form to transfer all data,
+    // I must keep data up-to-date (every render runs these)
+    let mut draft = ME
+        .read()
+        .profile
+        .as_ref()
+        .map(|p| p.images().clone())
+        .unwrap_or_default();
+
+    // rm and reinsert at proper pos in the vec
+    // achieve DELETE by not reinserting
+    draft.retain(|img| img.id() != sig.read().id());
+    if let Some(pos) = sig.read().pos() {
+        draft.insert(*pos as usize, sig());
+    };
+
+    let mut sorter = vec![];
+
+    for (idx, img) in draft.iter_mut().enumerate() {
+        let idx = Some(idx as i16);
+
+        if *img.pos() != idx {
+            img.set_pos(idx);
+            sorter.push((img.id(), idx));
+        }
+    }
+
+    let onsubmit = use_callback({
         move |evt: Event<FormData>| {
             spawn({
                 let mut rcx = rcx.clone();
+                let mut draft = draft.clone();
 
                 async move {
                     rcx.next_state();
+
+                    if new_but_empty {
+                        return rcx.next_state();
+                    }
 
                     if let Ok(Response {
                         authorized: true,
@@ -264,27 +272,19 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                         info!("PUT /api/me/prompts returned: {:?}", &res);
                         res
                     }) {
-                        ME.with_mut(|me| {
-                            me.profile.as_mut().map(|p| {
-                                sig.with_mut(|s| {
-                                    // updated inserted image id + url
-                                    if let Some(id) = inserted_id {
-                                        if let Some(url) = inserted_url {
-                                            if let Some(pos) = s.0.pos() {
-                                                s.1.get_mut(*pos as usize).map(|i| {
-                                                    i.set_id(Some(id));
-                                                    i.set_url(Some(url));
-                                                });
-                                            }
-                                        }
-                                    }
+                        if let Some(me) = ME.write().profile.as_mut() {
+                            if inserted_id.is_some() && inserted_url.is_some() {
+                                let idx = sig.read().pos().unwrap();
 
-                                    // finalize draft
-                                    p.images.truncate(0);
-                                    p.images.append(&mut s.1);
-                                });
-                            });
-                        });
+                                if let Some(img) = draft.get_mut(idx as usize) {
+                                    img.set_id(inserted_id);
+                                    img.set_url(inserted_url);
+                                }
+                            }
+
+                            me.images.truncate(0);
+                            me.images.append(&mut draft);
+                        }
                     }
 
                     rcx.next_state();
@@ -293,13 +293,9 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
     });
 
-    let to_be_deleted = sig.with(|(img, ..)| img.id().is_some() && img.pos().is_none());
-
-    let new_but_empty = false;
-
     let button_class = "z-2 absolute bottom-5 right-5 border-2! bg-background select-none";
-
     let class = "pt-10 pb-20 px-2 grid grid-cols-[1fr_auto] gap-2 [&>input]:text-xl";
+
     rsx! {
         Container { class, onsubmit,
 
@@ -312,33 +308,20 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 button { class: button_class, "That's how you delete! 😱" }
             }
 
-            input { name: "id", hidden: true, value: sig.read().0.id() }
+            input { name: "id", hidden: true, value: sig.read().id() }
 
             input {
                 name: "sorter",
                 hidden: true,
-                value: serde_json::to_string(&sig.read().2)?,
+                value: serde_json::to_string(&sorter)?,
             }
 
             input {
                 name: "prompt",
                 placeholder: "Prompt if any",
                 class: "w-full min-w-30",
-                value: sig.read().0.prompt(),
-                oninput: move |evt| {
-                    sig
-                        .with_mut(|(img, draft, ..)| {
-                        img.set_prompt(evt.value());
-
-                        if let Some(pos) = img.pos() {
-                            draft
-                                .get_mut(*pos as usize)
-                                .map(|dr_img| {
-                                    *dr_img = img.clone();
-                                });
-                        }
-                    })
-                },
+                value: sig.read().prompt(),
+                oninput: move |evt| sig.write().set_prompt(evt.value()),
             }
 
             input {
@@ -348,39 +331,45 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 r#type: "number",
                 min: 1,
                 max,
-                value: sig.read().0.pos().map(|p| p + 1),
-                oninput: move |evt| sorter(
-                    evt
-                        .value()
-                        .parse::<i16>()
-                        .ok()
-                        .filter(|&pos| 1 <= pos && pos <= max)
-                        .map(|pos| pos - 1),
-                ),
+                value: sig.read().pos().map(|p| p + 1),
+                oninput: move |evt| {
+                    sig
+                        .write()
+                        .set_pos(
+                            evt
+                                .value()
+                                .parse::<i16>()
+                                .ok()
+                                .filter(|&pos| 1 <= pos && pos <= max)
+                                .map(|pos| pos - 1),
+                        )
+                },
             }
 
-            label { class: "col-span-2 cursor-pointer",
+            label { class: "col-span-2", class: if !existing { "cursor-pointer" },
 
-                if sig.with(|(img, ..)| { img.has_url() || img.has_bytes() }) {
-                    img { class: "object-cover w-full", src: sig.read().0.src() }
+                if sig.with(|img| { img.has_url() || img.has_bytes() }) {
+                    img { class: "object-cover w-full", src: sig.read().src() }
                 } else {
                     p { class: "p-5 text-9xl text-center select-none", "🖼️" }
                 }
 
-                input {
-                    name: "image",
-                    hidden: true,
-                    r#type: "file",
-                    accept: ".png,.jpg,.jpeg,.bmp",
-                    onchange: move |evt| {
-                        spawn(async move {
-                            if let Some(file) = evt.files().get(0) {
-                                if let Ok(bytes) = file.read_bytes().await {
-                                    sig.write().3.set_bytes(bytes.to_vec());
+                if !existing {
+                    input {
+                        name: "image",
+                        hidden: true,
+                        r#type: "file",
+                        accept: ".png,.jpg,.jpeg,.bmp",
+                        onchange: move |evt| {
+                            spawn(async move {
+                                if let Some(file) = evt.files().get(0) {
+                                    if let Ok(bytes) = file.read_bytes().await {
+                                        sig.write().set_bytes(bytes.to_vec());
+                                    }
                                 }
-                            }
-                        });
-                    },
+                            });
+                        },
+                    }
                 }
             }
         }
