@@ -10,6 +10,7 @@ use crate::{
 
 mod button;
 mod container;
+mod despair;
 mod details;
 mod image;
 mod prompt;
