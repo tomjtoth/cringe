@@ -71,7 +71,15 @@ fn Button(decision: Option<Decision>) -> Element {
                 }
             }
         } else {
-            button { class, onclick: move |_| rcx.next_state(),
+            button {
+                class,
+                onclick: move |evt| {
+                    if !rcx.editing() {
+                        evt.prevent_default();
+                        rcx.next_state()
+                    }
+                },
+
                 if rcx.editing() {
                     "💾"
                 } else {
