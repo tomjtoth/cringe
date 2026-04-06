@@ -4,7 +4,7 @@ use crate::models::person::Person;
 
 #[component]
 pub(super) fn Has(sig: Signal<Person>, editing: bool, already_has_kids: bool) -> Element {
-    let value = sig.read().kids.as_ref().map(|k| k.has);
+    let value = sig.read().kids.as_ref().map(|k| k.has).flatten();
 
     rsx! {
         if editing {

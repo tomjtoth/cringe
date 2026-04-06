@@ -4,14 +4,14 @@ use crate::models::person::Person;
 
 #[component]
 pub(super) fn Wants(sig: Signal<Person>, editing: bool, already_has_kids: bool) -> Element {
-    let value = sig.read().kids.as_ref().map(|k| k.wants);
+    let value = sig.read().kids.as_ref().map(|k| k.wants).flatten();
 
     rsx! {
         if editing {
             li {
                 "🍼"
                 select {
-                    class: if value.unwrap_or(None) == None { "text-gray-500" },
+                    class: if value.is_none() { "text-gray-500" },
                     value,
                     onchange: move |evt| {
                         sig.with_mut(|p| {
