@@ -38,7 +38,7 @@ impl ResourceCtx {
     }
 
     fn editing(&self) -> bool {
-        (self.state)() >= 1
+        *(self.state).read() >= 1
     }
 
     fn next_state(&mut self) {

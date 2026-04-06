@@ -10,7 +10,7 @@ mod editor;
 #[component]
 pub fn Prompt(idx: usize) -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
-    let mut rcx = ResourceCtx::provide();
+    let rcx = ResourceCtx::provide();
 
     let (src, show_adder) = {
         let pcx = use_context::<PersonCtx>();
