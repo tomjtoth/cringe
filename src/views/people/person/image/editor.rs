@@ -208,8 +208,8 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         (
             src.unwrap_or(Image::Uploaded {
                 id: None,
-                bytes: vec![],
-                url: Some(String::new()),
+                bytes: None,
+                url: None,
                 prompt: None,
                 position: Some(max - 1),
             }),
@@ -219,18 +219,11 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 .map(|p| p.images().clone())
                 .unwrap_or_default(),
             vec![],
-            Image::Uploaded {
-                id: None,
-                bytes: vec![],
-                url: None,
-                prompt: None,
-                position: None,
-            },
         )
     });
 
     let sorter = use_callback(move |pos: Option<i16>| {
-        sig.with_mut(|(image, draft, positions, _)| {
+        sig.with_mut(|(image, draft, positions)| {
             image.set_pos(pos);
 
             // rm and reinsert at proper pos in the vec
@@ -244,7 +237,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
             for (idx, img) in draft.iter_mut().enumerate() {
                 let idx = Some(idx as i16);
 
-                if img.pos() != idx {
+                if *img.pos() != idx {
                     img.set_pos(idx);
                     positions.push((img.id(), idx));
                 }
@@ -368,8 +361,8 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
             label { class: "col-span-2 cursor-pointer",
 
-                if sig.read().3.has_bytes() {
-                    img { class: "object-cover w-full", src: sig.read().3.src() }
+                if sig.with(|(img, ..)| { img.has_url() || img.has_bytes() }) {
+                    img { class: "object-cover w-full", src: sig.read().0.src() }
                 } else {
                     p { class: "p-5 text-9xl text-center select-none", "🖼️" }
                 }
