@@ -94,6 +94,22 @@ impl Image {
             }
         }
     }
+
+    pub fn has_bytes(&self) -> bool {
+        match self {
+            Self::Uploaded { bytes, .. } => bytes.len() > 0,
+            _ => false,
+        }
+    }
+
+    pub fn set_bytes(&mut self, bytes: Vec<u8>) {
+        match self {
+            Self::Uploaded {
+                bytes: my_bytes, ..
+            } => *my_bytes = bytes,
+            _ => (),
+        }
+    }
 }
 
 fn vec_to_base64<S>(bytes: &Vec<u8>, s: S) -> Result<S::Ok, S::Error>
