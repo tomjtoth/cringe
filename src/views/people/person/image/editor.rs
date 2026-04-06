@@ -109,8 +109,7 @@ async fn upload_image(mut form: MultipartFormData) -> Result<Response> {
                     $4::int AS id,
                     $5::text AS prompt,
                     $6::int2 AS position,
-                    placeholder_url(idx) AS url,
-                    $7::bytea AS bytes
+                    placeholder_url(idx) AS url
                 FROM queue
             ),
 
@@ -147,12 +146,12 @@ async fn upload_image(mut form: MultipartFormData) -> Result<Response> {
 
             inserted AS (
                 INSERT INTO user_images AS ui
-                    (user_id, url, bytes, prompt, position)
+                    (user_id, url, prompt, position)
                 SELECT
-                    me.id, url, bytes, prompt, position
+                    me.id, url, prompt, position
                 FROM arg_image i
                 CROSS JOIN me
-                WHERE octet_length(i.bytes) > 0
+                WHERE i.id IS NULL
                 RETURNING ui.id, ui.url
             )
 
@@ -172,12 +171,12 @@ async fn upload_image(mut form: MultipartFormData) -> Result<Response> {
         .bind(&id)
         .bind(&prompt)
         .bind(&position)
-        .bind(&bytes)
         .fetch_one(&pool)
         .await?;
 
-        if let Some(bytes) = bytes {
-            if let Some(id) = res.inserted_id {
+        if let Some(id) = res.inserted_id {
+            if let Some(bytes) = bytes {
+                info!("Sending job #{id}");
                 converter_tx().await?.send((id, bytes)).await?;
             }
         }
@@ -207,9 +206,10 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
     let mut sig = use_signal(|| {
         (
-            src.unwrap_or(Image::Advanced {
+            src.unwrap_or(Image::Uploaded {
                 id: None,
-                url: String::new(),
+                bytes: vec![],
+                url: Some(String::new()),
                 prompt: None,
                 position: Some(max - 1),
             }),
@@ -222,6 +222,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
             Image::Uploaded {
                 id: None,
                 bytes: vec![],
+                url: None,
                 prompt: None,
                 position: None,
             },
@@ -243,9 +244,9 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
             for (idx, img) in draft.iter_mut().enumerate() {
                 let idx = Some(idx as i16);
 
-                if *img.pos() != idx {
+                if img.pos() != idx {
                     img.set_pos(idx);
-                    positions.push((img.id(), idx))
+                    positions.push((img.id(), idx));
                 }
             }
         })
