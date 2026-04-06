@@ -18,6 +18,8 @@ mod prompt;
 use image::Image;
 use prompt::Prompt;
 
+type Sorter = Vec<(Option<i32>, Option<i16>)>;
+
 #[derive(Clone)]
 struct PersonCtx {
     person: ReadSignal<MPerson>,

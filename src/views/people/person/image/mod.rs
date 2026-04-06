@@ -5,6 +5,8 @@ use crate::views::people::{
     person::{container::Container, PersonCtx, ResourceCtx},
 };
 
+mod editor;
+
 #[component]
 pub fn Image(idx: usize) -> Element {
     let _olcx = use_context::<Option<ListingCtx>>();
