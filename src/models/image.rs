@@ -80,7 +80,7 @@ impl Image {
             Self::Uploaded { bytes, .. } => {
                 use base64::{engine::general_purpose::STANDARD, Engine as _};
 
-                format!("data:image/jpeg;base64,{}", STANDARD.encode(bytes))
+                format!("data:image/avif;base64,{}", STANDARD.encode(bytes))
             }
         }
     }

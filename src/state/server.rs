@@ -90,7 +90,7 @@ fn convert(bytes: Vec<u8>) -> Result<Vec<u8>> {
     let mut preview = Vec::new();
     resized.write_to(
         &mut std::io::Cursor::new(&mut preview),
-        image::ImageFormat::Jpeg,
+        image::ImageFormat::Avif,
     )?;
 
     Ok(preview)
