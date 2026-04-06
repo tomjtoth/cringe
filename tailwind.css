@@ -45,6 +45,7 @@ h3 {
 }
 
 input,
+textarea,
 select {
   @apply p-2 border rounded;
 }

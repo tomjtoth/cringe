@@ -36,7 +36,8 @@ pub fn Prompt(idx: usize) -> Element {
                 if rcx.editing() {
                     PromptEditor {}
                 } else {
-                    Container { class: "p-2 px-5 flex gap-2 justify-between items-center",
+                    Container { class: "p-2 px-5 flex gap-2 justify-between items-center [&_button]:static",
+
                         "Add a new prompt"
                     }
                 }
