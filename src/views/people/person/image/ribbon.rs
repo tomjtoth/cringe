@@ -9,7 +9,6 @@ pub(super) fn Ribbon(to_be_profile_pic: bool) -> Element {
                 class: "transform-[translate(50%,-50%)_rotateZ(45deg)_translateY(250%)]",
                 class: "px-15 bg-purple-400 dark:bg-purple-600 border-2",
                 "profile picture"
-                "profile picture"
             }
         }
     }
