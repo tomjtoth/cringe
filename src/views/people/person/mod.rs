@@ -57,24 +57,25 @@ pub fn Person(person: ReadSignal<MPerson>) -> Element {
     let _rcx = ResourceCtx::provide();
 
     rsx! {
-        div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
-            div {
-                class: format!(
-                    "{} {}",
-                    "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
-                    "flex justify-between items-center",
-                ),
+        div {
+            class: format!(
+                "{} {}",
+                "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
+                "flex justify-between items-center",
+            ),
 
-                span { class: "text-2xl", "{person().name}" }
+            span { class: "text-2xl", "{person().name}" }
 
-                if olcx.is_none() {
-                    a {
-                        class: "border rounded p-2 cursor-pointer select-none",
-                        href: "/logout",
-                        "logout [➜"
-                    }
+            if olcx.is_none() {
+                a {
+                    class: "border rounded p-2 cursor-pointer select-none",
+                    href: "/logout",
+                    "logout [➜"
                 }
             }
+        }
+
+        div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
 
             Image { idx: 0 }
             Prompt { idx: 0 }
@@ -96,9 +97,10 @@ pub fn Person(person: ReadSignal<MPerson>) -> Element {
             Image { idx: 5 }
             Prompt { idx: 5 }
 
-            if olcx.is_some() {
-                SkipButton {}
-            }
+        }
+
+        if olcx.is_some() {
+            SkipButton {}
         }
 
     }
