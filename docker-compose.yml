@@ -1,5 +1,3 @@
-# for debugging hydration errors == caching issue
-
 version: "3.8"
 
 services:

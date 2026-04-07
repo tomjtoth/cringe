@@ -4,7 +4,14 @@ Just a Hinge clone with the additional movie stars deployed [here](https://cring
 
 ## Development
 
-Some notes for self..
+For the ad-hoc image testing:
+
+```sh
+docker build . -t test
+
+# the app image is read from env var $IMG
+IMG=test docker compose up
+```
 
 ### OAuth
 
