@@ -9,6 +9,39 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --breakpoint-3xl: 120rem;
+
+  --animate-peeking-fox: peeking-fox 10s infinite;
+  @keyframes peeking-fox {
+    0%,
+    40%,
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+
+    45% {
+      transform: translateY(-70px) rotate(0deg);
+    }
+
+    47% {
+      transform: translateY(-50px) rotate(0deg);
+    }
+
+    50% {
+      transform: translateY(-65px) rotate(0deg);
+    }
+
+    62% {
+      transform: translateY(-65px) rotate(5deg);
+    }
+
+    68% {
+      transform: translateY(-65px) rotate(5deg);
+    }
+
+    78% {
+      transform: translateY(-65px) rotate(-3deg);
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
