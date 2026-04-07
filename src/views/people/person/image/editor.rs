@@ -301,43 +301,44 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
     rsx! {
         Container { class, onsubmit,
+            div { class: "pt-5 px-2 grid-cols-subgrid grid col-span-2",
+                input { name: "id", hidden: true, value: sig.read().id() }
 
-            input { name: "id", hidden: true, value: sig.read().id() }
+                input {
+                    name: "sorter",
+                    hidden: true,
+                    value: serde_json::to_string(&sorter)?,
+                }
 
-            input {
-                name: "sorter",
-                hidden: true,
-                value: serde_json::to_string(&sorter)?,
-            }
+                input {
+                    name: "prompt",
+                    placeholder: "Prompt if any",
+                    class: "w-full min-w-30",
+                    value: sig.read().prompt(),
+                    oninput: move |evt| sig.write().set_prompt(evt.value()),
+                }
 
-            input {
-                name: "prompt",
-                placeholder: "Prompt if any",
-                class: "w-full min-w-30",
-                value: sig.read().prompt(),
-                oninput: move |evt| sig.write().set_prompt(evt.value()),
-            }
-
-            input {
-                name: "position",
-                placeholder: "#",
-                class: "max-w-20",
-                r#type: "number",
-                min: 1,
-                max,
-                value: sig.read().pos().map(|p| p + 1),
-                oninput: move |evt| {
-                    sig
-                        .write()
-                        .set_pos(
-                            evt
-                                .value()
-                                .parse::<i16>()
-                                .ok()
-                                .filter(|&pos| 1 <= pos && pos <= max)
-                                .map(|pos| pos - 1),
-                        )
-                },
+                input {
+                    name: "position",
+                    placeholder: "#",
+                    class: "max-w-20",
+                    r#type: "number",
+                    min: 1,
+                    max,
+                    value: sig.read().pos().map(|p| p + 1),
+                    oninput: move |evt| {
+                        sig
+                            .write()
+                            .set_pos(
+                                evt
+                                    .value()
+                                    .parse::<i16>()
+                                    .ok()
+                                    .filter(|&pos| 1 <= pos && pos <= max)
+                                    .map(|pos| pos - 1),
+                            )
+                    },
+                }
             }
 
             label {

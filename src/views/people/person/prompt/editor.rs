@@ -231,7 +231,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
     let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
 
     rsx! {
-        Container { class: "{class} pt-10 pb-20", onsubmit,
+        Container { class: "{class} px-2 pt-10 pb-20", onsubmit,
 
             input {
                 class: "min-w-20 w-full",

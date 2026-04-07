@@ -16,7 +16,7 @@ pub(super) fn class_canceler_deleter(
     to_be_deleted: bool,
 ) -> (String, Element, Element) {
     let class = format!(
-        "px-2 grid grid-cols-[1fr_auto] gap-2 {}{}",
+        "grid grid-cols-[1fr_auto] gap-2 {}{}",
         "[&>input]:text-xl",
         if new_but_empty || to_be_deleted {
             // hiding the Container's default LikeButton
