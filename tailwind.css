@@ -54,6 +54,23 @@ button {
   @apply p-2 border rounded cursor-pointer;
 }
 
+@layer utilities {
+  .border-groove {
+    --tw-border-style: groove;
+    border-style: groove;
+  }
+
+  .border-inset {
+    --tw-border-style: inset;
+    border-style: inset;
+  }
+
+  .border-ridge {
+    --tw-border-style: ridge;
+    border-style: ridge;
+  }
+}
+
 @layer components {
   .app-center {
     @apply absolute top-1/2 left-1/2 -translate-1/2;

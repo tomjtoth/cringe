@@ -8,7 +8,10 @@ use crate::{
     models::image::Image,
     state::client::{AUTH_CTE, ME},
     views::people::person::{
-        container::Container, image::ribbon::Ribbon, utils::class_canceler_deleter, ResourceCtx,
+        container::Container,
+        image::{masterpiece::Masterpiece, ribbon::Ribbon},
+        utils::class_canceler_deleter,
+        ResourceCtx,
     },
 };
 
@@ -300,7 +303,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
     let to_be_profile_pic = *sig.read().pos() == Some(0) || max == 1;
 
     rsx! {
-        Container { class, onsubmit,
+        Container { class: "{class} rounded-b-none!", onsubmit,
             div { class: "pt-5 px-2 grid-cols-subgrid grid col-span-2",
                 input { name: "id", hidden: true, value: sig.read().id() }
 
@@ -347,16 +350,13 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
                 if sig.with(|img| { img.has_url() || img.has_bytes() }) {
                     Ribbon { to_be_profile_pic }
-                    img { class: "object-cover w-full", src: sig.read().src() }
+                    img {
+                        class: "object-cover w-full border-t",
+                        src: sig.read().src(),
+                    }
                 } else {
                     Ribbon { to_be_profile_pic }
-                    div {
-                        class: "px-5 py-30",
-                        class: "border-20 border-amber-300 dark:border-amber-700",
-                        class: "text-9xl text-center select-none",
-
-                        "🧑"
-                    }
+                    Masterpiece {}
                 }
 
                 if !existing {

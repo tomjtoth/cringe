@@ -2,10 +2,15 @@ use dioxus::prelude::*;
 
 use crate::views::people::{
     listing::ListingCtx,
-    person::{container::Container, image::editor::ImageEditor, PersonCtx, ResourceCtx},
+    person::{
+        container::Container,
+        image::{editor::ImageEditor, ribbon::Ribbon},
+        PersonCtx, ResourceCtx,
+    },
 };
 
 mod editor;
+mod masterpiece;
 mod ribbon;
 
 #[component]
@@ -33,6 +38,9 @@ pub fn Image(idx: usize) -> Element {
                 ImageEditor { src: image }
             } else {
                 Container {
+                    if olcx.is_none() {
+                        Ribbon { to_be_profile_pic: idx == 0 }
+                    }
                     if let Some(prompt) = image.prompt() {
                         p { class: "p-2 py-4 text-2xl",
                             sub {
@@ -53,6 +61,7 @@ pub fn Image(idx: usize) -> Element {
                     ImageEditor {}
                 } else {
                     Container {
+                        Ribbon { to_be_profile_pic: idx == 0 }
                         div { class: "py-20 text-center select-none text-3xl",
                             p { "Add your" }
                             p { "{ordinal_idx} image" }
