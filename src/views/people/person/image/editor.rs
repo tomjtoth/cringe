@@ -293,11 +293,11 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
     });
 
-    let (class, canceler, deleter) =
-        class_canceler_deleter(new_but_empty, to_be_deleted, "☝️ Select an image first!");
+    let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
+
 
     rsx! {
-        Container { class: "{class} pt-10 pb-20", onsubmit,
+        Container { class, onsubmit,
 
             input { name: "id", hidden: true, value: sig.read().id() }
 

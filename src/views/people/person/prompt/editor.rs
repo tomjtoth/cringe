@@ -228,11 +228,10 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
     let to_be_deleted =
         sig.with(|p| p.id.is_some() && (p.title == "" || p.body == "" || p.position == None));
 
-    let (class, canceler, deleter) =
-        class_canceler_deleter(new_but_empty, to_be_deleted, "Need all values! ☝️");
+    let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
 
     rsx! {
-        Container { class, onsubmit,
+        Container { class: "{class} pt-10 pb-20", onsubmit,
 
             input {
                 class: "min-w-20 w-full",
