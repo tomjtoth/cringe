@@ -6,6 +6,7 @@ use crate::views::people::{
 };
 
 mod editor;
+mod ribbon;
 
 #[component]
 pub fn Image(idx: usize) -> Element {

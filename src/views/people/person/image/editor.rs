@@ -7,7 +7,9 @@ use sqlx::types::Json;
 use crate::{
     models::image::Image,
     state::client::{AUTH_CTE, ME},
-    views::people::person::{container::Container, utils::class_canceler_deleter, ResourceCtx},
+    views::people::person::{
+        container::Container, image::ribbon::Ribbon, utils::class_canceler_deleter, ResourceCtx,
+    },
 };
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -295,6 +297,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
     let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
 
+    let to_be_profile_pic = *sig.read().pos() == Some(0) || max == 1;
 
     rsx! {
         Container { class, onsubmit,
@@ -337,12 +340,22 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 },
             }
 
-            label { class: "col-span-2", class: if !existing { "cursor-pointer" },
+            label {
+                class: "relative col-span-2 overflow-hidden",
+                class: if !existing { "cursor-pointer" },
 
                 if sig.with(|img| { img.has_url() || img.has_bytes() }) {
+                    Ribbon { to_be_profile_pic }
                     img { class: "object-cover w-full", src: sig.read().src() }
                 } else {
-                    p { class: "p-5 text-9xl text-center select-none", "🖼️" }
+                    Ribbon { to_be_profile_pic }
+                    div {
+                        class: "px-5 py-30",
+                        class: "border-20 border-amber-300 dark:border-amber-700",
+                        class: "text-9xl text-center select-none",
+
+                        "🧑"
+                    }
                 }
 
                 if !existing {
