@@ -7,7 +7,7 @@ use sqlx::types::Json;
 use crate::{
     models::image::Image,
     state::client::{AUTH_CTE, ME},
-    views::people::person::{container::Container, despair::Despair, ResourceCtx},
+    views::people::person::{container::Container, utils::class_canceler_deleter, ResourceCtx},
 };
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -293,20 +293,11 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
     });
 
-    let button_class = "z-2 absolute bottom-5 right-5 border-2! bg-background select-none";
-    let class = "pt-10 pb-20 px-2 grid grid-cols-[1fr_auto] gap-2 [&>input]:text-xl";
+    let (class, canceler, deleter) =
+        class_canceler_deleter(new_but_empty, to_be_deleted, "☝️ Select an image first!");
 
     rsx! {
-        Container { class, onsubmit,
-
-            if new_but_empty {
-                button { class: button_class, "Select an image 1st! ☝️" }
-            }
-
-            if to_be_deleted {
-                Despair {}
-                button { class: button_class, "That's how you delete! 😱" }
-            }
+        Container { class: "{class} pt-10 pb-20", onsubmit,
 
             input { name: "id", hidden: true, value: sig.read().id() }
 
@@ -372,6 +363,10 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                     }
                 }
             }
+
+            // buttons
+            {canceler}
+            {deleter}
         }
     }
 }

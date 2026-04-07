@@ -3,7 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::person::Prompt;
 use crate::state::client::{AUTH_CTE, ME};
-use crate::views::people::person::{container::Container, despair::Despair, ResourceCtx, Sorter};
+use crate::views::people::person::utils::class_canceler_deleter;
+use crate::views::people::person::{container::Container, ResourceCtx, Sorter};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(feature = "server", derive(sqlx::FromRow))]
@@ -227,27 +228,11 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
     let to_be_deleted =
         sig.with(|p| p.id.is_some() && (p.title == "" || p.body == "" || p.position == None));
 
-    let bg_red = if to_be_deleted {
-        " bg-red-200 dark:bg-red-800"
-    } else {
-        ""
-    };
-
-    let class = format!("pt-10 pb-20 px-2 grid grid-cols-[1fr_auto] gap-2{bg_red}");
-
-    let button_class = "z-2 absolute bottom-5 right-5 border-2! bg-background select-none";
+    let (class, canceler, deleter) =
+        class_canceler_deleter(new_but_empty, to_be_deleted, "Need all values! ☝️");
 
     rsx! {
         Container { class, onsubmit,
-
-            if new_but_empty {
-                button { class: button_class, "Need all values! ☝️" }
-            }
-
-            if to_be_deleted {
-                Despair {}
-                button { class: "{button_class}{bg_red}", "That's how you delete! 😱" }
-            }
 
             input {
                 class: "min-w-20 w-full",
@@ -283,6 +268,9 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 oninput: move |evt| sig.write().body = evt.value(),
             }
 
+            // buttons
+            {canceler}
+            {deleter}
         }
     }
 }
