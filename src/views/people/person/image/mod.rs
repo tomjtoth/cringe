@@ -38,9 +38,6 @@ pub fn Image(idx: usize) -> Element {
                 ImageEditor { src: image }
             } else {
                 Container {
-                    if olcx.is_none() {
-                        Ribbon { to_be_profile_pic: idx == 0 }
-                    }
                     if let Some(prompt) = image.prompt() {
                         p { class: "p-2 py-4 text-2xl",
                             sub {
@@ -51,8 +48,25 @@ pub fn Image(idx: usize) -> Element {
 
                             "{prompt}"
                         }
+
+                        div {
+                            class: "relative overflow-hidden",
+                            class: if idx == 0 { "border-t" },
+
+                            img {
+                                class: "object-cover w-full",
+                                src: image.src(),
+                            }
+                            if olcx.is_none() {
+                                Ribbon { to_be_profile_pic: idx == 0 }
+                            }
+                        }
+                    } else {
+                        img { class: "object-cover w-full", src: image.src() }
+                        if olcx.is_none() {
+                            Ribbon { to_be_profile_pic: idx == 0 }
+                        }
                     }
-                    img { class: "object-cover w-full", src: image.src() }
                 }
             }
         } else {
@@ -61,12 +75,12 @@ pub fn Image(idx: usize) -> Element {
                     ImageEditor {}
                 } else {
                     Container {
-                        Ribbon { to_be_profile_pic: idx == 0 }
                         div { class: "py-20 text-center select-none text-3xl",
                             p { "Add your" }
                             p { "{ordinal_idx} image" }
                             p { class: "mt-5", "😏 YOLO" }
                         }
+                        Ribbon { to_be_profile_pic: idx == 0 }
                     }
                 }
             }

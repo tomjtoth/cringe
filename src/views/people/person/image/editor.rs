@@ -355,8 +355,8 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                         src: sig.read().src(),
                     }
                 } else {
-                    Ribbon { to_be_profile_pic }
                     Masterpiece {}
+                    Ribbon { to_be_profile_pic }
                 }
 
                 if !existing {
