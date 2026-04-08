@@ -29,14 +29,16 @@ pub async fn unregister_ws(session_id: &str) {
     reg.remove(session_id);
 }
 
+type Job = (i32, Vec<u8>, String);
+
 pub fn init_converter(pool: PgPool) -> Sender<Job> {
     let (tx, mut rx) = channel::<Job>(1000);
 
     tokio::task::spawn_blocking(move || {
-        while let Some((id, bytes)) = rx.blocking_recv() {
+        while let Some((id, bytes, session_id)) = rx.blocking_recv() {
             info!("Starting #{id}");
 
-            let bytes = match convert(bytes) {
+            let converted = match convert(bytes) {
                 Ok(converted) => {
                     info!("Converted #{id}");
                     converted
@@ -46,6 +48,25 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
                     continue;
                 }
             };
+
+            // If a websocket for this session is registered, notify it with the converted bytes.
+            tokio::spawn({
+                let converted = converted.clone();
+
+                async move {
+                    let guard = WS_REG.lock().await;
+                    if let Some(tx) = guard.get(&session_id) {
+                        info!("Converter reports #{id}");
+
+                        // ignore send errors (receiver may have dropped)
+                        let _ = tx
+                            .send(crate::state::client::WsResponse::ConvertedImageBytes(
+                                id, converted,
+                            ))
+                            .await;
+                    }
+                }
+            });
 
             let pool = pool.clone();
             tokio::spawn(async move {
@@ -84,7 +105,7 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
                     "#,
                 )
                 .bind(&id)
-                .bind(bytes)
+                .bind(&converted)
                 .execute(&pool)
                 .await
                 {
@@ -104,13 +125,13 @@ fn convert(bytes: Vec<u8>) -> Result<Vec<u8>> {
 
     let resized = img.thumbnail(1920, 1920);
 
-    let mut preview = Vec::new();
+    let mut converted = Vec::new();
     resized.write_to(
-        &mut std::io::Cursor::new(&mut preview),
+        &mut std::io::Cursor::new(&mut converted),
         image::ImageFormat::Avif,
     )?;
 
-    Ok(preview)
+    Ok(converted)
 }
 
 pub async fn converter_tx() -> Result<Sender<Job>> {
