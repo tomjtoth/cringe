@@ -5,12 +5,29 @@ use dioxus::{
         *,
     },
 };
+use once_cell::sync::Lazy;
 use sqlx::PgPool;
-use tokio::sync::mpsc::{channel, Sender};
+use std::collections::HashMap;
+use tokio::sync::{
+    mpsc::{channel, Sender},
+    Mutex as AsyncMutex,
+};
 
 use crate::{auth::COOKIE_NAME, models::person::Person};
 
-type Job = (i32, Vec<u8>);
+// Registry of websocket senders keyed by session id.
+static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<crate::state::client::WsResponse>>>> =
+    Lazy::new(|| AsyncMutex::new(HashMap::new()));
+
+pub async fn register_ws(session_id: String, tx: Sender<crate::state::client::WsResponse>) {
+    let mut reg = WS_REG.lock().await;
+    reg.insert(session_id, tx);
+}
+
+pub async fn unregister_ws(session_id: &str) {
+    let mut reg = WS_REG.lock().await;
+    reg.remove(session_id);
+}
 
 pub fn init_converter(pool: PgPool) -> Sender<Job> {
     let (tx, mut rx) = channel::<Job>(1000);
