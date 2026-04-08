@@ -6,14 +6,19 @@ use dioxus::{
     },
 };
 use once_cell::sync::Lazy;
-use sqlx::PgPool;
+use serde::Deserialize;
+use sqlx::{types::Json, PgPool};
 use std::collections::HashMap;
 use tokio::sync::{
     mpsc::{channel, Sender},
     Mutex as AsyncMutex,
 };
 
-use crate::{auth::COOKIE_NAME, models::person::Person, state::websocket::WsResponse};
+use crate::{
+    auth::COOKIE_NAME,
+    models::person::Person,
+    state::{client::AUTH_CTE, websocket::WsResponse},
+};
 
 // Registry of websocket senders keyed by session id.
 static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<WsResponse>>>> =
@@ -21,96 +26,127 @@ static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<WsResponse>>>> =
 
 pub async fn register_ws(session_id: String, tx: Sender<WsResponse>) {
     let mut reg = WS_REG.lock().await;
+    info!("WS registering: {session_id}");
     reg.insert(session_id, tx);
 }
 
 pub async fn unregister_ws(session_id: &str) {
     let mut reg = WS_REG.lock().await;
+    info!("WS unregistering: {session_id}");
     reg.remove(session_id);
 }
 
 type Job = (i32, Vec<u8>, String);
 
+#[derive(Deserialize)]
+struct ConverterResult {
+    placeholders: Vec<(i32, String)>,
+}
+
 pub fn init_converter(pool: PgPool) -> Sender<Job> {
     let (tx, mut rx) = channel::<Job>(1000);
 
     tokio::task::spawn_blocking(move || {
-        while let Some((id, bytes, session_id)) = rx.blocking_recv() {
-            info!("Starting #{id}");
+        while let Some((image_id, bytes, session_id)) = rx.blocking_recv() {
+            info!("Starting #{image_id}");
 
-            let converted = match convert(bytes) {
-                Ok(converted) => {
-                    info!("Converted #{id}");
-                    converted
-                }
-                Err(e) => {
-                    error!("Failed #{id}: {e:?}");
-                    continue;
-                }
+            let Ok(converted) = convert(bytes).map_err(|e| {
+                error!("Failed #{image_id}: {e:?}");
+            }) else {
+                continue;
             };
 
-            // If a websocket for this session is registered, notify it with the converted bytes.
-            tokio::spawn({
-                let converted = converted.clone();
-
-                async move {
-                    let guard = WS_REG.lock().await;
-                    if let Some(tx) = guard.get(&session_id) {
-                        info!("Converter reports #{id}");
-
-                        // ignore send errors (receiver may have dropped)
-                        let _ = tx
-                            .send(WsResponse::ConvertedImageBytes(id, converted))
-                            .await;
-                    }
-                }
-            });
+            info!("Converted #{image_id}");
 
             let pool = pool.clone();
             tokio::spawn(async move {
-                if let Err(e) = sqlx::query(
+                let Ok(Json(ConverterResult { placeholders, .. })) = sqlx::query_scalar(&format!(
                     r#"
-                    WITH job AS (
+                    WITH {AUTH_CTE},
+
+                    -- in case they delete the image during conversion
+                    user_fallback AS (
+                        SELECT id FROM users u
+                        INNER JOIN auth a ON a.email = u.email
+                    ),
+                    
+                    job AS (
                         UPDATE user_images ui
                         SET
                             url = NULL,
-                            bytes = $2::bytea
-                        WHERE id = $1::int
-                        RETURNING id
+                            bytes = $3::bytea
+                        WHERE id = $2::int
+                        RETURNING user_id
                     ),
 
                     queue AS (
-                        SELECT 
+                        SELECT
                             id,
-                            placeholder_url(
-                                row_number() OVER (ORDER BY id)
-                            ) AS url
+                            (
+                                -- substratcting 1 for:
+                                -- - 1-based indices
+                                -- - progressing the line
+                                row_number() OVER (ORDER BY id) - 2
+                            ) AS ord
                         FROM user_images
                         WHERE user_id > 0 AND bytes IS NULL
+                        AND EXISTS (
+                            SELECT coalesce((SELECT user_id FROM job), 1)
+                        )
                     ),
 
                     updated_queue AS (
                         UPDATE user_images ui
-                        SET url = q.url
+                        SET url = placeholder_url(ord)
                         FROM queue q
                         WHERE ui.id = q.id
-                        RETURNING ui.id
+                        RETURNING ui.id, user_id, url
+                    ),
+
+                    placeholders AS (
+                        SELECT q.id, q.url
+                        FROM updated_queue q
+                        CROSS JOIN user_fallback f
+                        WHERE f.id = q.user_id
                     )
 
-                    SELECT 
-                        (SELECT count(*) > 0 FROM job),
-                        (SELECT count(*) > 0 FROM updated_queue)
-                    "#,
-                )
-                .bind(&id)
+                    SELECT jsonb_build_object(
+                        'bytes_updated', (SELECT count(*) > 0 FROM job),
+                        'placeholders', (
+                            SELECT coalesce(
+                                jsonb_agg(jsonb_build_array(p.id, p.url)),
+                                '[]'::jsonb
+                            )
+                            FROM placeholders p
+                        )
+                    )
+                    "#
+                ))
+                .bind(&session_id)
+                .bind(&image_id)
                 .bind(&converted)
-                .execute(&pool)
+                .fetch_one(&pool)
                 .await
-                {
-                    error!("Failed #{id}: {e:?}",);
-                } else {
-                    info!("Finished #{id}");
+                .map_err(|e| error!("Failed #{image_id}: {e:?}")) else {
+                    return;
+                };
+
+                // If a websocket for this session is registered, notify it with the converted bytes and updated placeholder urls.
+                let guard = WS_REG.lock().await;
+                if let Some(tx) = guard.get(&session_id) {
+                    info!("Reporting #{image_id}");
+
+                    // ignore send errors (receiver may have dropped)
+                    let _ = tx
+                        .send(WsResponse::ConvertedImageBytes(
+                            image_id,
+                            converted,
+                            placeholders,
+                        ))
+                        .await;
                 }
+
+                info!("Finished #{image_id}");
             });
         }
     });
