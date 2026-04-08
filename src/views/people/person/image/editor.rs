@@ -347,13 +347,11 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
             label {
                 class: "relative col-span-2 overflow-hidden",
                 class: if !existing { "cursor-pointer" },
+                class: if !existing && !new_but_empty { "border-t" },
 
                 if sig.with(|img| { img.has_url() || img.has_bytes() }) {
+                    img { class: "object-cover w-full", src: sig.read().src() }
                     Ribbon { to_be_profile_pic }
-                    img {
-                        class: "object-cover w-full border-t",
-                        src: sig.read().src(),
-                    }
                 } else {
                     Masterpiece {}
                     Ribbon { to_be_profile_pic }
