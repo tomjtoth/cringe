@@ -10,11 +10,14 @@ use crate::state::client::{AUTH_CTE, ME};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum WsResponse {
+    ServerAlive,
     ConvertedImageBytes(i32, Vec<u8>, Vec<(i32, String)>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum WsRequest {}
+pub enum WsRequest {
+    KeepAlive,
+}
 
 #[get("/api/ws")]
 async fn connect_ws(options: WebSocketOptions) -> Result<Websocket<WsRequest, WsResponse>> {
@@ -46,14 +49,20 @@ async fn connect_ws(options: WebSocketOptions) -> Result<Websocket<WsRequest, Ws
             tokio::select! {
                 from_converter = rx.recv() => {
                     if let Some(notification) = from_converter {
-                        let _ = socket.send(notification).await;
+                        _ = socket.send(notification).await;
                     }
                 }
 
                 from_client = socket.recv() => {
                     match from_client {
-                        Ok(_) => (),
-                        Err(_) => break,
+                        Ok(WsRequest::KeepAlive) => {
+                            info!("KeepAlive received from {sess_id}");
+                            _ = socket.send(WsResponse::ServerAlive).await;
+                        },
+                        Err(e) => {
+                            error!("WS error: {e:?}");
+                            break;
+                        },
                     }
                 }
             }
@@ -70,8 +79,19 @@ pub(super) fn init_ws() {
     use_future(move || async move {
         _ = ws.connect().await;
 
+        // init keepalive cycle
+        _ = ws.send(WsRequest::KeepAlive).await;
+
         while let Ok(from_server) = ws.recv().await {
             match from_server {
+                WsResponse::ServerAlive => {
+                    info!("ServerAlive");
+                    #[cfg(target_arch = "wasm32")]
+                    gloo_timers::future::sleep(std::time::Duration::from_mins(5)).await;
+
+                    _ = ws.send(WsRequest::KeepAlive).await;
+                }
+
                 WsResponse::ConvertedImageBytes(id, bytes, placeholders) => {
                     info!("Updating #{id}, updated placeholders: {placeholders:?}");
 
