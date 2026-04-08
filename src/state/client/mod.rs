@@ -142,6 +142,8 @@ pub fn init_client_state() -> Result<(), RenderError> {
         error!("GET /api/me returned: {:?}", initial_state.value());
     }
 
+    super::websocket::init_ws();
+
     // use_gps_watch();
 
     Ok(())

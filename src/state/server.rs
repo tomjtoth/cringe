@@ -13,13 +13,13 @@ use tokio::sync::{
     Mutex as AsyncMutex,
 };
 
-use crate::{auth::COOKIE_NAME, models::person::Person};
+use crate::{auth::COOKIE_NAME, models::person::Person, state::websocket::WsResponse};
 
 // Registry of websocket senders keyed by session id.
-static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<crate::state::client::WsResponse>>>> =
+static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<WsResponse>>>> =
     Lazy::new(|| AsyncMutex::new(HashMap::new()));
 
-pub async fn register_ws(session_id: String, tx: Sender<crate::state::client::WsResponse>) {
+pub async fn register_ws(session_id: String, tx: Sender<WsResponse>) {
     let mut reg = WS_REG.lock().await;
     reg.insert(session_id, tx);
 }
@@ -60,9 +60,7 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
 
                         // ignore send errors (receiver may have dropped)
                         let _ = tx
-                            .send(crate::state::client::WsResponse::ConvertedImageBytes(
-                                id, converted,
-                            ))
+                            .send(WsResponse::ConvertedImageBytes(id, converted))
                             .await;
                     }
                 }
