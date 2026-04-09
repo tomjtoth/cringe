@@ -182,7 +182,7 @@ async fn upload_image(mut form: MultipartFormData) -> Result<Response> {
         if let Some(id) = res.inserted_id {
             if let Some(bytes) = bytes {
                 info!("Sending job #{id}");
-                converter_tx().await?.send((id, bytes, sess_id)).await?;
+                converter_tx().await?.send((id, bytes)).await?;
             }
         }
     }

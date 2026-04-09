@@ -14,11 +14,7 @@ use tokio::sync::{
     Mutex as AsyncMutex,
 };
 
-use crate::{
-    auth::COOKIE_NAME,
-    models::person::Person,
-    state::{client::AUTH_CTE, websocket::WsResponse},
-};
+use crate::{auth::COOKIE_NAME, models::person::Person, state::websocket::WsResponse};
 
 // Registry of websocket senders keyed by session id.
 static WS_REG: Lazy<AsyncMutex<HashMap<String, Sender<WsResponse>>>> =
@@ -36,10 +32,12 @@ pub async fn unregister_ws(session_id: &str) {
     reg.remove(session_id);
 }
 
-type Job = (i32, Vec<u8>, String);
+type Job = (i32, Vec<u8>);
 
 #[derive(Deserialize)]
-struct ConverterResult {
+struct UpdateResult {
+    needs_bytes: bool,
+    session_ids: Vec<String>,
     placeholders: Vec<(i32, String)>,
 }
 
@@ -47,7 +45,7 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
     let (tx, mut rx) = channel::<Job>(1000);
 
     tokio::task::spawn_blocking(move || {
-        while let Some((image_id, bytes, session_id)) = rx.blocking_recv() {
+        while let Some((image_id, bytes)) = rx.blocking_recv() {
             info!("Starting #{image_id}");
 
             let Ok(converted) = convert(bytes).map_err(|e| {
@@ -60,38 +58,38 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
 
             let pool = pool.clone();
             tokio::spawn(async move {
-                let Ok(Json(ConverterResult { placeholders, .. })) = sqlx::query_scalar(&format!(
+                let Ok(res) = sqlx::query_scalar::<_, Json<UpdateResult>>(
                     r#"
-                    WITH {AUTH_CTE},
-
-                    -- in case they delete the image during conversion
-                    user_fallback AS (
-                        SELECT id FROM users u
-                        INNER JOIN auth a ON a.email = u.email
-                    ),
-                    
-                    job AS (
+                    WITH job AS (
                         UPDATE user_images ui
                         SET
                             url = NULL,
-                            bytes = $3::bytea
-                        WHERE id = $2::int
-                        RETURNING user_id
+                            bytes = $2::bytea
+                        WHERE id = $1::int
+                        RETURNING id, user_id
+                    ),
+
+                    user_sessions AS (
+                        SELECT u.id AS user_id, jsonb_agg(a.id) AS session_ids
+                        FROM users u
+                        INNER JOIN auth_sessions a ON a.email = u.email
+                        WHERE a.csrf_token IS NULL
+                        AND a.email IS NOT NULL
+                        AND a.expires_at > NOW()
+                        GROUP BY user_id
                     ),
 
                     queue AS (
                         SELECT
                             id,
                             (
-                                -- substratcting 1 for:
-                                -- - 1-based indices
-                                -- - progressing the line
-                                row_number() OVER (ORDER BY id) - 2
+                                -- 1-based indices so -1
+                                row_number() OVER (ORDER BY id) - 1
                             ) AS ord
-                        FROM user_images
+                        FROM user_images ui
                         WHERE user_id > 0 AND bytes IS NULL
-                        AND EXISTS (
-                            SELECT coalesce((SELECT user_id FROM job), 1)
+                        AND NOT EXISTS(
+                            SELECT 1 FROM job j WHERE j.id = ui.id
                         )
                     ),
 
@@ -100,50 +98,61 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
                         SET url = placeholder_url(ord)
                         FROM queue q
                         WHERE ui.id = q.id
-                        RETURNING ui.id, user_id, url
+                        RETURNING ui.id, ui.user_id, url
                     ),
 
-                    placeholders AS (
-                        SELECT q.id, q.url
-                        FROM updated_queue q
-                        CROSS JOIN user_fallback f
-                        WHERE f.id = q.user_id
+                    grouped_changes AS (
+                        SELECT 
+                            user_id, 
+                            jsonb_agg(jsonb_build_object(
+                                'id', id, 'url', url
+                            )) AS placeholders
+                        FROM updated_queue uq
+                        GROUP BY user_id
                     )
 
-                    SELECT jsonb_build_object(
-                        'bytes_updated', (SELECT count(*) > 0 FROM job),
-                        'placeholders', (
-                            SELECT coalesce(
-                                jsonb_agg(jsonb_build_array(p.id, p.url)),
-                                '[]'::jsonb
-                            )
-                            FROM placeholders p
+                    SELECT 
+                        row_to_json(us)::jsonb || 
+                        row_to_json(c)::jsonb || 
+                        jsonb_build_object(
+                            'needs_bytes', j.id IS NOT NULL
                         )
-                    )
-                    "#
-                ))
-                .bind(&session_id)
+                    FROM user_sessions us
+                    INNER JOIN grouped_changes c USING (user_id)
+                    LEFT JOIN job j USING (user_id)
+                    "#,
+                )
                 .bind(&image_id)
                 .bind(&converted)
-                .fetch_one(&pool)
+                .fetch_all(&pool)
                 .await
                 .map_err(|e| error!("Failed #{image_id}: {e:?}")) else {
                     return;
                 };
 
-                // If a websocket for this session is registered, notify it with the converted bytes and updated placeholder urls.
-                let guard = WS_REG.lock().await;
-                if let Some(tx) = guard.get(&session_id) {
-                    info!("Reporting #{image_id}");
+                info!("Reporting #{image_id}");
 
-                    // ignore send errors (receiver may have dropped)
-                    let _ = tx
-                        .send(WsResponse::ConvertedImageBytes(
-                            image_id,
-                            converted,
-                            placeholders,
-                        ))
-                        .await;
+                for Json(UpdateResult {
+                    needs_bytes,
+                    session_ids,
+                    placeholders,
+                }) in res
+                {
+                    for session_id in session_ids {
+                        if let Some(tx) = WS_REG.lock().await.get(&session_id) {
+                            // ignore send errors (receiver may have dropped)
+                            let _ = tx
+                                .send(WsResponse::ImageUpdate(
+                                    if needs_bytes {
+                                        Some((image_id, converted.clone()))
+                                    } else {
+                                        None
+                                    },
+                                    placeholders.clone(),
+                                ))
+                                .await;
+                        }
+                    }
                 }
 
                 info!("Finished #{image_id}");

@@ -11,7 +11,7 @@ use crate::state::client::{AUTH_CTE, ME};
 #[derive(Serialize, Deserialize, Debug)]
 pub enum WsResponse {
     ServerAlive,
-    ConvertedImageBytes(i32, Vec<u8>, Vec<(i32, String)>),
+    ImageUpdate(Option<(i32, Vec<u8>)>, Vec<(i32, String)>),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -125,18 +125,21 @@ pub(super) fn init_ws() {
                         })
                 }
 
-                WsResponse::ConvertedImageBytes(id, bytes, placeholders) => {
-                    info!("Updating #{id}, updated placeholders: {placeholders:?}");
-
+                WsResponse::ImageUpdate(converted, placeholders) => {
                     let keyed_urls: HashMap<i32, String> =
                         HashMap::from_iter(placeholders.into_iter());
 
                     if let Some(p) = ME.write().profile.as_mut() {
-                        if let Some(i) = p.images.iter_mut().find(|i| i.id() == Some(id)) {
-                            i.set_bytes(bytes);
-                            i.set_url(None);
+                        if let Some((id, bytes)) = converted {
+                            info!("Updating #{id}");
+
+                            if let Some(i) = p.images.iter_mut().find(|i| i.id() == Some(id)) {
+                                i.set_bytes(bytes);
+                                i.set_url(None);
+                            }
                         }
 
+                        info!("updated placeholders: {keyed_urls:?}");
                         for img in p.images.iter_mut() {
                             if let Some(id) = img.id() {
                                 if let Some(url) = keyed_urls.get(&id) {
