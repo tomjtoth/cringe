@@ -324,7 +324,7 @@ pub async fn seed_bots(pool: &sqlx::PgPool) -> anyhow::Result<()> {
 
 #[test]
 fn no_broken_bot_img_urls() {
-    let client = reqwest::blocking::Client::builder()
+    let client = oauth2::reqwest::blocking::Client::builder()
         .user_agent("Mozilla/5.0 (compatible; cringe-bot/1.0)")
         .timeout(std::time::Duration::from_secs(15))
         .build()
