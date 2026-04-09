@@ -104,14 +104,14 @@ pub fn init_converter(pool: PgPool) -> Sender<Job> {
                     grouped_changes AS (
                         SELECT 
                             user_id, 
-                            jsonb_agg(jsonb_build_object(
-                                'id', id, 'url', url
+                            jsonb_agg(jsonb_build_array(
+                                id, url
                             )) AS placeholders
                         FROM updated_queue uq
                         GROUP BY user_id
                     )
 
-                    SELECT 
+                    SELECT
                         row_to_json(us)::jsonb || 
                         row_to_json(c)::jsonb || 
                         jsonb_build_object(
