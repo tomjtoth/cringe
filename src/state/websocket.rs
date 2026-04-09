@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dioxus::{
-    fullstack::{use_websocket, WebSocketOptions, Websocket},
+    fullstack::{use_websocket, CloseCode, WebSocketOptions, Websocket, WebsocketState},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
@@ -56,7 +56,6 @@ async fn connect_ws(options: WebSocketOptions) -> Result<Websocket<WsRequest, Ws
                 from_client = socket.recv() => {
                     match from_client {
                         Ok(WsRequest::KeepAlive) => {
-                            info!("KeepAlive received from {sess_id}");
                             _ = socket.send(WsResponse::ServerAlive).await;
                         },
                         Err(e) => {
@@ -73,23 +72,57 @@ async fn connect_ws(options: WebSocketOptions) -> Result<Websocket<WsRequest, Ws
     }))
 }
 
+async fn sleep(secs: u64) {
+    #[cfg(target_arch = "wasm32")]
+    gloo_timers::future::sleep(std::time::Duration::from_secs(secs)).await;
+}
+
 pub(super) fn init_ws() {
     let mut ws = use_websocket(|| connect_ws(WebSocketOptions::new()));
 
     use_future(move || async move {
-        _ = ws.connect().await;
+        let init_conn = move || async move {
+            match ws.connect().await {
+                WebsocketState::FailedToConnect => error!("WS failed to connect"),
+                state => info!("WS state: {state:?}"),
+            }
 
-        // init keepalive cycle
-        _ = ws.send(WsRequest::KeepAlive).await;
+            // init keepalive cycle
+            if let Err(e) = ws.send(WsRequest::KeepAlive).await {
+                error!("WS error: {e:?}");
+            }
+        };
+
+        init_conn().await;
 
         while let Ok(from_server) = ws.recv().await {
             match from_server {
                 WsResponse::ServerAlive => {
-                    info!("ServerAlive");
-                    #[cfg(target_arch = "wasm32")]
-                    gloo_timers::future::sleep(std::time::Duration::from_mins(5)).await;
+                    sleep(30).await;
 
-                    _ = ws.send(WsRequest::KeepAlive).await;
+                    _ = ws
+                        .send(WsRequest::KeepAlive)
+                        .await
+                        .map_err(move |e| async move {
+                            type E = dioxus_fullstack::WebsocketError;
+
+                            match e {
+                                E::Capacity
+                                | E::ConnectionClosed {
+                                    code: CloseCode::Restart,
+                                    ..
+                                } => {
+                                    error!("WS reconnecting after 30 secs: {e:?}");
+                                    sleep(30).await;
+                                }
+
+                                _ => {
+                                    error!("WS reconnecting: {e:?}");
+                                }
+                            }
+
+                            init_conn().await;
+                        })
                 }
 
                 WsResponse::ConvertedImageBytes(id, bytes, placeholders) => {
