@@ -730,6 +730,7 @@ dependencies = [
  "gloo-timers 0.4.0",
  "http",
  "image",
+ "js-sys",
  "oauth2",
  "once_cell",
  "serde",
@@ -742,6 +743,7 @@ dependencies = [
  "tracing-subscriber",
  "tracing-wasm",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
 ]
 
