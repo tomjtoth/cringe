@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dioxus::prelude::*;
 
-use crate::{models::person::Gps, state::client::AUTH_CTE};
+use crate::{models::person::Gps, state::AUTH_CTE};
 
 #[post("/api/gps")]
 async fn post_gps(coords: Gps) -> Result<()> {

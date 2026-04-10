@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
-use crate::state::client::init_client_state;
+use crate::state::init_client;
 
 #[cfg(feature = "server")]
 mod auth;
@@ -51,25 +51,14 @@ fn main() {
 
     #[cfg(feature = "server")]
     dioxus::serve(|| async {
-        use crate::state::server::{init_converter, seed_bots};
+        let (pool, tx) = crate::state::server::init().await?;
 
-        dotenvy::dotenv().ok();
-
-        let pool = sqlx::PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
-
-        sqlx::migrate!().run(&pool).await?;
-
-        if let Err(e) = seed_bots(&pool).await {
-            error!("Failed to load bots.yaml: {}", e);
-        }
-
-        let tx = init_converter(pool.clone());
-
+        // TODO: stop passing pool.clone to auth::routes,
+        // make use of Dioxus' extractor style if possible
         let app = auth::routes(pool.clone())?
             .fallback_service(dioxus::server::router(App))
             .layer(axum::Extension(pool))
-            .layer(axum::Extension(tx))
-            .layer(axum::extract::DefaultBodyLimit::max(20 * 1024 * 1024));
+            .layer(axum::Extension(tx));
 
         Ok(app)
     })
@@ -79,7 +68,7 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    init_client_state()?;
+    init_client()?;
 
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
