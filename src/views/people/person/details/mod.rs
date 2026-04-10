@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person,
-    state::client::{AUTH_CTE, ME},
+    state::{AUTH_CTE, ME},
     views::people::{
         listing::ListingCtx,
         person::{container::Container, PersonCtx, ResourceCtx},

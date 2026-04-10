@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{router::Route, state::client::ME, views::login::Login};
+use crate::{router::Route, state::ME, views::login::Login};
 
 #[component]
 pub fn NeedsLogin(children: Element) -> Element {

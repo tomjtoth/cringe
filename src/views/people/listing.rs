@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::{Decision, Person},
-    state::client::AUTH_CTE,
+    state::AUTH_CTE,
     views::{people::person::Person as VPerson, protector::NeedsLoginAndProfile},
 };
 

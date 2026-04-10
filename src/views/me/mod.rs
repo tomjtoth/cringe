@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    state::client::ME,
+    state::ME,
     views::{
         me::basic::BasicMe,
         people::{listing::ListingCtx, person::Person},

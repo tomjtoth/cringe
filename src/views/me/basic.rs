@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::{gender::Gender, person::Person},
-    state::client::{AUTH_CTE, ME},
+    state::{AUTH_CTE, ME},
 };
 
 #[post("/api/me")]

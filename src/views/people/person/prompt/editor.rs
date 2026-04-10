@@ -2,9 +2,10 @@ use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::models::person::Prompt;
-use crate::state::client::{AUTH_CTE, ME};
-use crate::views::people::person::utils::class_canceler_deleter;
-use crate::views::people::person::{container::Container, ResourceCtx, Sorter};
+use crate::state::{AUTH_CTE, ME};
+use crate::views::people::person::{
+    container::Container, utils::class_canceler_deleter, ResourceCtx, Sorter,
+};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(feature = "server", derive(sqlx::FromRow))]

@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Decision,
-    state::client::decide,
+    state::decide,
     views::people::{
         listing::ListingCtx,
         person::{PersonCtx, ResourceCtx},
