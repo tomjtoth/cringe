@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::models::person::Prompt;
 use crate::state::{AUTH_CTE, ME};
 use crate::views::people::person::{
-    container::Container, utils::class_canceler_deleter, ResourceCtx, Sorter,
+    container::Container, utils::class_canceler_deleter, ResourceCtx,
 };
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -17,6 +17,8 @@ struct Response {
     updated: i64,
     inserted_id: Option<i32>,
 }
+
+type Sorter = Vec<(Option<i32>, Option<i16>)>;
 
 #[put("/api/me/prompts")]
 async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
