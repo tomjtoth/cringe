@@ -27,7 +27,7 @@ pub async fn image_crud_ops(ctx: &ServerCtx, img: Image) -> anyhow::Result<()> {
 
         queue AS (
             SELECT count(*) AS idx FROM user_images
-            WHERE user_id > 0 AND bytes IS NULL
+            WHERE user_id > 0 AND url IS NOT NULL AND bytes IS NOT NULL
         ),
 
         arg_image AS (

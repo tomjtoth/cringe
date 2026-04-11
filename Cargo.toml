@@ -1,6 +1,6 @@
 [package]
 name = "cringe"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Tamás Tóth <tomjtoth@gmail.com>"]
 edition = "2021"
 
