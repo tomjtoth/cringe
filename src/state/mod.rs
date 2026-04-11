@@ -37,6 +37,7 @@ async fn get_me() -> Result<Me> {
 
             profile AS (
                 SELECT
+                    id,
                     name,
                     gender,
                     born,

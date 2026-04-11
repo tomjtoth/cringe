@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     models::image::Image,
     state::{
-        image::{ImageConversionResult, ImageOpResult},
+        image::{image_cli_ops, ImageConversionResult, ImageOpResult},
         AUTH_CTE, ME,
     },
     utils::sleep,
@@ -80,8 +80,9 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                         },
 
                         Ok(WsRequest::ImageOp(img)) => {
-                            info!("received img, sized: {:?}", img.bytes().as_ref().map(|b|b.len()));
-                            _ = crate::state::image::image_op(img).await;
+                            if let Err(e) = crate::state::image::ops::image_crud_ops(&ctx, img).await {
+                                error!("ImageOp failed: {e:?}");
+                            }
                         },
 
                         Err(e) => {
@@ -153,11 +154,7 @@ pub(super) fn ws_init() {
                     _ = ws.send(WsRequest::KeepAlive).await.map_err(error_handler)
                 }
 
-                WsResponse::ImageOp(ImageOpResult {
-                    authorized,
-                    image,
-                    sorted,
-                }) => {}
+                WsResponse::ImageOp(res) => image_cli_ops(res),
 
                 WsResponse::ImageConversion(ImageConversionResult {
                     image,

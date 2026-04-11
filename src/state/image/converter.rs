@@ -6,7 +6,10 @@ use tokio::sync::mpsc::{channel, Sender};
 
 use crate::{
     models::image::Image,
-    state::{image::ImageConversionResult, websocket::WsResponse},
+    state::{
+        image::ImageConversionResult,
+        websocket::{server::ws_notify, WsResponse},
+    },
 };
 
 static CONVERTER_TX: LazyLock<RwLock<Option<Sender<i32>>>> = LazyLock::new(|| RwLock::new(None));
@@ -67,7 +70,7 @@ pub fn init_converter(pool: sqlx::PgPool) {
                             url = NULL,
                             bytes = $2::bytea
                         WHERE id = $1::int
-                        RETURNING id
+                        RETURNING id, user_id, position, prompt
                     ),
 
                     queue AS (
@@ -92,16 +95,18 @@ pub fn init_converter(pool: sqlx::PgPool) {
                     ),
 
                     placeholders AS (
-                        SELECT jsonb_object_agg(
-                            id, url
+                        SELECT coalesce(
+                            jsonb_object_agg(id, url),
+                            '{}'::jsonb
                         ) AS placeholders
                         FROM updated_queue uq
                     )
 
                     SELECT
-                        row_to_json(p) || 
-                        jsonb_build_object('image', NULL)
+                        to_jsonb(p) ||
+                        jsonb_build_object('image', to_jsonb(j))
                     FROM placeholders p
+                    CROSS JOIN job j
                     "#,
             )
             .bind(&id)
@@ -112,12 +117,13 @@ pub fn init_converter(pool: sqlx::PgPool) {
                 continue;
             };
 
-            res.image = converted;
+            if let Some(bytes) = converted.bytes() {
+                res.image.set_bytes(bytes.clone());
+            }
 
             info!("Reporting #{id}");
 
-            _ = crate::state::websocket::server::ws_notify(None, WsResponse::ImageConversion(res))
-                .await;
+            _ = ws_notify(None, WsResponse::ImageConversion(res)).await;
 
             info!("Finished #{id}");
         }

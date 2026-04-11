@@ -36,9 +36,7 @@ impl std::fmt::Debug for Image {
                 url,
                 bytes,
             } => {
-                let bytes = bytes
-                    .as_ref()
-                    .map(|bytes| 
+                let bytes = bytes.as_ref().map(|bytes|
                         // keeping 2 digits from fractional part
                         (bytes.len() as f64 / 10.24).trunc() / 100.0);
 
