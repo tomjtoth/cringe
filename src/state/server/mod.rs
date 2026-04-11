@@ -11,7 +11,11 @@ use sqlx::PgPool;
 
 use crate::{auth::COOKIE_NAME, state::image::converter::init_converter};
 
-
+#[derive(Clone)]
+pub struct ServerCtx {
+    pub session_id: String,
+    pub pool: PgPool,
+}
 
 async fn get_db() -> sqlx::PgPool {
     let Extension(pool) = FullstackContext::extract()

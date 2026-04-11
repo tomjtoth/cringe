@@ -60,6 +60,11 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
         let (tx, mut rx) = tokio::sync::mpsc::channel::<WsResponse>(32);
         ws_register(sess_id.clone(), tx).await;
 
+        let ctx = ServerCtx {
+            session_id: sess_id.clone(),
+            pool,
+        };
+
         loop {
             tokio::select! {
                 from_server_fns = rx.recv() => {
