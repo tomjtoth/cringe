@@ -37,6 +37,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
     let mut sig = use_signal(|| {
         src.unwrap_or(Image::Uploaded {
             id: None,
+            user_id: None,
             bytes: None,
             url: None,
             prompt: None,

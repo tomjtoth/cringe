@@ -8,6 +8,7 @@ pub enum Image {
 
     Uploaded {
         id: Option<i32>,
+        user_id: Option<i32>,
 
         #[serde(default)]
         position: Option<i16>,
@@ -24,49 +25,49 @@ pub enum Image {
 }
 
 impl Image {
-    pub fn id(&self) -> Option<i32> {
+    pub fn id(&self) -> &Option<i32> {
         match self {
-            Self::UrlOnly(_) => None,
-            Self::Uploaded { id, .. } => id.clone(),
+            Self::Uploaded { id, .. } => id,
+            _ => &None,
         }
     }
 
-    pub fn set_id(&mut self, id: Option<i32>) {
-        let other_id = id;
+    pub fn set_id(&mut self, new_id: Option<i32>) {
+        if let Self::Uploaded { id, .. } = self {
+            *id = new_id
+        }
+    }
 
+    pub fn user_id(&self) -> &Option<i32> {
         match self {
-            Self::UrlOnly(_) => (),
-            Self::Uploaded { id, .. } => *id = other_id,
+            Self::Uploaded { user_id, .. } => user_id,
+            _ => &None,
         }
     }
 
     pub fn pos(&self) -> &Option<i16> {
         match self {
-            Self::UrlOnly(_) => &None,
             Self::Uploaded { position, .. } => position,
+            _ => &None,
         }
     }
 
     pub fn set_pos(&mut self, pos: Option<i16>) {
-        match self {
-            Self::UrlOnly(_) => (),
-            Self::Uploaded { position, .. } => {
-                *position = pos;
-            }
-        };
+        if let Self::Uploaded { position, .. } = self {
+            *position = pos;
+        }
     }
 
     pub fn prompt(&self) -> Option<&str> {
         match self {
-            Self::UrlOnly(_) => None,
             Self::Uploaded { prompt, .. } => prompt.as_deref(),
+            _ => None,
         }
     }
 
     pub fn set_prompt(&mut self, val: String) {
-        match self {
-            Self::UrlOnly(_) => (),
-            Self::Uploaded { prompt, .. } => *prompt = if val == "" { None } else { Some(val) },
+        if let Self::Uploaded { prompt, .. } = self {
+            *prompt = if val == "" { None } else { Some(val) }
         }
     }
 
@@ -89,17 +90,29 @@ impl Image {
     }
 
     pub fn set_url(&mut self, url: Option<String>) {
+        if let Self::Uploaded { url: my_url, .. } = self {
+            *my_url = url
+        }
+    }
+
+    pub fn url(&self) -> Option<String> {
         match self {
-            Self::Uploaded { url: my_url, .. } => *my_url = url,
-            // idc about the others
-            _ => (),
+            Self::UrlOnly(url) => Some(url.clone()),
+            Self::Uploaded { url, .. } => url.clone(),
         }
     }
 
     pub fn has_url(&self) -> bool {
         match self {
             Self::Uploaded { url, .. } => url.is_some(),
-            _ => false,
+            _ => true,
+        }
+    }
+
+    pub fn bytes(&self) -> &Option<Vec<u8>> {
+        match self {
+            Self::Uploaded { bytes, .. } => bytes,
+            _ => &None,
         }
     }
 
@@ -111,11 +124,11 @@ impl Image {
     }
 
     pub fn set_bytes(&mut self, bytes: Vec<u8>) {
-        match self {
-            Self::Uploaded {
-                bytes: my_bytes, ..
-            } => *my_bytes = Some(bytes),
-            _ => (),
+        if let Self::Uploaded {
+            bytes: my_bytes, ..
+        } = self
+        {
+            *my_bytes = Some(bytes)
         }
     }
 }
