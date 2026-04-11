@@ -10,6 +10,7 @@ mod models;
 mod navbar;
 mod router;
 mod state;
+mod utils;
 mod views;
 
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
