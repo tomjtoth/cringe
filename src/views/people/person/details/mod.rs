@@ -149,21 +149,23 @@ pub fn Details() -> Element {
         }
     );
 
+    let immutables = "cursor-not-allowed select-none text-gray-500";
+
     rsx! {
         Container { class: class_container, wo_button: olcx.is_some(), onsubmit,
             ul { class: class_ul,
 
                 if let Some(age) = &sig.read().age() {
-                    li { "🎂 {age}" }
+                    li { class: if editing { immutables }, "🎂 {age}" }
                 }
 
                 if let Some(dist) = &sig.read().distance() {
-                    li { "{dist}" }
+                    li { class: if editing { immutables }, "{dist}" }
                 }
 
-                li { "{sig.read().gender}" }
+                li { class: if editing { immutables }, "{sig.read().gender}" }
 
-                li { "📏 {sig.read().height} cm" }
+                li { class: if editing { immutables }, "📏 {sig.read().height} cm" }
 
                 location::Location { sig, editing }
 
@@ -172,7 +174,7 @@ pub fn Details() -> Element {
                 // TODO: include pets here
                 //
                 if let Some(sign) = sig.read().zodiac_sign() {
-                    li { "{sign}" }
+                    li { class: if editing { "cursor-not-allowed" }, "{sign}" }
                 }
 
                 habits::Habits { sig, editing }
