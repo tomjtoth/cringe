@@ -8,9 +8,10 @@ use dioxus::{
     },
 };
 use sqlx::PgPool;
-use tokio::sync::mpsc::Sender;
 
-use crate::{auth::COOKIE_NAME, state::image::init_converter};
+use crate::{auth::COOKIE_NAME, state::image::converter::init_converter};
+
+
 
 async fn get_db() -> sqlx::PgPool {
     let Extension(pool) = FullstackContext::extract()
@@ -48,7 +49,7 @@ async fn get_session_id() -> Option<String> {
     Some(String::from(id))
 }
 
-pub async fn init() -> anyhow::Result<(PgPool, Sender<i32>)> {
+pub async fn init() -> anyhow::Result<PgPool> {
     dotenvy::dotenv().ok();
 
     let pool = PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
@@ -59,7 +60,7 @@ pub async fn init() -> anyhow::Result<(PgPool, Sender<i32>)> {
         error!("Failed to load bots.yaml: {}", e);
     }
 
-    let tx = init_converter(pool.clone());
+    init_converter(pool.clone());
 
-    Ok((pool, tx))
+    Ok(pool)
 }

@@ -1,34 +1,34 @@
-use std::collections::HashMap;
+use std::sync::{LazyLock, RwLock};
 
-use axum::Extension;
-use dioxus::fullstack::FullstackContext;
 use dioxus::prelude::{error, info};
-use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
-use sqlx::PgPool;
 use tokio::sync::mpsc::{channel, Sender};
 
 use crate::{
     models::image::Image,
-    state::websocket::{server::ws_notify, WsResponse},
+    state::{image::ImageConversionResult, websocket::WsResponse},
 };
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ImageConversionResult {
-    pub image: Image,
-    pub placeholders: HashMap<i32, String>,
+static CONVERTER_TX: LazyLock<RwLock<Option<Sender<i32>>>> = LazyLock::new(|| RwLock::new(None));
+
+pub(super) async fn enqueue(id: i32) -> anyhow::Result<()> {
+    let Some(tx) = CONVERTER_TX
+        .read()
+        .expect("converter tx lock poisoned")
+        .clone()
+    else {
+        anyhow::bail!("converter queue is not initialized")
+    };
+
+    tx.send(id).await?;
+
+    Ok(())
 }
 
-pub(super) async fn converter_tx() -> anyhow::Result<Sender<i32>> {
-    let Extension(tx) = FullstackContext::extract()
-        .await
-        .expect("failed to extract converter daemon's tx");
-
-    Ok(tx)
-}
-
-pub fn init_converter(pool: PgPool) -> Sender<i32> {
+pub fn init_converter(pool: sqlx::PgPool) {
     let (tx, mut rx) = channel::<i32>(1000);
+
+    *CONVERTER_TX.write().expect("converter tx lock poisoned") = Some(tx);
 
     tokio::spawn(async move {
         while let Some(id) = rx.recv().await {
@@ -116,13 +116,12 @@ pub fn init_converter(pool: PgPool) -> Sender<i32> {
 
             info!("Reporting #{id}");
 
-            _ = ws_notify(None, WsResponse::ImageConversion(res)).await;
+            _ = crate::state::websocket::server::ws_notify(None, WsResponse::ImageConversion(res))
+                .await;
 
             info!("Finished #{id}");
         }
 
         anyhow::Ok(())
     });
-
-    tx
 }

@@ -52,14 +52,13 @@ fn main() {
 
     #[cfg(feature = "server")]
     dioxus::serve(|| async {
-        let (pool, tx) = crate::state::server::init().await?;
+        let pool = crate::state::server::init().await?;
 
         // TODO: stop passing pool.clone to auth::routes,
         // make use of Dioxus' extractor style if possible
         let app = auth::routes(pool.clone())?
             .fallback_service(dioxus::server::router(App))
-            .layer(axum::Extension(pool))
-            .layer(axum::Extension(tx));
+            .layer(axum::Extension(pool));
 
         Ok(app)
     })
