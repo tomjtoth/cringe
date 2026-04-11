@@ -35,7 +35,7 @@ pub(super) fn use_gps_watch() {
     let _gps = use_hook(|| {
         #[cfg(target_arch = "wasm32")]
         {
-            use crate::{models::person::Gps, state::client::ME};
+            use crate::{models::person::Gps, state::ME};
 
             if ME.with(|me| me.authenticated && me.profile.is_some()) {
                 use wasm_bindgen::{closure::Closure, JsCast};

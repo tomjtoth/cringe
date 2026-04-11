@@ -10,8 +10,14 @@ use tokio::sync::mpsc::{channel, Sender};
 
 use crate::{
     models::image::Image,
-    state::{server::websocket::ws_notify, websocket::WsResponse},
+    state::websocket::{server::ws_notify, WsResponse},
 };
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ImageConversionResult {
+    pub image: Image,
+    pub placeholders: HashMap<i32, String>,
+}
 
 pub(super) async fn converter_tx() -> anyhow::Result<Sender<i32>> {
     let Extension(tx) = FullstackContext::extract()
@@ -19,12 +25,6 @@ pub(super) async fn converter_tx() -> anyhow::Result<Sender<i32>> {
         .expect("failed to extract converter daemon's tx");
 
     Ok(tx)
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ImageConversionResult {
-    pub image: Image,
-    pub placeholders: HashMap<i32, String>,
 }
 
 pub fn init_converter(pool: PgPool) -> Sender<i32> {

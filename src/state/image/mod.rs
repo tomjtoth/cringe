@@ -8,10 +8,10 @@ use sqlx::types::Json;
 
 use crate::{
     models::image::Image,
-    state::AUTH_CTE,
     state::{
-        server::{get_ctx, websocket::ws_notify},
-        websocket::WsResponse,
+        server::get_ctx,
+        websocket::{server::ws_notify, WsResponse},
+        AUTH_CTE,
     },
 };
 pub use converter::*;
@@ -25,9 +25,9 @@ pub struct ImageOpResult {
     // session_ids: Vec<String>,
 }
 
-pub async fn image_op(mut img: Image) -> anyhow::Result<()> {
+pub async fn image_op(img: Image) -> anyhow::Result<()> {
     if let (Some(sess_id), pool) = get_ctx().await {
-        let Json(mut res) = sqlx::query_scalar::<_, Json<ImageOpResult>>(&format!(
+        let Json(res) = sqlx::query_scalar::<_, Json<ImageOpResult>>(&format!(
             r"
             WITH {AUTH_CTE},
 

@@ -1,3 +1,5 @@
+mod bots;
+
 use dioxus::{
     fullstack::TypedHeader,
     prelude::{
@@ -8,11 +10,7 @@ use dioxus::{
 use sqlx::PgPool;
 use tokio::sync::mpsc::Sender;
 
-use crate::{auth::COOKIE_NAME, models::image::Image};
-
-mod bots;
-pub mod img;
-pub mod websocket;
+use crate::{auth::COOKIE_NAME, state::image::init_converter};
 
 async fn get_db() -> sqlx::PgPool {
     let Extension(pool) = FullstackContext::extract()
@@ -61,7 +59,7 @@ pub async fn init() -> anyhow::Result<(PgPool, Sender<i32>)> {
         error!("Failed to load bots.yaml: {}", e);
     }
 
-    let tx = img::init_converter(pool.clone());
+    let tx = init_converter(pool.clone());
 
     Ok((pool, tx))
 }
