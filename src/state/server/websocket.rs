@@ -10,9 +10,28 @@ use crate::state::websocket::WsResponse;
 static WS_REG: Lazy<Mutex<HashMap<String, Sender<WsResponse>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub async fn ws_notify(session_id: &String, noti: WsResponse) {
-    if let Some(tx) = WS_REG.lock().await.get(session_id) {
-        _ = tx.send(noti).await
+/// if no specific connections were defined, it'll be a broadcast to all available connections
+pub async fn ws_notify(specific_connections: Option<Vec<String>>, notification: WsResponse) {
+    let mut recipients = vec![];
+
+    {
+        let guard = WS_REG.lock().await;
+
+        if let Some(mut specific_connections) = specific_connections {
+            for conn in specific_connections {
+                if let Some(tx) = guard.get(&conn).cloned() {
+                    recipients.push(tx)
+                }
+            }
+        } else {
+            for tx in guard.values() {
+                recipients.push(tx.clone())
+            }
+        }
+    }
+
+    for tx in recipients {
+        _ = tx.send(notification.clone()).await
     }
 }
 
