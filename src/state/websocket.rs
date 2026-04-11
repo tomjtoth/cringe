@@ -8,15 +8,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::state::client::{AUTH_CTE, ME};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
-    ImageUpdate(Option<(i32, Vec<u8>)>, Vec<(i32, String)>),
+    ImageOp(ImageOpResult),
+    ImageConversion(ImageConversionResult),
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum WsRequest {
     KeepAlive,
+    ImageOp(Image),
 }
 
 #[get("/api/ws")]

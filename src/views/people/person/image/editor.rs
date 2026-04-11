@@ -65,7 +65,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                         return rcx.next_state();
                     }
 
-                    _ = wscx.send(WsRequest::ImageToDb(sig())).await;
+                    _ = wscx.send(WsRequest::ImageOp(sig())).await;
 
                     rcx.next_state();
                 }
@@ -80,7 +80,11 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
     rsx! {
         Container { class: "{class} rounded-b-none!", onsubmit,
             div { class: "pt-5 px-2 grid-cols-subgrid grid col-span-2",
-                input { name: "id", hidden: true, value: sig.read().id() }
+                input {
+                    name: "id",
+                    hidden: true,
+                    value: sig.read().id().clone(),
+                }
 
                 input {
                     name: "prompt",

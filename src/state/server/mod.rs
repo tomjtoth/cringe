@@ -50,7 +50,7 @@ async fn get_session_id() -> Option<String> {
     Some(String::from(id))
 }
 
-pub async fn init() -> anyhow::Result<(PgPool, Sender<Image>)> {
+pub async fn init() -> anyhow::Result<(PgPool, Sender<i32>)> {
     dotenvy::dotenv().ok();
 
     let pool = PgPool::connect(&std::env::var("DATABASE_URL")?).await?;
