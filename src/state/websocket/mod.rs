@@ -35,13 +35,13 @@ pub enum WsRequest {
 #[get("/api/ws")]
 async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, WsResponse>> {
     use crate::state::{
-        server::get_ctx,
+        server::{get_ctx, ServerCtx},
         websocket::server::{ws_register, ws_unregister},
     };
 
-    let mut sess_id = None::<String>;
+    let (mut sess_id, pool) = get_ctx().await;
 
-    if let (Some(session_id), pool) = get_ctx().await {
+    if let Some(session_id) = sess_id {
         sess_id = sqlx::query_scalar(&format!(
             r"
             WITH {AUTH_CTE}
@@ -149,9 +149,11 @@ pub(super) fn ws_init() {
         while let Ok(from_server) = ws.recv().await {
             match from_server {
                 WsResponse::ServerAlive => {
-                    sleep(30).await;
+                    spawn(async move {
+                        sleep(30).await;
 
-                    _ = ws.send(WsRequest::KeepAlive).await.map_err(error_handler)
+                        _ = ws.send(WsRequest::KeepAlive).await.map_err(error_handler)
+                    });
                 }
 
                 WsResponse::ImageOp(res) => image_cli_ops(res),

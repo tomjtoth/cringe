@@ -17,7 +17,7 @@ pub async fn ws_notify(specific_connections: Option<Vec<String>>, notification: 
     {
         let guard = WS_REG.lock().await;
 
-        if let Some(mut specific_connections) = specific_connections {
+        if let Some(specific_connections) = specific_connections {
             for conn in specific_connections {
                 if let Some(tx) = guard.get(&conn).cloned() {
                     recipients.push(tx)
