@@ -45,6 +45,25 @@ impl Image {
         }
     }
 
+    #[cfg(feature = "server")]
+    pub fn convert(&mut self) -> anyhow::Result<()> {
+        if let Self::Uploaded { bytes, .. } = self {
+            if let Some(bytes) = bytes {
+                let img = image::load_from_memory(bytes.as_slice())?;
+
+                let mut converted = Vec::new();
+                img.write_to(
+                    &mut std::io::Cursor::new(&mut converted),
+                    image::ImageFormat::Avif,
+                )?;
+
+                *bytes = converted;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn pos(&self) -> &Option<i16> {
         match self {
             Self::Uploaded { position, .. } => position,
