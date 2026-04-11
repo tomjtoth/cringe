@@ -45,7 +45,7 @@ async fn get_me() -> Result<Me> {
                     occupation,
                     location,
                     hometown,
-                    
+
                     seeking,
                     relationship_type,
 

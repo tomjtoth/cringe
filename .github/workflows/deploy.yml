@@ -131,7 +131,7 @@ jobs:
           for docker_tag in ${TAGS[@]}; do
             # trim repo from docker_tag
             tag=${docker_tag#*:}
-            
+
             if [ $tag == "latest" ]; then
               tag=prod
             fi

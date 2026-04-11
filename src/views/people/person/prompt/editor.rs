@@ -35,7 +35,7 @@ async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
         Json(res) = sqlx::query_scalar::<_, Json<Response>>(&format!(
             r"
             WITH {AUTH_CTE},
-            
+
             me AS (
                 SELECT u.id FROM auth a
                 JOIN users u ON a.email = u.email
@@ -52,7 +52,7 @@ async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
             ),
 
             arg_sorter AS (
-                SELECT * FROM unnest($3::int[], $4::smallint[]) 
+                SELECT * FROM unnest($3::int[], $4::smallint[])
                 AS _x(id, position)
             ),
 
@@ -70,7 +70,7 @@ async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
                 DELETE FROM user_prompts AS up
                 USING arg_prompt AS p
                 CROSS JOIN me
-                WHERE up.user_id = me.id 
+                WHERE up.user_id = me.id
                 AND up.id = p.id AND (p.title = '' OR p.body = '' OR p.position IS NULL)
                 RETURNING up.id
             ),
@@ -88,7 +88,7 @@ async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
 
             updated AS (
                 UPDATE user_prompts AS up
-                SET 
+                SET
                     position = p.position,
                     title = p.title,
                     body = p.body

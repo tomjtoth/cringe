@@ -252,7 +252,7 @@ impl Image {
 
             let cb = Closure::wrap(Box::new(move |blob: JsValue| {
                 if let Some(tx) = tx.take() {
-                    let _ = tx.send(blob);
+                    _ = tx.send(blob);
                 }
             }) as Box<dyn FnMut(JsValue)>);
 

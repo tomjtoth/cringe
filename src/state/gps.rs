@@ -10,8 +10,8 @@ async fn post_gps(coords: Gps) -> Result<()> {
         let res = sqlx::query(&format!(
             "
             WITH {AUTH_CTE}
-        
-            UPDATE users u 
+
+            UPDATE users u
             SET gps_lon = $2, gps_lat = $3
             FROM auth a
             WHERE u.email = a.email

@@ -14,7 +14,7 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
         res = sqlx::query_as::<_, Person>(&format!(
                 r#"
                 WITH {AUTH_CTE},
-                
+
                 me AS (
                     SELECT
                         u.id, gps_lon, gps_lat

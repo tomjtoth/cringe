@@ -57,8 +57,6 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
 
     Ok(options.on_upgrade(move |mut socket| async move {
         // determine session for this websocket and register a sender for notifications
-
-
         let (tx, mut rx) = tokio::sync::mpsc::channel::<WsResponse>(32);
         ws_register(sess_id.clone(), tx).await;
 

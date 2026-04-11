@@ -30,7 +30,7 @@ async fn update_me(me: Person) -> Result<bool> {
             r#"
             WITH {AUTH_CTE}
 
-            UPDATE users u 
+            UPDATE users u
             SET
                 education = $2,
                 occupation = $3,
