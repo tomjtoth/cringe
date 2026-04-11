@@ -150,6 +150,106 @@ impl Image {
             *my_bytes = Some(bytes)
         }
     }
+
+    pub async fn set_bytes_resized(&mut self, _bytes: Vec<u8>) {
+        #[cfg(target_arch = "wasm32")]
+        {
+            use futures::channel::oneshot;
+            use js_sys::{Array, Uint8Array};
+            use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+            use web_sys::{window, Blob, CanvasRenderingContext2d, HtmlCanvasElement, ImageBitmap};
+
+            let uint8 = Uint8Array::from(_bytes.as_slice());
+
+            let parts = Array::new();
+            parts.push(&uint8.buffer());
+
+            let blob = Blob::new_with_u8_array_sequence(&parts).unwrap();
+
+            // Use ImageBitmap (no extra <img> element) and draw it to the canvas
+            let window = window().unwrap();
+
+            // create_image_bitmap returns a Promise, await it to get an ImageBitmap
+            let bitmap_promise = window.create_image_bitmap_with_blob(&blob).unwrap();
+            let bitmap_js = wasm_bindgen_futures::JsFuture::from(bitmap_promise)
+                .await
+                .unwrap();
+            let img: ImageBitmap = bitmap_js.dyn_into().unwrap();
+
+            let document = window.document().unwrap();
+
+            let canvas = document
+                .create_element("canvas")
+                .unwrap()
+                .dyn_into::<HtmlCanvasElement>()
+                .unwrap();
+
+            let (w, h) = {
+                let max_size = 1920;
+
+                let w = img.width();
+                let h = img.height();
+
+                let larger = w.max(h);
+
+                if larger > max_size {
+                    let ratio = max_size as f64 / larger as f64;
+
+                    ((w as f64 * ratio) as u32, (h as f64 * ratio) as u32)
+                } else {
+                    (w, h)
+                }
+            };
+
+            canvas.set_width(w);
+            canvas.set_height(h);
+
+            let ctx = canvas
+                .get_context("2d")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<CanvasRenderingContext2d>()
+                .unwrap();
+
+            ctx.draw_image_with_image_bitmap_and_dw_and_dh(&img, 0.0, 0.0, w as f64, h as f64)
+                .unwrap();
+
+            // Convert to blob (JPEG compression) using callback -> oneshot channel
+
+            let (tx, rx) = oneshot::channel();
+            let mut tx = Some(tx);
+
+            let cb = Closure::wrap(Box::new(move |blob: JsValue| {
+                if let Some(tx) = tx.take() {
+                    let _ = tx.send(blob);
+                }
+            }) as Box<dyn FnMut(JsValue)>);
+
+            // to_blob_with_type_and_quality takes (callback, mime_type, quality)
+            canvas
+                .to_blob_with_type_and_encoder_options(
+                    cb.as_ref().unchecked_ref(),
+                    "image/jpeg",
+                    &JsValue::from_f64(0.95),
+                )
+                .unwrap();
+
+            let blob_js = rx.await.unwrap();
+            let blob: Blob = blob_js.dyn_into().unwrap();
+
+            // Keep the callback alive until after the blob arrives, then release it.
+            drop(cb);
+
+            let array_buffer = wasm_bindgen_futures::JsFuture::from(blob.array_buffer())
+                .await
+                .unwrap();
+
+            let u8_array = Uint8Array::new(&array_buffer);
+            let res = u8_array.to_vec();
+            dioxus::prelude::info!("res.len = {}", res.len());
+            self.set_bytes(res);
+        }
+    }
 }
 
 fn option_vec_to_base64<S>(bytes: &Option<Vec<u8>>, s: S) -> Result<S::Ok, S::Error>
