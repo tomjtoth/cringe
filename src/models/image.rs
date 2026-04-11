@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use serde::{de::Error as _, Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Image {
     UrlOnly(String),
@@ -22,6 +22,37 @@ pub enum Image {
         )]
         bytes: Option<Vec<u8>>,
     },
+}
+
+impl std::fmt::Debug for Image {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UrlOnly(url) => f.debug_tuple("UrlOnly").field(url).finish(),
+            Self::Uploaded {
+                id,
+                user_id,
+                position,
+                prompt,
+                url,
+                bytes,
+            } => {
+                let bytes = bytes
+                    .as_ref()
+                    .map(|bytes| 
+                        // keeping 2 digits from fractional part
+                        (bytes.len() as f64 / 10.24).trunc() / 100.0);
+
+                f.debug_struct("Uploaded")
+                    .field("id", id)
+                    .field("user_id", user_id)
+                    .field("position", position)
+                    .field("prompt", prompt)
+                    .field("url", url)
+                    .field("bytes [kiB]", &bytes)
+                    .finish()
+            }
+        }
+    }
 }
 
 impl Image {
