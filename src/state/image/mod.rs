@@ -5,6 +5,7 @@ pub(super) mod ops;
 
 use std::collections::HashMap;
 
+use dioxus::prelude::info;
 use serde::{Deserialize, Serialize};
 
 use crate::{models::image::Image, state::ME};
@@ -45,4 +46,29 @@ pub struct ImageConversionResult {
     pub placeholders: HashMap<i32, String>,
 }
 
-pub async fn image_cli_converted(res: ImageConversionResult) {}
+pub fn image_cli_converted(
+    ImageConversionResult {
+        image,
+        placeholders,
+    }: ImageConversionResult,
+) {
+    if let Some(p) = ME.write().profile.as_mut() {
+        if placeholders.len() > 0 {
+            for img in p.images.iter_mut() {
+                if let Some(id) = img.id() {
+                    if let Some(url) = placeholders.get(&id) {
+                        info!("Updating placeholder for {id}");
+                        img.set_url(Some(url.clone()));
+                    }
+                }
+            }
+        }
+
+        if *image.user_id() == p.id {
+            if let Some(i) = p.images.iter_mut().find(|i| i.id() == image.id()) {
+                *i = image;
+                info!("Received #{}", i.id().unwrap());
+            }
+        }
+    }
+}

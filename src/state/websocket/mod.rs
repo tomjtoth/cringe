@@ -13,8 +13,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     models::image::Image,
     state::{
-        image::{image_cli_ops, ImageConversionResult, ImageOpResult},
-        AUTH_CTE, ME,
+        image::{image_cli_converted, image_cli_ops, ImageConversionResult, ImageOpResult},
+        AUTH_CTE,
     },
     utils::sleep,
 };
@@ -147,6 +147,10 @@ pub(super) fn ws_init() {
         };
 
         while let Ok(from_server) = ws.recv().await {
+            if !matches!(from_server, WsResponse::ServerAlive) {
+                info!("Received {from_server:?}");
+            }
+
             match from_server {
                 WsResponse::ServerAlive => {
                     spawn(async move {
@@ -158,32 +162,7 @@ pub(super) fn ws_init() {
 
                 WsResponse::ImageOp(res) => image_cli_ops(res),
 
-                WsResponse::ImageConversion(ImageConversionResult {
-                    image,
-                    placeholders,
-                }) => {
-                    if let Some(p) = ME.write().profile.as_mut() {
-                        if placeholders.len() > 0 {
-                            info!("Updating placeholders");
-                            for img in p.images.iter_mut() {
-                                if let Some(id) = img.id() {
-                                    if let Some(url) = placeholders.get(&id) {
-                                        img.set_url(Some(url.clone()));
-                                    }
-                                }
-                            }
-                        }
-
-                        if *image.user_id() == p.id {
-                            if let Some(id) = image.id() {
-                                info!("Received #{id}");
-                            }
-                            if let Some(i) = p.images.iter_mut().find(|i| i.id() == image.id()) {
-                                *i = image;
-                            }
-                        }
-                    }
-                }
+                WsResponse::ImageConversion(res) => image_cli_converted(res),
             }
         }
     });
