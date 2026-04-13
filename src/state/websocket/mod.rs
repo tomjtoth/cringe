@@ -2,10 +2,7 @@
 pub mod server;
 
 use dioxus::{
-    fullstack::{
-        use_websocket, CloseCode, UseWebsocket, WebSocketOptions, Websocket, WebsocketError,
-        WebsocketState,
-    },
+    fullstack::{use_websocket, UseWebsocket, WebSocketOptions, Websocket, WebsocketError},
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
@@ -26,7 +23,7 @@ pub enum WsResponse {
     ImageConversion(ImageConversionResult),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
     ImageOp(Image),
@@ -99,70 +96,77 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
     }))
 }
 
-pub type WsCtx = UseWebsocket<WsRequest, WsResponse>;
+pub struct WsCtx(UseWebsocket<WsRequest, WsResponse>);
 
-pub async fn ws_send(sock: WsCtx, payload: WsRequest) -> Result<(), WebsocketError> {
-    sock.send(payload).await
+impl Copy for WsCtx {}
+impl Clone for WsCtx {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl std::ops::Deref for WsCtx {
+    type Target = UseWebsocket<WsRequest, WsResponse>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-pub(super) fn ws_init() {
-    let mut ws = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
+impl WsCtx {
+    pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
+        if self.is_closed() {
+            let res = self.connect().await;
 
-    use_context_provider(|| ws);
+            info!("WS channeld was closed, tried self.connect(): {res:?}")
+        }
+
+        self.send(request).await.map_err(|e| {
+            error!("WS error: {e:?}");
+            e
+        })
+    }
+
+    pub fn delayed_req(&self, delay: u64, request: WsRequest) {
+        let ws = *self;
+
+        spawn(async move {
+            sleep(delay).await;
+
+            _ = ws.req(request).await;
+        });
+    }
+}
+
+pub(super) fn use_ws() {
+    info!("Creating NEW websocket instance");
+
+    let ws = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
+
+    let ws = use_context_provider(|| WsCtx(ws));
 
     use_future(move || async move {
-        let init_conn = move || async move {
-            match ws.connect().await {
-                WebsocketState::FailedToConnect => error!("WS failed to connect"),
-                state => info!("WS state: {state:?}"),
-            }
+        let mut socket = ws.0;
 
-            // init keepalive cycle
-            if let Err(e) = ws.send(WsRequest::KeepAlive).await {
-                error!("WS error: {e:?}");
-            }
-        };
+        ws.delayed_req(10, WsRequest::KeepAlive);
 
-        init_conn().await;
+        loop {
+            match socket.recv().await {
+                Ok(from_server) => {
+                    if !matches!(from_server, WsResponse::ServerAlive) {
+                        info!("Received {from_server:?}");
+                    }
 
-        let error_handler = move |e| async move {
-            type E = dioxus_fullstack::WebsocketError;
+                    match from_server {
+                        WsResponse::ServerAlive => ws.delayed_req(10, WsRequest::KeepAlive),
 
-            match e {
-                E::Capacity
-                | E::ConnectionClosed {
-                    code: CloseCode::Restart,
-                    ..
-                } => {
-                    error!("WS reconnecting after 30 secs: {e:?}");
-                    sleep(30).await;
+                        WsResponse::ImageOp(res) => image_cli_ops(res),
+
+                        WsResponse::ImageConversion(res) => image_cli_converted(res),
+                    }
                 }
 
-                _ => {
-                    error!("WS reconnecting: {e:?}");
-                }
-            }
-
-            init_conn().await;
-        };
-
-        while let Ok(from_server) = ws.recv().await {
-            if !matches!(from_server, WsResponse::ServerAlive) {
-                info!("Received {from_server:?}");
-            }
-
-            match from_server {
-                WsResponse::ServerAlive => {
-                    spawn(async move {
-                        sleep(30).await;
-
-                        _ = ws.send(WsRequest::KeepAlive).await.map_err(error_handler)
-                    });
-                }
-
-                WsResponse::ImageOp(res) => image_cli_ops(res),
-
-                WsResponse::ImageConversion(res) => image_cli_converted(res),
+                // not breaking loop, so that automatic_reconnect could do its job
+                _ => (),
             }
         }
     });

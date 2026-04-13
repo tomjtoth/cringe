@@ -66,9 +66,9 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                         return rcx.next_state();
                     }
 
-                    _ = wscx.send(WsRequest::ImageOp(sig())).await;
-
-                    rcx.next_state();
+                    if wscx.req(WsRequest::ImageOp(sig())).await.is_ok() {
+                        rcx.next_state();
+                    }
                 }
             });
         }

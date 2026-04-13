@@ -143,7 +143,7 @@ pub fn init_client() -> Result<(), RenderError> {
         error!("GET /api/me returned: {:?}", initial_state.value());
     }
 
-    websocket::ws_init();
+    websocket::use_ws();
 
     // use_gps_watch();
 
