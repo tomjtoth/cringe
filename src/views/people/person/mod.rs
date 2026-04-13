@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
+    utils::rand_u32,
     views::people::{
         listing::ListingCtx,
         person::{button::SkipButton, details::Details},

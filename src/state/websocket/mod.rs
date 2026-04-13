@@ -1,3 +1,4 @@
+pub mod ops;
 #[cfg(feature = "server")]
 pub mod server;
 
@@ -19,14 +20,14 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
-    ImageOp(ImageOpResult),
+    ImageOp(u32, ImageOpResult),
     ImageConversion(ImageConversionResult),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
-    ImageOp(Image),
+    ImageOp(u32, Image),
 }
 
 #[get("/api/ws")]
@@ -76,8 +77,8 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                             _ = socket.send(WsResponse::ServerAlive).await;
                         },
 
-                        Ok(WsRequest::ImageOp(img)) => {
-                            if let Err(e) = crate::state::image::ops::image_crud_ops(&ctx, img).await {
+                        Ok(WsRequest::ImageOp(oid, img)) => {
+                            if let Err(e) = crate::state::image::ops::image_crud_ops(&ctx, oid,img).await {
                                 error!("ImageOp failed: {e:?}");
                             }
                         },
@@ -113,12 +114,15 @@ impl std::ops::Deref for WsCtx {
 }
 
 impl WsCtx {
+    /// #### Registers outgoing requests' operation id and logs errors
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
         if self.is_closed() {
             let res = self.connect().await;
 
             info!("WS channeld was closed, tried self.connect(): {res:?}")
         }
+
+        ops::register(&request);
 
         self.send(request).await.map_err(|e| {
             error!("WS error: {e:?}");
@@ -159,7 +163,7 @@ pub(super) fn use_ws() {
                     match from_server {
                         WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
 
-                        WsResponse::ImageOp(res) => image_cli_ops(res),
+                        WsResponse::ImageOp(oid, res) => image_cli_ops(oid, res),
 
                         WsResponse::ImageConversion(res) => image_cli_converted(res),
                     }

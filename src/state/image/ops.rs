@@ -10,7 +10,7 @@ use crate::{
     },
 };
 
-pub async fn image_crud_ops(ctx: &ServerCtx, img: Image) -> anyhow::Result<()> {
+pub async fn image_crud_ops(ctx: &ServerCtx, oid: u32, img: Image) -> anyhow::Result<()> {
     use crate::state::websocket::server::ws_notify;
     use sqlx::types::Json;
 
@@ -151,7 +151,7 @@ pub async fn image_crud_ops(ctx: &ServerCtx, img: Image) -> anyhow::Result<()> {
             }
         }
 
-        ws_notify(None, WsResponse::ImageOp(res)).await;
+        ws_notify(None, WsResponse::ImageOp(oid, res)).await;
     } else {
         // TODO
         // ws_notify(Some(vec![sess_id]), todo!()).await;

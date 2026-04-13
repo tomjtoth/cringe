@@ -5,10 +5,16 @@ pub(super) mod ops;
 
 use std::collections::HashMap;
 
-use dioxus::prelude::info;
+use dioxus::prelude::{debug, info};
 use serde::{Deserialize, Serialize};
 
-use crate::{models::image::Image, state::ME};
+use crate::{
+    models::image::Image,
+    state::{
+        websocket::ops::{OpState, OPS},
+        ME,
+    },
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ImageOpResult {
@@ -19,25 +25,46 @@ pub struct ImageOpResult {
     // session_ids: Vec<String>,
 }
 
-pub(super) fn image_cli_ops(ImageOpResult { image, sorted, .. }: ImageOpResult) {
-    if let Some(me) = ME.write().profile.as_mut() {
-        if *image.user_id() == me.id {
-            me.images.retain(|img| img.id() != image.id());
-            if let Some(pos) = image.pos() {
-                me.images.insert(*pos as usize, image);
-            }
+pub(super) fn image_cli_ops(
+    oid: u32,
+    ImageOpResult {
+        authorized,
+        image,
+        sorted,
+    }: ImageOpResult,
+) {
+    OPS.with_mut(|ops| {
+        // this user initiated the op
+        if let Some(OpState::Pending) = ops.get(&oid) {
+            let res = if authorized {
+                OpState::Success
+            } else {
+                OpState::Failure
+            };
 
-            for img in me.images.iter_mut() {
-                if let Some(id) = img.id() {
-                    if let Some(pos) = sorted.get(id) {
-                        img.set_pos(Some(*pos))
+            ops.insert(oid, res);
+            debug!("OPS: {ops:?}");
+
+            if let Some(me) = ME.write().profile.as_mut() {
+                if *image.user_id() == me.id {
+                    me.images.retain(|img| img.id() != image.id());
+                    if let Some(pos) = image.pos() {
+                        me.images.insert(*pos as usize, image);
                     }
+
+                    for img in me.images.iter_mut() {
+                        if let Some(id) = img.id() {
+                            if let Some(pos) = sorted.get(id) {
+                                img.set_pos(Some(*pos))
+                            }
+                        }
+                    }
+
+                    me.images.sort_by_key(|img| *img.pos());
                 }
             }
-
-            me.images.sort_by_key(|img| *img.pos());
         }
-    }
+    });
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
