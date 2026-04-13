@@ -8,8 +8,7 @@ use axum::{
 };
 use axum_extra::{headers, TypedHeader};
 use dioxus::logger::tracing;
-use http::StatusCode;
-use oauth2::{CsrfToken, EndpointNotSet, EndpointSet};
+use oauth2::{http::StatusCode, CsrfToken, EndpointNotSet, EndpointSet};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use sqlx::PgPool;
