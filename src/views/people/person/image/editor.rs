@@ -137,7 +137,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
             label {
                 class: "relative col-span-2 overflow-hidden",
                 class: if is_new { "cursor-pointer" },
-                class: if is_new && !is_empty { "border-t" },
+                class: if !is_empty { "border-t" },
 
                 if sig.with(|img| { img.has_url() || img.has_bytes() }) {
                     img { class: "object-cover w-full", src: sig.read().src() }
