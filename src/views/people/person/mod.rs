@@ -25,24 +25,38 @@ struct PersonCtx {
 }
 
 /// This might be a Prompt, an Image or the whole Personal data section
-#[derive(Clone)]
 struct ResourceCtx {
-    state: Signal<u8>,
+    state: Signal<bool>,
+    op_id: u32,
+}
+
+impl Copy for ResourceCtx {}
+impl Clone for ResourceCtx {
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 impl ResourceCtx {
     fn provide() -> Self {
-        let state = use_signal(|| 0);
-        use_context_provider(|| ResourceCtx { state })
+        let state = use_signal(|| false);
+        use_context_provider(|| ResourceCtx {
+            state,
+            op_id: rand_u32(),
+        })
+    }
+
+    fn oid(&self) -> u32 {
+        self.op_id
     }
 
     fn editing(&self) -> bool {
-        *(self.state).read() >= 1
+        (self.state)()
     }
 
-    fn next_state(&mut self) {
-        let curr = (self.state)();
-        *(self.state).write() = if curr == 2 { 0 } else { curr + 1 };
+    fn toggle_editing(&mut self) {
+        self.state.toggle();
+        debug!("rcx.toggle() -> {}", self.editing());
     }
 }
 

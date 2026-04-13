@@ -120,7 +120,7 @@ async fn mod_prompt(prompt: Prompt, sorter: Sorter) -> Result<Response> {
 
 #[component]
 pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
-    let rcx = use_context::<ResourceCtx>();
+    let mut rcx = use_context::<ResourceCtx>();
 
     let max = ME
         .read()
@@ -153,82 +153,70 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         )
     });
 
-    let onsubmit = use_callback({
-        let rcx = rcx.clone();
+    let onsubmit = use_callback(move |_: Event<FormData>| {
+        spawn(async move {
+            if is_new && is_empty || !is_new && !has_changes {
+                return rcx.toggle_editing();
+            }
 
-        move |_: Event<FormData>| {
-            spawn({
-                let mut rcx = rcx.clone();
+            info!("Submitting prompt: {:?}", sig.read());
 
-                async move {
-                    rcx.next_state();
+            // getting a detached clone of the whole array to accommodate changes
+            let mut draft = ME
+                .read()
+                .profile
+                .as_ref()
+                .map(|p| p.prompts().clone())
+                .unwrap_or(vec![]);
 
-                    if is_new && is_empty || !is_new && !has_changes {
-                        return rcx.next_state();
+            let prompt_id = sig.read().id;
+            draft.retain(|pp| pp.id != prompt_id);
+
+            // achieving DELETE by not re-inserting at desired position
+            if let Some(pos) = sig.with(|p| p.position.filter(|_| p.title != "" && p.body != "")) {
+                draft.insert(pos as usize, sig());
+            }
+
+            let mut positions = vec![];
+
+            // adjust positions of each prompt
+            for (idx, prompt) in draft.iter_mut().enumerate() {
+                prompt.position.as_mut().map(|pos| {
+                    let idx = idx as i16;
+
+                    if *pos != idx {
+                        *pos = idx;
+                        positions.push((prompt.id, Some(idx)));
                     }
+                });
+            }
 
-                    info!("Submitting prompt: {:?}", sig.read());
-
-                    // getting a detached clone of the whole array to accommodate changes
-                    let mut draft = ME
-                        .read()
-                        .profile
-                        .as_ref()
-                        .map(|p| p.prompts().clone())
-                        .unwrap_or(vec![]);
-
-                    let prompt_id = sig.read().id;
-                    draft.retain(|pp| pp.id != prompt_id);
-
-                    // achieving DELETE by not re-inserting at desired position
-                    if let Some(pos) =
-                        sig.with(|p| p.position.filter(|_| p.title != "" && p.body != ""))
-                    {
-                        draft.insert(pos as usize, sig());
-                    }
-
-                    let mut positions = vec![];
-
-                    // adjust positions of each prompt
-                    for (idx, prompt) in draft.iter_mut().enumerate() {
-                        prompt.position.as_mut().map(|pos| {
-                            let idx = idx as i16;
-
-                            if *pos != idx {
-                                *pos = idx;
-                                positions.push((prompt.id, Some(idx)));
-                            }
-                        });
-                    }
-
-                    if let Ok(Response {
-                        authorized: true,
-                        inserted_id,
-                        ..
-                    }) = mod_prompt(sig(), positions).await.map(|res| {
-                        info!("PUT /api/me/prompts returned: {:?}", res);
-                        res
-                    }) {
-                        // paste the ID received from the server to its prompt based on pos
-                        if let Some(pos) = sig.read().position.filter(|_| inserted_id.is_some()) {
-                            draft.get_mut(pos as usize).map(|p| {
-                                p.id = inserted_id;
-                            });
-                        }
-
-                        // sync state
-                        ME.with_mut(|p| {
-                            p.profile.as_mut().map(|p| {
-                                p.prompts.truncate(0);
-                                p.prompts.append(&mut draft);
-                            });
-                        });
-                    }
-
-                    rcx.next_state();
+            if let Ok(Response {
+                authorized: true,
+                inserted_id,
+                ..
+            }) = mod_prompt(sig(), positions).await.map(|res| {
+                info!("PUT /api/me/prompts returned: {:?}", res);
+                res
+            }) {
+                // paste the ID received from the server to its prompt based on pos
+                if let Some(pos) = sig.read().position.filter(|_| inserted_id.is_some()) {
+                    draft.get_mut(pos as usize).map(|p| {
+                        p.id = inserted_id;
+                    });
                 }
-            });
-        }
+
+                // sync state
+                ME.with_mut(|p| {
+                    p.profile.as_mut().map(|p| {
+                        p.prompts.truncate(0);
+                        p.prompts.append(&mut draft);
+                    });
+                });
+            }
+
+            rcx.toggle_editing();
+        });
     });
 
     let disabled = !rcx.editing();

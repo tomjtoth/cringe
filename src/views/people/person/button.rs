@@ -76,7 +76,7 @@ fn Button(decision: Option<Decision>) -> Element {
                 onclick: move |evt| {
                     if !rcx.editing() {
                         evt.prevent_default();
-                        rcx.next_state()
+                        rcx.toggle_editing()
                     }
                 },
 

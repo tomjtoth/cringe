@@ -19,7 +19,7 @@ use crate::{
 
 #[component]
 pub fn ImageEditor(src: Option<Image>) -> Element {
-    let rcx = use_context::<ResourceCtx>();
+    let mut rcx = use_context::<ResourceCtx>();
     let wscx = use_context::<WsCtx>();
 
     let max = ME
@@ -80,24 +80,14 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         )
     });
 
-    let onsubmit = use_callback({
-        move |_: Event<FormData>| {
-            spawn({
-                let mut rcx = rcx.clone();
-
-                async move {
-                    rcx.next_state();
-
-                    if is_new && is_empty || !is_new && !has_changes {
-                        return rcx.next_state();
-                    }
-
-                    if wscx.req(WsRequest::ImageOp(sig())).await.is_ok() {
-                        rcx.next_state();
-                    }
-                }
-            });
+    let onsubmit = use_callback(move |_: Event<FormData>| {
+        if is_new && is_empty || !is_new && !has_changes {
+            return rcx.toggle_editing();
         }
+
+        spawn(async move {
+            _ = wscx.req(WsRequest::ImageOp(rcx.oid(), sig())).await;
+        });
     });
 
     let class = container_class(is_empty, has_changes);

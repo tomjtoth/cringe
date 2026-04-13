@@ -74,36 +74,26 @@ async fn update_me(me: Person) -> Result<bool> {
 pub fn Details() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
     let person = use_context::<PersonCtx>().person;
-    let rcx = use_context::<ResourceCtx>();
+    let mut rcx = use_context::<ResourceCtx>();
 
     let sig = use_signal(|| person());
 
-    let onsubmit = use_callback({
-        let rcx = rcx.clone();
+    let onsubmit = use_callback(move |_: Event<FormData>| {
+        spawn(async move {
+            if let Ok(true) = update_me({
+                let mut wo_prompts_and_images = sig();
+                wo_prompts_and_images.prompts.truncate(0);
+                wo_prompts_and_images.images.truncate(0);
 
-        move |_: Event<FormData>| {
-            spawn({
-                let mut rcx = rcx.clone();
+                wo_prompts_and_images
+            })
+            .await
+            {
+                ME.with_mut(|me| me.profile = Some(sig()));
+            }
 
-                async move {
-                    rcx.next_state();
-
-                    if let Ok(true) = update_me({
-                        let mut wo_prompts_and_images = sig();
-                        wo_prompts_and_images.prompts.truncate(0);
-                        wo_prompts_and_images.images.truncate(0);
-
-                        wo_prompts_and_images
-                    })
-                    .await
-                    {
-                        ME.with_mut(|me| me.profile = Some(sig()));
-                    }
-
-                    rcx.next_state();
-                }
-            });
-        }
+            rcx.toggle_editing();
+        });
     });
 
     let values_under_ul = [
