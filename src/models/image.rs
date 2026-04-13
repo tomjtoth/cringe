@@ -77,7 +77,14 @@ impl Image {
                 let mut converted = Vec::new();
                 img.write_to(
                     &mut std::io::Cursor::new(&mut converted),
-                    image::ImageFormat::Avif,
+                    #[cfg(debug_assertions)]
+                    {
+                        image::ImageFormat::Jpeg
+                    },
+                    #[cfg(not(debug_assertions))]
+                    {
+                        image::ImageFormat::Avif
+                    },
                 )?;
 
                 *bytes = converted;
