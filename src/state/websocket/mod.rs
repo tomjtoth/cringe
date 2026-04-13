@@ -147,7 +147,7 @@ pub(super) fn use_ws() {
     use_future(move || async move {
         let mut socket = ws.0;
 
-        ws.delayed_req(10, WsRequest::KeepAlive);
+        ws.delayed_req(30, WsRequest::KeepAlive);
 
         loop {
             match socket.recv().await {
@@ -157,7 +157,7 @@ pub(super) fn use_ws() {
                     }
 
                     match from_server {
-                        WsResponse::ServerAlive => ws.delayed_req(10, WsRequest::KeepAlive),
+                        WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
 
                         WsResponse::ImageOp(res) => image_cli_ops(res),
 
