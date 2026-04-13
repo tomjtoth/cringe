@@ -9,7 +9,7 @@ use crate::{
     views::people::person::{
         container::Container,
         image::{masterpiece::Masterpiece, ribbon::Ribbon},
-        utils::class_canceler_deleter,
+        utils::{container_class, ButtonOverride},
         ResourceCtx,
     },
 };
@@ -35,7 +35,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         };
 
     let mut sig = use_signal(|| {
-        src.unwrap_or(Image::Uploaded {
+        src.clone().unwrap_or(Image::Uploaded {
             id: None,
             user_id: None,
             bytes: None,
@@ -45,12 +45,14 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         })
     });
 
-    let (existing, new_but_empty, to_be_deleted) = sig.with(|img| {
-        let has_id = img.id().is_some();
+    let (is_new, is_empty, has_changes) = sig.with(|sig| {
         (
-            has_id,
-            !has_id && !img.has_bytes(),
-            has_id && img.pos().is_none(),
+            sig.id().is_none(),
+            !sig.has_bytes() && !sig.has_url() || sig.pos().is_none(),
+            src.map(|src| {
+                src.pos() != sig.pos() || src.prompt() != sig.prompt() || src.src() != sig.src()
+            })
+            .unwrap_or(true),
         )
     });
 
@@ -62,7 +64,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 async move {
                     rcx.next_state();
 
-                    if new_but_empty {
+                    if is_new && is_empty || !is_new && !has_changes {
                         return rcx.next_state();
                     }
 
@@ -74,7 +76,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
     });
 
-    let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
+    let class = container_class(is_empty, has_changes);
 
     let to_be_profile_pic = *sig.read().pos() == Some(0) || max == 1;
 
@@ -91,7 +93,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                     name: "prompt",
                     placeholder: "Prompt if any",
                     class: "w-full min-w-30",
-                    value: sig.read().prompt(),
+                    value: sig.read().prompt().as_deref(),
                     oninput: move |evt| sig.write().set_prompt(evt.value()),
                 }
 
@@ -120,8 +122,8 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
             label {
                 class: "relative col-span-2 overflow-hidden",
-                class: if !existing { "cursor-pointer" },
-                class: if !existing && !new_but_empty { "border-t" },
+                class: if is_new { "cursor-pointer" },
+                class: if is_new && !is_empty { "border-t" },
 
                 if sig.with(|img| { img.has_url() || img.has_bytes() }) {
                     img { class: "object-cover w-full", src: sig.read().src() }
@@ -131,7 +133,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
 
                 Ribbon { to_be_profile_pic }
 
-                if !existing {
+                if is_new {
                     input {
                         name: "image",
                         hidden: true,
@@ -150,9 +152,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 }
             }
 
-            // buttons
-            {canceler}
-            {deleter}
+            ButtonOverride { has_changes, is_empty, is_new }
         }
     }
 }

@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::person::Prompt;
 use crate::state::{AUTH_CTE, ME};
-use crate::views::people::person::{
-    container::Container, utils::class_canceler_deleter, ResourceCtx,
-};
+use crate::views::people::person::utils::ButtonOverride;
+use crate::views::people::person::{container::Container, utils::container_class, ResourceCtx};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(feature = "server", derive(sqlx::FromRow))]
@@ -139,14 +138,20 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         };
 
     let mut sig = use_signal(|| {
-        src.unwrap_or(Prompt {
+        src.clone().unwrap_or(Prompt {
             position: Some(max - 1),
             ..Default::default()
         })
     });
 
-    let new_but_empty =
-        sig.with(|p| p.id == None && (p.title == "" || p.body == "" || p.position == None));
+    let (is_new, is_empty, has_changes) = sig.with(|p| {
+        (
+            p.id.is_none(),
+            p.title == "" || p.body == "" || p.position == None,
+            src.map(|src| src.title != p.title || src.body != p.body || src.position != p.position)
+                .unwrap_or(true),
+        )
+    });
 
     let onsubmit = use_callback({
         let rcx = rcx.clone();
@@ -158,7 +163,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 async move {
                     rcx.next_state();
 
-                    if new_but_empty {
+                    if is_new && is_empty || !is_new && !has_changes {
                         return rcx.next_state();
                     }
 
@@ -228,10 +233,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
 
     let disabled = !rcx.editing();
 
-    let to_be_deleted =
-        sig.with(|p| p.id.is_some() && (p.title == "" || p.body == "" || p.position == None));
-
-    let (class, canceler, deleter) = class_canceler_deleter(new_but_empty, to_be_deleted);
+    let class = container_class(is_empty, has_changes);
 
     rsx! {
         Container { class: "{class} px-2 pt-10 pb-20", onsubmit,
@@ -270,9 +272,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 oninput: move |evt| sig.write().body = evt.value(),
             }
 
-            // buttons
-            {canceler}
-            {deleter}
+            ButtonOverride { has_changes, is_empty, is_new }
         }
     }
 }

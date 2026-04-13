@@ -106,10 +106,10 @@ impl Image {
         }
     }
 
-    pub fn prompt(&self) -> Option<&str> {
+    pub fn prompt(&self) -> &Option<String> {
         match self {
-            Self::Uploaded { prompt, .. } => prompt.as_deref(),
-            _ => None,
+            Self::Uploaded { prompt, .. } => &prompt,
+            _ => &None,
         }
     }
 
