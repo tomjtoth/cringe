@@ -61,12 +61,6 @@ impl Image {
         }
     }
 
-    pub fn set_id(&mut self, new_id: Option<i32>) {
-        if let Self::Uploaded { id, .. } = self {
-            *id = new_id
-        }
-    }
-
     pub fn user_id(&self) -> &Option<i32> {
         match self {
             Self::Uploaded { user_id, .. } => user_id,
@@ -140,13 +134,6 @@ impl Image {
     pub fn set_url(&mut self, url: Option<String>) {
         if let Self::Uploaded { url: my_url, .. } = self {
             *my_url = url
-        }
-    }
-
-    pub fn url(&self) -> Option<String> {
-        match self {
-            Self::UrlOnly(url) => Some(url.clone()),
-            Self::Uploaded { url, .. } => url.clone(),
         }
     }
 
