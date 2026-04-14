@@ -34,14 +34,14 @@ pub(super) fn image_cli_ops(
         sorted,
     }: ImageOpResult,
 ) {
-    fn do_op(prof: &mut Person, image: &Image, sorted: &HashMap<i32, i16>) {
-        if *image.user_id() == prof.id {
-            prof.images.retain(|img| img.id() != image.id());
+    fn do_op(profile: &mut Person, image: &Image, sorted: &HashMap<i32, i16>) {
+        if *image.user_id() == profile.id {
+            profile.images.retain(|img| img.id() != image.id());
             if let Some(pos) = image.pos() {
-                prof.images.insert(*pos as usize, image.clone());
+                profile.images.insert(*pos as usize, image.clone());
             }
 
-            for img in prof.images.iter_mut() {
+            for img in profile.images.iter_mut() {
                 if let Some(id) = img.id() {
                     if let Some(pos) = sorted.get(id) {
                         img.set_pos(Some(*pos))
@@ -49,7 +49,7 @@ pub(super) fn image_cli_ops(
                 }
             }
 
-            prof.images.sort_by_key(|img| *img.pos());
+            profile.images.sort_by_key(|img| *img.pos());
         }
     }
 
@@ -70,11 +70,9 @@ pub(super) fn image_cli_ops(
                 do_op(me, &image, &sorted);
             }
         } else {
-            OTHERS.with_mut(|profiles| {
-                for prof in profiles {
-                    do_op(prof, &image, &sorted);
-                }
-            });
+            for profile in OTHERS.write().iter_mut() {
+                do_op(profile, &image, &sorted);
+            }
         }
     });
 }
@@ -91,9 +89,9 @@ pub fn image_cli_converted(
         placeholders,
     }: ImageConversionResult,
 ) {
-    if let Some(p) = ME.write().profile.as_mut() {
+    fn do_op(profile: &mut Person, image: &Image, placeholders: &HashMap<i32, String>) {
         if placeholders.len() > 0 {
-            for img in p.images.iter_mut() {
+            for img in profile.images.iter_mut() {
                 if let Some(id) = img.id() {
                     if let Some(url) = placeholders.get(&id) {
                         info!("Updating placeholder for {id}");
@@ -103,11 +101,18 @@ pub fn image_cli_converted(
             }
         }
 
-        if *image.user_id() == p.id {
-            if let Some(i) = p.images.iter_mut().find(|i| i.id() == image.id()) {
-                *i = image;
-                info!("Received #{}", i.id().unwrap());
+        if *image.user_id() == profile.id {
+            if let Some(img) = profile.images.iter_mut().find(|i| i.id() == image.id()) {
+                *img = image.clone();
+                info!("Received #{}", img.id().unwrap());
             }
         }
+    }
+
+    if let Some(p) = ME.write().profile.as_mut() {
+        do_op(p, &image, &placeholders);
+    }
+    for profile in OTHERS.write().iter_mut() {
+        do_op(profile, &image, &placeholders);
     }
 }
