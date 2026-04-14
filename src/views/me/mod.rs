@@ -4,7 +4,7 @@ use crate::{
     state::ME,
     views::{
         me::basic::BasicMe,
-        people::{listing::ListingCtx, person::Person},
+        people::{listing::ListingCtx, profile::Profile},
         protector::NeedsLogin,
     },
 };
@@ -17,9 +17,9 @@ pub fn Me() -> Element {
 
     rsx! {
         NeedsLogin {
-            if let Some(person) = ME().profile {
+            if let Some(profile) = ME().profile {
                 div { class: "relative h-full overflow-y-scroll px-2",
-                    Person { person }
+                    Profile { profile }
                 }
             } else {
                 BasicMe {}

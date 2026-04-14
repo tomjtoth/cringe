@@ -5,7 +5,7 @@ use crate::{
     state::decide,
     views::people::{
         listing::{ListingCtx, OTHERS},
-        person::{PersonCtx, ResourceCtx},
+        profile::{ProfileCtx, ResourceCtx},
     },
 };
 
@@ -25,7 +25,7 @@ pub fn SkipButton() -> Element {
 
 #[component]
 fn Button(decision: Option<Decision>) -> Element {
-    let pcx = use_context::<PersonCtx>();
+    let pcx = use_context::<ProfileCtx>();
     let olcx = use_context::<Option<ListingCtx>>();
     let mut rcx = use_context::<ResourceCtx>();
 
@@ -44,7 +44,7 @@ fn Button(decision: Option<Decision>) -> Element {
         // - or Liked and this is a Skip button
         if let Some(listing_wants) = olcx {
             if decision != listing_wants {
-                if let Some(id) = pcx.person.read().id {
+                if let Some(id) = pcx.profile.read().id {
                     button {
                         class,
 

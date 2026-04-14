@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::{
     models::person::{Decision, Person},
     state::AUTH_CTE,
-    views::{people::person::Person as VPerson, protector::NeedsLoginAndProfile},
+    views::{people::profile::Profile as VPerson, protector::NeedsLoginAndProfile},
 };
 
 #[get("/api/profiles?wants")]
@@ -137,9 +137,9 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
                     // we're swiping, hide everything but the 1st child
                     class: if wants.is_none() { "[&_>_*+*]:hidden" },
 
-                    for person in OTHERS().into_iter() {
-                        li { key: r#"{person.id.expect("missing ID on profile")}"#,
-                            VPerson { person }
+                    for profile in OTHERS().into_iter() {
+                        li { key: r#"{profile.id.expect("missing ID on profile")}"#,
+                            VPerson { profile }
                         }
                     }
                 }

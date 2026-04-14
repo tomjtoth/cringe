@@ -1,2 +1,2 @@
 pub mod listing;
-pub mod person;
+pub mod profile;

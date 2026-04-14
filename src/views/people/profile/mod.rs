@@ -5,7 +5,7 @@ use crate::{
     utils::rand_u32,
     views::people::{
         listing::ListingCtx,
-        person::{button::SkipButton, details::Details},
+        profile::{button::SkipButton, details::Details},
     },
 };
 
@@ -20,8 +20,8 @@ use image::Image;
 use prompt::Prompt;
 
 #[derive(Clone)]
-struct PersonCtx {
-    person: ReadSignal<MPerson>,
+struct ProfileCtx {
+    profile: ReadSignal<MPerson>,
 }
 
 /// This might be a Prompt, an Image or the whole Personal data section
@@ -61,10 +61,10 @@ impl ResourceCtx {
 }
 
 #[component]
-pub fn Person(person: ReadSignal<MPerson>) -> Element {
+pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
 
-    use_context_provider(move || PersonCtx { person });
+    use_context_provider(move || ProfileCtx { profile });
 
     // for the SkipButton and PersonalData
     let _rcx = ResourceCtx::provide();
@@ -77,7 +77,7 @@ pub fn Person(person: ReadSignal<MPerson>) -> Element {
                 "flex justify-between items-center",
             ),
 
-            span { class: "text-2xl", "{person().name}" }
+            span { class: "text-2xl", "{profile.read().name}" }
 
             if olcx.is_none() {
                 a {

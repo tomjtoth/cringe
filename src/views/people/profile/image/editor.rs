@@ -9,7 +9,7 @@ use crate::{
         },
         ME,
     },
-    views::people::person::{
+    views::people::profile::{
         container::Container,
         image::{masterpiece::Masterpiece, ribbon::Ribbon},
         utils::{container_class, ButtonOverride},

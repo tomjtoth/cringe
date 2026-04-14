@@ -2,10 +2,10 @@ use dioxus::prelude::*;
 
 use crate::views::people::{
     listing::ListingCtx,
-    person::{
+    profile::{
         container::Container,
         image::{editor::ImageEditor, ribbon::Ribbon},
-        PersonCtx, ResourceCtx,
+        ProfileCtx, ResourceCtx,
     },
 };
 
@@ -19,8 +19,8 @@ pub fn Image(idx: usize) -> Element {
     let rcx = ResourceCtx::provide();
 
     let (src, show_adder) = {
-        let pcx = use_context::<PersonCtx>();
-        let person = (pcx.person)();
+        let pcx = use_context::<ProfileCtx>();
+        let person = (pcx.profile)();
         let pics = person.images();
         let op = pics.get(idx);
 

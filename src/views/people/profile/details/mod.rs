@@ -5,7 +5,7 @@ use crate::{
     state::{AUTH_CTE, ME},
     views::people::{
         listing::ListingCtx,
-        person::{container::Container, PersonCtx, ResourceCtx},
+        profile::{container::Container, ProfileCtx, ResourceCtx},
     },
 };
 
@@ -73,7 +73,7 @@ async fn update_me(me: Person) -> Result<bool> {
 #[component]
 pub fn Details() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
-    let person = use_context::<PersonCtx>().person;
+    let person = use_context::<ProfileCtx>().profile;
     let mut rcx = use_context::<ResourceCtx>();
 
     let sig = use_signal(|| person());

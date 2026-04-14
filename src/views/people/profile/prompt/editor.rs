@@ -3,8 +3,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::person::Prompt;
 use crate::state::{AUTH_CTE, ME};
-use crate::views::people::person::utils::ButtonOverride;
-use crate::views::people::person::{container::Container, utils::container_class, ResourceCtx};
+use crate::views::people::profile::{
+    container::Container,
+    utils::{container_class, ButtonOverride},
+    ResourceCtx,
+};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(feature = "server", derive(sqlx::FromRow))]

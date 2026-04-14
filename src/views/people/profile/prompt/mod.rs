@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::views::people::listing::ListingCtx;
-use crate::views::people::person::{
-    container::Container, prompt::editor::PromptEditor, PersonCtx, ResourceCtx,
+use crate::views::people::profile::{
+    container::Container, prompt::editor::PromptEditor, ProfileCtx, ResourceCtx,
 };
 
 mod editor;
@@ -13,8 +13,8 @@ pub fn Prompt(idx: usize) -> Element {
     let rcx = ResourceCtx::provide();
 
     let (src, show_adder) = {
-        let pcx = use_context::<PersonCtx>();
-        let person = (pcx.person)();
+        let pcx = use_context::<ProfileCtx>();
+        let person = (pcx.profile)();
         let prompts = person.prompts();
         let op = prompts.get(idx);
 
