@@ -112,42 +112,34 @@ pub fn SwipeProfiles() -> Element {
     }
 }
 
-#[derive(Clone)]
-pub struct ListingCtx {
-    pub wants: Option<Decision>,
-    pub retainer: Callback<i32>,
-}
+pub static OTHERS: GlobalSignal<Vec<Person>> = GlobalSignal::new(|| vec![]);
+
+pub type ListingCtx = Option<Decision>;
 
 #[component]
 fn ListProfiles(wants: Option<Decision>) -> Element {
     let from_server = use_server_future(move || async move { get_profiles(wants).await })?;
 
-    let mut profiles = use_signal(Vec::new);
-
     use_effect(move || {
         if let Some(Ok(peeps)) = from_server().to_owned() {
-            *profiles.write() = peeps;
+            *OTHERS.write() = peeps;
         }
     });
 
-    let retainer = use_callback(move |id: i32| profiles.retain(|p| p.id != Some(id)));
-
-    use_context_provider(|| Some(ListingCtx { wants, retainer }));
+    use_context_provider(|| Some(wants));
 
     rsx! {
         NeedsLoginAndProfile {
-            if profiles.read().len() > 0 {
+            if OTHERS.read().len() > 0 {
                 ul {
                     class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
 
                     // we're swiping, hide everything but the 1st child
                     class: if wants.is_none() { "[&_>_*+*]:hidden" },
 
-                    for person in profiles().into_iter() {
-                        if let Some(id) = person.id {
-                            li { key: "{id}",
-                                VPerson { person }
-                            }
+                    for person in OTHERS().into_iter() {
+                        li { key: r#"{person.id.expect("missing ID on profile")}"#,
+                            VPerson { person }
                         }
                     }
                 }

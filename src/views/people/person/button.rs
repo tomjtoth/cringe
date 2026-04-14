@@ -4,7 +4,7 @@ use crate::{
     models::person::Decision,
     state::decide,
     views::people::{
-        listing::ListingCtx,
+        listing::{ListingCtx, OTHERS},
         person::{PersonCtx, ResourceCtx},
     },
 };
@@ -42,12 +42,9 @@ fn Button(decision: Option<Decision>) -> Element {
         // we're on a listing, but the profile is:
         // - either Skipped and this is a Like button
         // - or Liked and this is a Skip button
-
-        // _dx_wants -> syntax highlight/complainer issue
-        if let Some(ListingCtx { wants: _dx_wants, retainer }) = olcx {
-
-            if decision != _dx_wants {
-                if let Some(id) = (pcx.person)().id {
+        if let Some(listing_wants) = olcx {
+            if decision != listing_wants {
+                if let Some(id) = pcx.person.read().id {
                     button {
                         class,
 
@@ -56,7 +53,7 @@ fn Button(decision: Option<Decision>) -> Element {
 
                             if let Some(buttons_decision) = decision {
                                 if let Ok(true) = decide(id, buttons_decision).await {
-                                    retainer(id);
+                                    OTHERS.write().retain(|p| p.id != Some(id));
                                 }
                             }
                         },
@@ -66,7 +63,6 @@ fn Button(decision: Option<Decision>) -> Element {
                         } else {
                             "✅"
                         }
-
                     }
                 }
             }
