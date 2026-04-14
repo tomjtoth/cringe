@@ -9,11 +9,12 @@ use dioxus::prelude::{debug, info};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::image::Image,
+    models::{image::Image, person::Person},
     state::{
         websocket::ops::{OpState, OPS},
         ME,
     },
+    views::people::listing::OTHERS,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -33,36 +34,47 @@ pub(super) fn image_cli_ops(
         sorted,
     }: ImageOpResult,
 ) {
+    fn do_op(prof: &mut Person, image: &Image, sorted: &HashMap<i32, i16>) {
+        if *image.user_id() == prof.id {
+            prof.images.retain(|img| img.id() != image.id());
+            if let Some(pos) = image.pos() {
+                prof.images.insert(*pos as usize, image.clone());
+            }
+
+            for img in prof.images.iter_mut() {
+                if let Some(id) = img.id() {
+                    if let Some(pos) = sorted.get(id) {
+                        img.set_pos(Some(*pos))
+                    }
+                }
+            }
+
+            prof.images.sort_by_key(|img| *img.pos());
+        }
+    }
+
     OPS.with_mut(|ops| {
         // this user initiated the op
         if let Some(OpState::Pending) = ops.get(&oid) {
-            let res = if authorized {
-                OpState::Success
-            } else {
-                OpState::Failure
-            };
-
-            ops.insert(oid, res);
+            ops.insert(
+                oid,
+                if authorized {
+                    OpState::Success
+                } else {
+                    OpState::Failure
+                },
+            );
             debug!("OPS: {ops:?}");
 
             if let Some(me) = ME.write().profile.as_mut() {
-                if *image.user_id() == me.id {
-                    me.images.retain(|img| img.id() != image.id());
-                    if let Some(pos) = image.pos() {
-                        me.images.insert(*pos as usize, image);
-                    }
-
-                    for img in me.images.iter_mut() {
-                        if let Some(id) = img.id() {
-                            if let Some(pos) = sorted.get(id) {
-                                img.set_pos(Some(*pos))
-                            }
-                        }
-                    }
-
-                    me.images.sort_by_key(|img| *img.pos());
-                }
+                do_op(me, &image, &sorted);
             }
+        } else {
+            OTHERS.with_mut(|profiles| {
+                for prof in profiles {
+                    do_op(prof, &image, &sorted);
+                }
+            });
         }
     });
 }
