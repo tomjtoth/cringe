@@ -13,7 +13,7 @@ use crate::{
     router::Route,
     state::{
         image::{image_cli_converted, image_cli_ops, ImageConversionResult, ImageOpResult},
-        AUTH_CTE,
+        AUTH_CTE, ME,
     },
     utils::sleep,
 };
@@ -190,9 +190,11 @@ fn use_ws(mut state: Signal<u8>) {
             }
         }
 
-        info!("WS connection #{} failed, reconnecting...", state());
+        if ME.read().authenticated {
+            info!("WS connection #{} failed, reconnecting...", state());
 
-        sleep(1).await;
-        state.with_mut(|s| *s = s.wrapping_add(1));
+            sleep(1).await;
+            state.with_mut(|s| *s = s.wrapping_add(1));
+        }
     });
 }
