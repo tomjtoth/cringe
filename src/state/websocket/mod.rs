@@ -98,10 +98,7 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
     }))
 }
 
-pub struct WsCtx {
-    socket: UseWebsocket<WsRequest, WsResponse>,
-    state: Signal<u8>,
-}
+pub struct WsCtx(UseWebsocket<WsRequest, WsResponse>);
 
 impl Copy for WsCtx {}
 impl Clone for WsCtx {
@@ -113,19 +110,13 @@ impl std::ops::Deref for WsCtx {
     type Target = UseWebsocket<WsRequest, WsResponse>;
 
     fn deref(&self) -> &Self::Target {
-        &self.socket
+        &self.0
     }
 }
 
 impl WsCtx {
     /// #### Registers outgoing requests' operation id and logs errors
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
-        if self.is_closed() {
-            error!("WS channel was closed, tried self.connect():");
-            let mut as_mut = *self;
-            as_mut.renew().await;
-        }
-
         ops::register(&request);
 
         self.send(request).await.map_err(|e| {
@@ -142,13 +133,6 @@ impl WsCtx {
 
             _ = ws.req(request).await;
         });
-    }
-
-    async fn renew(&mut self) {
-        info!("WS connection #{} failed, reconnecting...", (self.state)());
-
-        sleep(1).await;
-        self.state.with_mut(|s| *s = s.wrapping_add(1));
     }
 }
 
@@ -182,17 +166,17 @@ fn Odd(state: Signal<u8>, children: Element) -> Element {
     }
 }
 
-fn use_ws(state: Signal<u8>) {
+fn use_ws(mut state: Signal<u8>) {
     let socket = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
 
     info!("WS connection #{}: {:?}", state(), socket.status());
 
-    let mut ws = use_context_provider(|| WsCtx { socket, state });
+    let mut ws = use_context_provider(|| WsCtx(socket));
 
     use_future(move || async move {
         ws.delayed_req(30, WsRequest::KeepAlive);
 
-        while let Ok(from_server) = ws.socket.recv().await {
+        while let Ok(from_server) = ws.0.recv().await {
             if !matches!(from_server, WsResponse::ServerAlive) {
                 info!("Received {from_server:?}");
             }
@@ -206,6 +190,9 @@ fn use_ws(state: Signal<u8>) {
             }
         }
 
-        ws.renew().await;
+        info!("WS connection #{} failed, reconnecting...", state());
+
+        sleep(1).await;
+        state.with_mut(|s| *s = s.wrapping_add(1));
     });
 }
