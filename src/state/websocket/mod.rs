@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     models::image::Image,
+    router::Route,
     state::{
         image::{image_cli_converted, image_cli_ops, ImageConversionResult, ImageOpResult},
         AUTH_CTE,
@@ -97,7 +98,10 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
     }))
 }
 
-pub struct WsCtx(UseWebsocket<WsRequest, WsResponse>);
+pub struct WsCtx {
+    socket: UseWebsocket<WsRequest, WsResponse>,
+    state: Signal<u8>,
+}
 
 impl Copy for WsCtx {}
 impl Clone for WsCtx {
@@ -109,7 +113,7 @@ impl std::ops::Deref for WsCtx {
     type Target = UseWebsocket<WsRequest, WsResponse>;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.socket
     }
 }
 
@@ -117,9 +121,9 @@ impl WsCtx {
     /// #### Registers outgoing requests' operation id and logs errors
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
         if self.is_closed() {
-            let res = self.connect().await;
-
-            info!("WS channeld was closed, tried self.connect(): {res:?}")
+            error!("WS channel was closed, tried self.connect():");
+            let mut as_mut = *self;
+            as_mut.renew().await;
         }
 
         ops::register(&request);
@@ -139,39 +143,69 @@ impl WsCtx {
             _ = ws.req(request).await;
         });
     }
+
+    async fn renew(&mut self) {
+        info!("WS connection #{} failed, reconnecting...", (self.state)());
+
+        sleep(1).await;
+        self.state.with_mut(|s| *s = s.wrapping_add(1));
+    }
 }
 
-pub(super) fn use_ws() {
-    info!("Creating NEW websocket instance");
+/// The sole purpose of this component is the re-creation of the WS connection
+#[component]
+pub fn WsProvider() -> Element {
+    let state = use_signal(|| 0u8);
 
-    let ws = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
+    rsx! {
+        if state() % 2 == 0 {
+            Even { state, Outlet::<Route> {} }
+        } else {
+            Odd { state, Outlet::<Route> {} }
+        }
+    }
+}
 
-    let ws = use_context_provider(|| WsCtx(ws));
+#[component]
+fn Even(state: Signal<u8>, children: Element) -> Element {
+    use_ws(state);
+    rsx! {
+        {children}
+    }
+}
+
+#[component]
+fn Odd(state: Signal<u8>, children: Element) -> Element {
+    use_ws(state);
+    rsx! {
+        {children}
+    }
+}
+
+fn use_ws(state: Signal<u8>) {
+    let socket = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
+
+    info!("WS connection #{}: {:?}", state(), socket.status());
+
+    let mut ws = use_context_provider(|| WsCtx { socket, state });
 
     use_future(move || async move {
-        let mut socket = ws.0;
-
         ws.delayed_req(30, WsRequest::KeepAlive);
 
-        loop {
-            match socket.recv().await {
-                Ok(from_server) => {
-                    if !matches!(from_server, WsResponse::ServerAlive) {
-                        info!("Received {from_server:?}");
-                    }
+        while let Ok(from_server) = ws.socket.recv().await {
+            if !matches!(from_server, WsResponse::ServerAlive) {
+                info!("Received {from_server:?}");
+            }
 
-                    match from_server {
-                        WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
+            match from_server {
+                WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
 
-                        WsResponse::ImageOp(oid, res) => image_cli_ops(oid, res),
+                WsResponse::ImageOp(oid, res) => image_cli_ops(oid, res),
 
-                        WsResponse::ImageConversion(res) => image_cli_converted(res),
-                    }
-                }
-
-                // not breaking loop, so that automatic_reconnect could do its job
-                _ => (),
+                WsResponse::ImageConversion(res) => image_cli_converted(res),
             }
         }
+
+        ws.renew().await;
     });
 }
