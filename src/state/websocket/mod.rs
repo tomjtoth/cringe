@@ -76,7 +76,12 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                 }
 
                 from_client = socket.recv() => {
-                    match from_client {
+                    match from_client.map(|req|{
+                        if !matches!(req, WsRequest::KeepAlive) {
+                            info!("Received {req:?}");
+                        }
+                        req
+                    }) {
                         Ok(WsRequest::KeepAlive) => {
                             _ = socket.send(WsResponse::ServerAlive).await;
                         }

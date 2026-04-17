@@ -12,6 +12,8 @@ static WS_REG: Lazy<Mutex<HashMap<String, Sender<WsResponse>>>> =
 
 /// if no specific connections were defined, it'll be a broadcast to all available connections
 pub async fn ws_notify(specific_connections: Option<Vec<String>>, notification: WsResponse) {
+    info!("WS pushes notification of {notification:?}");
+
     let mut recipients = vec![];
 
     {
