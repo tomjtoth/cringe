@@ -9,10 +9,11 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::image::Image,
+    models::{image::Image, person::Prompt},
     router::Route,
     state::{
         image::{handle_image_crud_res, image_cli_converted, ImageConversionResult, ImageOpResult},
+        prompt::{handle_prompt_crud_res, PromptOpResult},
         AUTH_CTE, ME,
     },
     utils::sleep,
@@ -21,6 +22,7 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
+    PromptOp(u32, PromptOpResult),
     ImageOp(u32, ImageOpResult),
     ImageConversion(ImageConversionResult),
 }
@@ -28,6 +30,7 @@ pub enum WsResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
+    PromptOp(u32, Prompt),
     ImageOp(u32, Image),
 }
 
@@ -76,7 +79,14 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                     match from_client {
                         Ok(WsRequest::KeepAlive) => {
                             _ = socket.send(WsResponse::ServerAlive).await;
-                        },
+                        }
+
+                        Ok(WsRequest::PromptOp(oid, prompt)) => {
+                            match crate::state::prompt::crud::prompt_crud(&ctx, prompt).await {
+                                Ok(res) => ws_notify(None, WsResponse::PromptOp(oid, res)).await,
+                                Err(e) => error!("PromptOp failed: {e:?}"),
+                            }
+                        }
 
                         Ok( WsRequest::ImageOp(oid, img)) => {
                             match crate::state::image::ops::image_crud(&ctx, img).await {
@@ -184,6 +194,8 @@ fn use_ws(mut state: Signal<u8>) {
 
             match from_server {
                 WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
+
+                WsResponse::PromptOp(oid, res) => handle_prompt_crud_res(oid, res),
 
                 WsResponse::ImageOp(oid, res) => handle_image_crud_res(oid, res),
 

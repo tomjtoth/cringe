@@ -14,13 +14,13 @@ pub enum OpState {
 pub static OPS: GlobalSignal<HashMap<u32, OpState>> = GlobalSignal::new(HashMap::new);
 
 pub(super) fn register(req: &WsRequest) {
-    let insert = |oid: u32| {
-        debug!("WS registering operation id {oid}");
-        OPS.with_mut(|ops| ops.insert(oid, OpState::Pending));
-    };
-
     match req {
-        WsRequest::ImageOp(oid, ..) => insert(*oid),
+        WsRequest::ImageOp(oid, ..) | WsRequest::PromptOp(oid, ..) => {
+            OPS.with_mut(|ops| {
+                ops.insert(*oid, OpState::Pending);
+                debug!("WS registered operation id {oid} ({:?})", ops);
+            });
+        }
 
         _ => (),
     }

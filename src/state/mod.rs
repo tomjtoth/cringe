@@ -1,6 +1,7 @@
 mod crud_query;
 mod gps;
 mod image;
+mod prompt;
 #[cfg(feature = "server")]
 pub mod server;
 pub mod websocket;
