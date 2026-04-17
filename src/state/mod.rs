@@ -1,3 +1,4 @@
+mod crud_query;
 mod gps;
 mod image;
 #[cfg(feature = "server")]

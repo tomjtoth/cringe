@@ -12,7 +12,7 @@ use crate::{
     models::image::Image,
     router::Route,
     state::{
-        image::{image_cli_converted, image_cli_ops, ImageConversionResult, ImageOpResult},
+        image::{handle_image_crud_res, image_cli_converted, ImageConversionResult, ImageOpResult},
         AUTH_CTE, ME,
     },
     utils::sleep,
@@ -35,7 +35,7 @@ pub enum WsRequest {
 async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, WsResponse>> {
     use crate::state::{
         server::{get_ctx, ServerCtx},
-        websocket::server::{ws_register, ws_unregister},
+        websocket::server::{ws_notify, ws_register, ws_unregister},
     };
 
     let (mut sess_id, pool) = get_ctx().await;
@@ -78,16 +78,17 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                             _ = socket.send(WsResponse::ServerAlive).await;
                         },
 
-                        Ok(WsRequest::ImageOp(oid, img)) => {
-                            if let Err(e) = crate::state::image::ops::image_crud_ops(&ctx, oid,img).await {
-                                error!("ImageOp failed: {e:?}");
+                        Ok( WsRequest::ImageOp(oid, img)) => {
+                            match crate::state::image::ops::image_crud(&ctx, img).await {
+                                Ok(res) => ws_notify(None, WsResponse::ImageOp(oid, res)).await,
+                                Err(e) => error!("ImageOp failed: {e:?}"),
                             }
-                        },
+                        }
 
                         Err(e) => {
                             error!("WS error: {e:?}");
                             break;
-                        },
+                        }
                     }
                 }
             }
@@ -184,7 +185,7 @@ fn use_ws(mut state: Signal<u8>) {
             match from_server {
                 WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
 
-                WsResponse::ImageOp(oid, res) => image_cli_ops(oid, res),
+                WsResponse::ImageOp(oid, res) => handle_image_crud_res(oid, res),
 
                 WsResponse::ImageConversion(res) => image_cli_converted(res),
             }

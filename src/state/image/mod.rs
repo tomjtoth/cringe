@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     models::{image::Image, person::Person},
     state::{
+        crud_query::Sorted,
         websocket::ops::{OpState, OPS},
         ME,
     },
@@ -21,12 +22,12 @@ use crate::{
 pub struct ImageOpResult {
     pub authorized: bool,
     pub image: Image,
-    pub sorted: HashMap<i32, i16>,
+    pub sorted: Sorted,
     // broadcast to all connections for now
     // session_ids: Vec<String>,
 }
 
-pub(super) fn image_cli_ops(
+pub(super) fn handle_image_crud_res(
     oid: u32,
     ImageOpResult {
         authorized,
@@ -34,7 +35,7 @@ pub(super) fn image_cli_ops(
         sorted,
     }: ImageOpResult,
 ) {
-    fn do_op(profile: &mut Person, image: &Image, sorted: &HashMap<i32, i16>) {
+    fn do_op(profile: &mut Person, image: &Image, sorted: &Sorted) {
         if *image.user_id() == profile.id {
             profile.images.retain(|img| img.id() != image.id());
             if let Some(pos) = image.pos() {
@@ -66,12 +67,16 @@ pub(super) fn image_cli_ops(
             );
             debug!("OPS: {ops:?}");
 
-            if let Some(me) = ME.write().profile.as_mut() {
-                do_op(me, &image, &sorted);
+            if authorized {
+                if let Some(me) = ME.write().profile.as_mut() {
+                    do_op(me, &image, &sorted);
+                }
             }
         } else {
-            for profile in OTHERS.write().iter_mut() {
-                do_op(profile, &image, &sorted);
+            if authorized {
+                for profile in OTHERS.write().iter_mut() {
+                    do_op(profile, &image, &sorted);
+                }
             }
         }
     });
