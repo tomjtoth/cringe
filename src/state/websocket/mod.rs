@@ -3,7 +3,12 @@ pub mod ops;
 pub mod server;
 
 use dioxus::{
-    fullstack::{use_websocket, UseWebsocket, WebSocketOptions, Websocket, WebsocketError},
+    fullstack::{
+        use_websocket,
+        CloseCode::{Away, Normal},
+        UseWebsocket, WebSocketOptions, Websocket,
+        WebsocketError::{self, ConnectionClosed},
+    },
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
@@ -93,12 +98,16 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                             }
                         }
 
-                        Ok( WsRequest::ImageOp(oid, img)) => {
+                        Ok(WsRequest::ImageOp(oid, img)) => {
                             match crate::state::image::ops::image_crud(&ctx, img).await {
                                 Ok(res) => ws_notify(None, WsResponse::ImageOp(oid, res)).await,
                                 Err(e) => error!("ImageOp failed: {e:?}"),
                             }
                         }
+
+                        // this gets logged in ws_unregister
+                        Err(ConnectionClosed { code: Normal, ..})
+                        | Err(ConnectionClosed { code: Away, ..}) => break,
 
                         Err(e) => {
                             error!("WS error: {e:?}");
