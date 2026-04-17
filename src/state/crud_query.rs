@@ -13,12 +13,24 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
     };
 
     let arg = if for_prompt {
-        r"arg AS (
+        r"raw_arg AS (
             SELECT
                 $2::int AS id,
                 $3::int2 AS position,
                 $4::text AS title,
                 $5::text AS body
+        ),
+
+        arg AS (
+            SELECT
+                id,
+                CASE
+                    WHEN title = '' OR BODY = '' THEN NULL
+                    ELSE position
+                END AS position,
+                title,
+                body
+            FROM raw_arg
         )"
     } else {
         r"queue AS (
@@ -37,12 +49,6 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
         )"
     };
 
-    let deleted_where_crit = if for_prompt {
-        "(arg.position IS NULL OR arg.title = '' OR arg.body = '')"
-    } else {
-        "arg.position IS NULL"
-    };
-
     let deleted_return_clause = if for_prompt {
         "tbl.id, tbl.user_id, tbl.title, tbl.body"
     } else {
@@ -55,14 +61,8 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
         "prompt = arg.prompt"
     };
 
-    let updated_where_crit = if for_prompt {
-        "arg.position IS NOT NULL AND arg.title != '' AND arg.body != ''"
-    } else {
-        "arg.position IS NOT NULL"
-    };
-
     let returning_clause = if for_prompt {
-        "*"
+        "tbl.*"
     } else {
         "tbl.id, tbl.user_id, tbl.url, tbl.prompt, tbl.position"
     };
@@ -71,12 +71,6 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
         "title, body"
     } else {
         "prompt, url, bytes"
-    };
-
-    let inserted_where_crit = if for_prompt {
-        "position IS NOT NULL AND body != '' AND title != ''"
-    } else {
-        "position IS NOT NULL"
     };
 
     let result_name = if for_prompt { "prompt" } else { "image" };
@@ -104,7 +98,7 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
             USING arg
             CROSS JOIN me
             WHERE tbl.user_id = me.id
-            AND arg.id = tbl.id AND {deleted_where_crit}
+            AND arg.id = tbl.id AND arg.position IS NULL
             RETURNING {deleted_return_clause}
         ),
 
@@ -148,7 +142,7 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
             FROM arg
             CROSS JOIN me
             WHERE tbl.user_id = me.id AND tbl.id = arg.id
-            AND {updated_where_crit}
+            AND arg.position IS NOT NULL
             RETURNING {returning_clause}
         ),
 
@@ -159,7 +153,7 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
                 me.id, position, {inserted_cols}
             FROM arg
             CROSS JOIN me
-            WHERE arg.id IS NULL AND {inserted_where_crit}
+            WHERE arg.id IS NULL AND position IS NOT NULL
             RETURNING {returning_clause}
         )
 
