@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dioxus::{
-    prelude::debug,
+    prelude::{debug, error},
     signals::{GlobalSignal, ReadableExt},
 };
 
@@ -21,7 +21,7 @@ pub(super) fn ws_register_op_id(req: &WsRequest) {
         WsRequest::ImageOp(op_id, ..) | WsRequest::PromptOp(op_id, ..) => {
             OPS.with_mut(|ops| {
                 ops.insert(*op_id, OpState::Pending);
-                debug!("WS registered operation id #{op_id} ({ops:?})");
+                debug!("WS op registered {ops:?}");
             });
         }
         _ => (),
@@ -32,7 +32,7 @@ pub fn ws_clear_op_id(rcx: &mut ResourceCtx) {
     let id = rcx.op_id();
 
     let returned = OPS.with(|ops| {
-        debug!("WS looking for op #{id} in {ops:?}");
+        debug!("WS op #{id} polled {ops:?}");
         ops.get(&id)
             .filter(|state| !matches!(state, OpState::Pending))
             .cloned()
@@ -45,6 +45,7 @@ pub fn ws_clear_op_id(rcx: &mut ResourceCtx) {
             OpState::Success => rcx.toggle_editing(),
             OpState::Failure => {
                 // TODO: show a modal or simple toast
+                error!("WS op #{id} failed");
             }
             _ => (),
         };
