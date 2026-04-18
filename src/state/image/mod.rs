@@ -5,7 +5,7 @@ pub(super) mod ops;
 
 use std::collections::HashMap;
 
-use dioxus::prelude::{debug, info};
+use dioxus::prelude::info;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -21,14 +21,14 @@ use crate::{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ImageOpResult {
     pub authorized: bool,
-    pub image: Image,
+
+    /// #### Will send this back anyways, so that clients can use .user_id and .id
+    pub image: Option<Image>,
     pub sorted: Sorted,
-    // broadcast to all connections for now
-    // session_ids: Vec<String>,
 }
 
 pub(super) fn handle_image_crud_res(
-    oid: u32,
+    op_id: u128,
     ImageOpResult {
         authorized,
         image,
@@ -36,48 +36,39 @@ pub(super) fn handle_image_crud_res(
     }: ImageOpResult,
 ) {
     fn do_op(profile: &mut Person, image: &Image, sorted: &Sorted) {
-        if *image.user_id() == profile.id {
-            profile.images.retain(|img| img.id() != image.id());
-            if let Some(pos) = image.pos() {
-                profile.images.insert(*pos as usize, image.clone());
-            }
+        profile.images.retain(|img| img.id() != image.id());
 
-            for img in profile.images.iter_mut() {
-                if let Some(id) = img.id() {
-                    if let Some(pos) = sorted.get(id) {
-                        img.set_pos(Some(*pos))
-                    }
+        for img in profile.images.iter_mut() {
+            if let Some(id) = img.id() {
+                if let Some(pos) = sorted.get(id) {
+                    img.set_pos(Some(*pos))
                 }
             }
+        }
 
-            profile.images.sort_by_key(|img| *img.pos());
+        profile.images.sort_by_key(|img| *img.pos());
+
+        if let Some(pos) = image.pos() {
+            profile.images.insert(*pos as usize, image.clone());
         }
     }
 
     OPS.with_mut(|ops| {
-        // this user initiated the op
-        if let Some(OpState::Pending) = ops.get(&oid) {
-            ops.insert(
-                oid,
-                if authorized {
-                    OpState::Success
-                } else {
-                    OpState::Failure
-                },
-            );
-            debug!("OPS: {ops:?}");
-
-            if authorized {
+        if let Some(OpState::Pending) = ops.get(&op_id) {
+            if let Some(image) = image.as_ref().filter(|_| authorized) {
                 if let Some(me) = ME.write().profile.as_mut() {
-                    do_op(me, &image, &sorted);
+                    do_op(me, image, &sorted);
                 }
+                ops.insert(op_id, OpState::Success);
+            } else {
+                ops.insert(op_id, OpState::Failure);
             }
-        } else {
-            if authorized {
-                for profile in OTHERS.write().iter_mut() {
-                    do_op(profile, &image, &sorted);
+        } else if let Some(image) = image.as_ref().filter(|_| authorized) {
+            OTHERS.with_mut(|profs| {
+                if let Some(profile) = profs.iter_mut().find(|prof| prof.id == *image.user_id()) {
+                    do_op(profile, image, &sorted);
                 }
-            }
+            });
         }
     });
 }
@@ -88,7 +79,7 @@ pub struct ImageConversionResult {
     pub placeholders: HashMap<i32, String>,
 }
 
-pub fn image_cli_converted(
+pub(super) fn image_cli_converted(
     ImageConversionResult {
         image,
         placeholders,
@@ -114,8 +105,8 @@ pub fn image_cli_converted(
         }
     }
 
-    if let Some(p) = ME.write().profile.as_mut() {
-        do_op(p, &image, &placeholders);
+    if let Some(me) = ME.write().profile.as_mut() {
+        do_op(me, &image, &placeholders);
     }
     for profile in OTHERS.write().iter_mut() {
         do_op(profile, &image, &placeholders);

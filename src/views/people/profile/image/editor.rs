@@ -3,10 +3,7 @@ use dioxus::prelude::*;
 use crate::{
     models::image::Image,
     state::{
-        websocket::{
-            ops::{OpState, OPS},
-            WsCtx, WsRequest,
-        },
+        websocket::{ops::ws_clear_op_id, WsCtx, WsRequest},
         ME,
     },
     views::people::profile::{
@@ -48,26 +45,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         })
     });
 
-    use_effect(move || {
-        let id = rcx.oid();
-
-        debug!("looking for #{id} in OPS");
-        let is_success = OPS.with(|ops| {
-            ops.get(&id)
-                .map(|state| matches!(state, OpState::Success))
-                .unwrap_or(false)
-        });
-
-        // must keep this separate, otherwise use_effect wouldn't subscribe to changes in OPS \o/
-        if is_success {
-            debug!("found #{id} in OPS");
-
-            OPS.with_mut(|ops| {
-                ops.remove(&id);
-            });
-            rcx.toggle_editing();
-        }
-    });
+    use_effect(move || ws_clear_op_id(&mut rcx));
 
     let (is_new, is_empty, has_changes) = sig.with(|sig| {
         (
@@ -86,7 +64,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
 
         spawn(async move {
-            _ = wscx.req(WsRequest::ImageOp(rcx.oid(), sig())).await;
+            _ = wscx.req(WsRequest::ImageOp(rcx.op_id(), sig())).await;
         });
     });
 

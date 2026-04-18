@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
-    utils::rand_u32,
+    utils::random_id,
     views::people::{
         listing::ListingCtx,
         profile::{button::SkipButton, details::Details},
@@ -24,10 +24,10 @@ struct ProfileCtx {
     profile: ReadSignal<MPerson>,
 }
 
-/// This might be a Prompt, an Image or the whole Personal data section
-struct ResourceCtx {
+/// This might be a Prompt, an Image or the whole Details section
+pub(crate) struct ResourceCtx {
     state: Signal<bool>,
-    op_id: u32,
+    op_id: u128,
 }
 
 impl Copy for ResourceCtx {}
@@ -42,11 +42,11 @@ impl ResourceCtx {
         let state = use_signal(|| false);
         use_context_provider(|| ResourceCtx {
             state,
-            op_id: rand_u32(),
+            op_id: random_id(),
         })
     }
 
-    fn oid(&self) -> u32 {
+    pub(crate) fn op_id(&self) -> u128 {
         self.op_id
     }
 
@@ -54,7 +54,7 @@ impl ResourceCtx {
         (self.state)()
     }
 
-    fn toggle_editing(&mut self) {
+    pub(crate) fn toggle_editing(&mut self) {
         self.state.toggle();
         debug!("rcx.toggle() -> {}", self.editing());
     }
@@ -66,8 +66,8 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
     use_context_provider(move || ProfileCtx { profile });
 
-    // for the SkipButton and PersonalData
-    let _rcx = ResourceCtx::provide();
+    // for the SkipButton and Details
+    ResourceCtx::provide();
 
     rsx! {
         div {

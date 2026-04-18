@@ -19,6 +19,7 @@ use crate::{
     state::{
         image::{handle_image_crud_res, image_cli_converted, ImageConversionResult, ImageOpResult},
         prompt::{handle_prompt_crud_res, PromptOpResult},
+        websocket::ops::ws_register_op_id,
         AUTH_CTE, ME,
     },
     utils::sleep,
@@ -27,16 +28,16 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
-    PromptOp(u32, PromptOpResult),
-    ImageOp(u32, ImageOpResult),
+    PromptOp(u128, PromptOpResult),
+    ImageOp(u128, ImageOpResult),
     ImageConversion(ImageConversionResult),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
-    PromptOp(u32, Prompt),
-    ImageOp(u32, Image),
+    PromptOp(u128, Prompt),
+    ImageOp(u128, Image),
 }
 
 #[get("/api/ws")]
@@ -142,7 +143,7 @@ impl std::ops::Deref for WsCtx {
 impl WsCtx {
     /// #### Registers outgoing requests' operation id and logs errors
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
-        ops::register(&request);
+        ws_register_op_id(&request);
 
         self.send(request).await.map_err(|e| {
             error!("WS error: {e:?}");
@@ -209,9 +210,9 @@ fn use_ws(mut state: Signal<u8>) {
             match from_server {
                 WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
 
-                WsResponse::PromptOp(oid, res) => handle_prompt_crud_res(oid, res),
+                WsResponse::PromptOp(op_id, res) => handle_prompt_crud_res(op_id, res),
 
-                WsResponse::ImageOp(oid, res) => handle_image_crud_res(oid, res),
+                WsResponse::ImageOp(op_id, res) => handle_image_crud_res(op_id, res),
 
                 WsResponse::ImageConversion(res) => image_cli_converted(res),
             }

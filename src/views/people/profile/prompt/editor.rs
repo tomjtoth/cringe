@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::models::person::Prompt;
-use crate::state::websocket::ops::{OpState, OPS};
+use crate::state::websocket::ops::ws_clear_op_id;
 use crate::state::websocket::{WsCtx, WsRequest};
 use crate::state::ME;
 use crate::views::people::profile::{
@@ -37,25 +37,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         })
     });
 
-    use_effect(move || {
-        let id = rcx.oid();
-
-        debug!("looking for #{id} in OPS");
-        let is_success = OPS.with(|ops| {
-            ops.get(&id)
-                .map(|state| matches!(state, OpState::Success))
-                .unwrap_or(false)
-        });
-
-        if is_success {
-            debug!("found #{id} in OPS");
-
-            OPS.with_mut(|ops| {
-                ops.remove(&id);
-            });
-            rcx.toggle_editing();
-        }
-    });
+    use_effect(move || ws_clear_op_id(&mut rcx));
 
     let (is_new, is_empty, has_changes) = sig.with(|p| {
         (
@@ -72,7 +54,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         }
 
         spawn(async move {
-            _ = wscx.req(WsRequest::PromptOp(rcx.oid(), sig())).await;
+            _ = wscx.req(WsRequest::PromptOp(rcx.op_id(), sig())).await;
         });
     });
 

@@ -8,8 +8,9 @@ pub async fn sleep(secs: u64) {
     gloo_timers::future::sleep(duration).await;
 }
 
-pub fn rand_u32() -> u32 {
-    let mut buf = [0u8; 4];
+pub fn random_id() -> u128 {
+    #[allow(unused_mut)]
+    let mut buf = [0u8; 16];
 
     #[cfg(target_arch = "wasm32")]
     {
@@ -21,5 +22,5 @@ pub fn rand_u32() -> u32 {
             .expect("failed to get random");
     }
 
-    u32::from_le_bytes(buf)
+    u128::from_le_bytes(buf)
 }

@@ -1,27 +1,52 @@
 use std::collections::HashMap;
 
-use dioxus::{prelude::debug, signals::GlobalSignal};
+use dioxus::{
+    prelude::debug,
+    signals::{GlobalSignal, ReadableExt},
+};
 
-use crate::state::websocket::WsRequest;
+use crate::{state::websocket::WsRequest, views::people::profile::ResourceCtx};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum OpState {
     Pending,
     Success,
     Failure,
 }
 
-pub static OPS: GlobalSignal<HashMap<u32, OpState>> = GlobalSignal::new(HashMap::new);
+pub static OPS: GlobalSignal<HashMap<u128, OpState>> = GlobalSignal::new(HashMap::new);
 
-pub(super) fn register(req: &WsRequest) {
+pub(super) fn ws_register_op_id(req: &WsRequest) {
     match req {
-        WsRequest::ImageOp(oid, ..) | WsRequest::PromptOp(oid, ..) => {
+        WsRequest::ImageOp(op_id, ..) | WsRequest::PromptOp(op_id, ..) => {
             OPS.with_mut(|ops| {
-                ops.insert(*oid, OpState::Pending);
-                debug!("WS registered operation id {oid} ({:?})", ops);
+                ops.insert(*op_id, OpState::Pending);
+                debug!("WS registered operation id #{op_id} ({ops:?})");
             });
         }
-
         _ => (),
+    }
+}
+
+pub fn ws_clear_op_id(rcx: &mut ResourceCtx) {
+    let id = rcx.op_id();
+
+    let returned = OPS.with(|ops| {
+        debug!("WS looking for op #{id} in {ops:?}");
+        ops.get(&id)
+            .filter(|state| !matches!(state, OpState::Pending))
+            .cloned()
+    });
+
+    if let Some(state) = returned {
+        OPS.with_mut(|ops| ops.remove(&id));
+
+        match state {
+            OpState::Success => rcx.toggle_editing(),
+            OpState::Failure => {
+                // TODO: show a modal or simple toast
+            }
+            _ => (),
+        };
     }
 }
