@@ -1,21 +1,24 @@
 use dioxus::prelude::*;
 
-use crate::models::{person::Person, relationship_type::RelationshipType as ERT};
+use crate::models::relationship_type::RelationshipType as ERT;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn RelationshipType(sig: Signal<Person>, editing: bool) -> Element {
-    let tmp = sig.read().relationship_type;
+pub(super) fn RelationshipType() -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
+    let tmp = dcx.rw.read().relationship_type;
     let r = tmp.as_ref();
     let value = r.map(|rt| rt.to_string());
 
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             div {
                 select {
                     class: if value == None { "text-gray-500" },
                     value,
                     onchange: move |evt| {
-                        sig.write().relationship_type = ERT::from_str(&evt.value());
+                        dcx.rw.write().relationship_type = ERT::from_str(&evt.value());
                     },
 
                     option { value: "", "👩‍❤️‍👨 Your relationship type..." }

@@ -1,13 +1,15 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Has(sig: Signal<Person>, editing: bool, already_has_kids: bool) -> Element {
-    let value = sig.read().kids.as_ref().map(|k| k.has).flatten();
+pub(super) fn Has(already_has_kids: bool) -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
+    let value = dcx.rw.read().kids.as_ref().map(|k| k.has).flatten();
 
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             li {
                 "🧑‍🧒‍🧒"
                 input {
@@ -18,25 +20,26 @@ pub(super) fn Has(sig: Signal<Person>, editing: bool, already_has_kids: bool) ->
                     max: i8::MAX,
                     value,
                     onchange: move |evt| {
-                        sig.with_mut(|p| {
-                            let has = evt.value().parse::<i8>().ok();
-                            if let Some(kids) = p.kids.as_mut() {
-                                kids.has = has;
-                            } else {
-                                #[cfg(not(feature = "server"))]
-                                {
-                                    p.kids = Some(crate::models::kids::Kids {
-                                        has,
-                                        wants: None,
-                                    });
+                        dcx.rw
+                            .with_mut(|p| {
+                                let has = evt.value().parse::<i8>().ok();
+                                if let Some(kids) = p.kids.as_mut() {
+                                    kids.has = has;
+                                } else {
+                                    #[cfg(not(feature = "server"))]
+                                    {
+                                        p.kids = Some(crate::models::kids::Kids {
+                                            has,
+                                            wants: None,
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
                     },
                 }
             }
         } else {
-            if let Some(has) = sig.read().kids.as_ref().and_then(|k| k.has) {
+            if let Some(has) = dcx.ro.read().kids.as_ref().and_then(|k| k.has) {
                 li {
                     "🧑‍🧒‍🧒 Has "
                     if has > 0 {

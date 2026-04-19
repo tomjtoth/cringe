@@ -1,24 +1,26 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Education(sig: Signal<Person>, editing: bool) -> Element {
+pub(super) fn Education() -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             div {
                 "🎓"
                 input {
                     placeholder: "Education",
-                    value: sig.read().education.clone(),
+                    value: dcx.rw.read().education.clone(),
                     onchange: move |evt| {
                         let val = evt.value();
-                        sig.write().education = if val.len() > 0 { Some(val) } else { None };
+                        dcx.rw.write().education = if val.len() > 0 { Some(val) } else { None };
                     },
                 }
             }
         } else {
-            if let Some(edu) = &sig.read().education {
+            if let Some(edu) = &dcx.ro.read().education {
                 div {
                     "🎓"
                     div { "{edu}" }

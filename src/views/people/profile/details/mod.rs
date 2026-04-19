@@ -75,24 +75,32 @@ pub fn Details() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
     let person = use_context::<ProfileCtx>().profile;
     let mut rcx = use_context::<ResourceCtx>();
-
+    let wscx = use_context::<WsCtx>();
+    let mut editing = use_signal(|| false);
     let sig = use_signal(|| person());
+
+    use_context_provider(|| DetailsCtx {
+        rw: sig,
+        ro: person,
+        editing,
+    });
+
+    use_effect(move || editing.set(olcx.is_none() && rcx.editing()));
+
+    use_effect(move || rcx.await_op());
 
     let onsubmit = use_callback(move |_: Event<FormData>| {
         spawn(async move {
-            if let Ok(true) = update_me({
-                let mut wo_prompts_and_images = sig();
-                wo_prompts_and_images.prompts.truncate(0);
-                wo_prompts_and_images.images.truncate(0);
+            // sending without images or prompts to save bandwidth
+            let mut me = sig();
+            me.prompts.truncate(0);
+            me.images.truncate(0);
 
-                wo_prompts_and_images
-            })
-            .await
-            {
-                ME.with_mut(|me| me.profile = Some(sig()));
-            }
-
-            rcx.toggle_editing();
+            _ = wscx
+                .req(crate::state::websocket::WsRequest::DetailsUpdate(
+                    rcx.op_id, me,
+                ))
+                .await;
         });
     });
 
@@ -107,14 +115,12 @@ pub fn Details() -> Element {
     .filter(|&x| x)
     .count();
 
-    let editing = olcx.is_none() && rcx.editing();
-
     let class_container = format!(
         "px-2 [&>*+*]:border-t [&>*+*]:p-2 {} {} {}{}{}",
         "[&_input]:border-none! [&>div>input]:w-full",
         "[&_select]:border-none! [&>div>select]:px-0! [&>div>select]:w-full",
         "[&>div]:flex [&>div]:gap-2 [&>div]:items-center",
-        if editing {
+        if editing() {
             " [&>div]:nth-last-2:mb-20"
         } else {
             ""
@@ -146,40 +152,40 @@ pub fn Details() -> Element {
             ul { class: class_ul,
 
                 if let Some(age) = &sig.read().age() {
-                    li { class: if editing { immutables }, "🎂 {age}" }
+                    li { class: if editing() { immutables }, "🎂 {age}" }
                 }
 
                 if let Some(dist) = &sig.read().distance() {
-                    li { class: if editing { immutables }, "{dist}" }
+                    li { class: if editing() { immutables }, "{dist}" }
                 }
 
-                li { class: if editing { immutables }, "{sig.read().gender}" }
+                li { class: if editing() { immutables }, "{sig.read().gender}" }
 
-                li { class: if editing { immutables }, "📏 {sig.read().height} cm" }
+                li { class: if editing() { immutables }, "📏 {sig.read().height} cm" }
 
-                location::Location { sig, editing }
+                location::Location {}
 
-                kids::Kids { sig, editing }
+                kids::Kids {}
 
                 // TODO: include pets here
                 //
                 if let Some(sign) = sig.read().zodiac_sign() {
-                    li { class: if editing { "cursor-not-allowed" }, "{sign}" }
+                    li { class: if editing() { "cursor-not-allowed" }, "{sign}" }
                 }
 
-                habits::Habits { sig, editing }
+                habits::Habits {}
 
             }
 
-            occupation::Occupation { sig, editing }
+            occupation::Occupation {}
 
-            education::Education { sig, editing }
+            education::Education {}
 
-            hometown::Hometown { sig, editing }
+            hometown::Hometown {}
 
-            seeking::Seeking { sig, editing }
+            seeking::Seeking {}
 
-            relationship_type::RelationshipType { sig, editing }
+            relationship_type::RelationshipType {}
         }
     }
 }

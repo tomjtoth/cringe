@@ -1,21 +1,24 @@
 use dioxus::prelude::*;
 
-use crate::models::{person::Person, seeking::Seeking as ES};
+use crate::models::seeking::Seeking as ES;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Seeking(sig: Signal<Person>, editing: bool) -> Element {
-    let tmp = sig.read().seeking;
+pub(super) fn Seeking() -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
+    let tmp = dcx.rw.read().seeking;
     let r = tmp.as_ref();
     let value = r.map(|s| s.to_string());
 
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             div {
                 select {
                     class: if value == None { "text-gray-500" },
                     value,
                     onchange: move |evt| {
-                        sig.write().seeking = ES::from_str(&evt.value());
+                        dcx.rw.write().seeking = ES::from_str(&evt.value());
                     },
 
                     option { value: "", class: "text-gray-500", "🕵️ You're seeking..." }

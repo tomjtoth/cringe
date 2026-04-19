@@ -1,33 +1,36 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Wants(sig: Signal<Person>, editing: bool, already_has_kids: bool) -> Element {
-    let value = sig.read().kids.as_ref().map(|k| k.wants).flatten();
+pub(super) fn Wants(already_has_kids: bool) -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
+    let value = dcx.rw.read().kids.as_ref().map(|k| k.wants).flatten();
 
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             li {
                 "🍼"
                 select {
                     class: if value.is_none() { "text-gray-500" },
                     value,
                     onchange: move |evt| {
-                        sig.with_mut(|p| {
-                            let wants = evt.value().parse::<i8>().ok();
-                            if let Some(kids) = p.kids.as_mut() {
-                                kids.wants = wants;
-                            } else {
-                                #[cfg(not(feature = "server"))]
-                                {
-                                    p.kids = Some(crate::models::kids::Kids {
-                                        wants,
-                                        ..Default::default()
-                                    });
+                        dcx.rw
+                            .with_mut(|p| {
+                                let wants = evt.value().parse::<i8>().ok();
+                                if let Some(kids) = p.kids.as_mut() {
+                                    kids.wants = wants;
+                                } else {
+                                    #[cfg(not(feature = "server"))]
+                                    {
+                                        p.kids = Some(crate::models::kids::Kids {
+                                            wants,
+                                            ..Default::default()
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
                     },
 
                     option { value: "",
@@ -74,7 +77,7 @@ pub(super) fn Wants(sig: Signal<Person>, editing: bool, already_has_kids: bool) 
                 }
             }
         } else {
-            if let Some(wants) = sig.read().kids.as_ref().and_then(|k| k.wants) {
+            if let Some(wants) = dcx.ro.read().kids.as_ref().and_then(|k| k.wants) {
                 li {
                     "🍼 "
                     if wants > 0 {

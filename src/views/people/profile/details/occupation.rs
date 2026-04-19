@@ -1,24 +1,26 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Occupation(sig: Signal<Person>, editing: bool) -> Element {
+pub(super) fn Occupation() -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             div {
                 "💼"
                 input {
                     placeholder: "Occupation",
-                    value: sig.read().occupation.clone(),
+                    value: dcx.rw.read().occupation.clone(),
                     onchange: move |evt| {
                         let val = evt.value();
-                        sig.write().occupation = if val.len() > 0 { Some(val) } else { None };
+                        dcx.rw.write().occupation = if val.len() > 0 { Some(val) } else { None };
                     },
                 }
             }
         } else {
-            if let Some(job) = &sig.read().occupation {
+            if let Some(job) = &dcx.ro.read().occupation {
                 div {
                     "💼"
                     div { "{job}" }

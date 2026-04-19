@@ -1,25 +1,27 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
+use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
-pub(super) fn Location(sig: Signal<Person>, editing: bool) -> Element {
+pub(super) fn Location() -> Element {
+    let mut dcx = use_context::<DetailsCtx>();
+
     rsx! {
-        if editing {
+        if (dcx.editing)() {
             li {
                 "📍"
                 input {
                     placeholder: "Location",
                     class: "w-30",
-                    value: sig.read().location.clone(),
+                    value: dcx.rw.read().location.clone(),
                     onchange: move |evt| {
                         let loc = evt.value();
-                        sig.write().location = if loc.len() > 0 { Some(loc) } else { None };
+                        dcx.rw.write().location = if loc.len() > 0 { Some(loc) } else { None };
                     },
                 }
             }
         } else {
-            if let Some(city) = &sig.read().location {
+            if let Some(city) = &dcx.ro.read().location {
                 li { "📍 {city}" }
             }
         }
