@@ -1,18 +1,37 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Person;
-
-mod drinking;
-mod drugs;
-mod marijuana;
-mod smoking;
+mod generic;
 
 #[component]
-pub(super) fn Habits(sig: Signal<Person>, editing: bool) -> Element {
+pub(super) fn Habits() -> Element {
     rsx! {
-        drinking::Drinking { sig, editing }
-        smoking::Smoking { sig, editing }
-        marijuana::Marijuana { sig, editing }
-        drugs::Drugs { sig, editing }
+        generic::Habit {
+            emoji: "🍷",
+            selector: |h| h.drinking.as_ref(),
+            onchange: |h, f| h.drinking = f,
+            option { value: "", "Drinking?" }
+        }
+
+        generic::Habit {
+            emoji: "🚬",
+            selector: |h| h.smoking.as_ref(),
+            onchange: |h, f| h.smoking = f,
+            option { value: "", "Smoking?" }
+        }
+
+        generic::Habit {
+            emoji: "🌿🚬",
+            selector: |h| h.marijuana.as_ref(),
+            onchange: |h, f| h.marijuana = f,
+            option { value: "", "Marijuana?" }
+        }
+
+        generic::Habit {
+            emoji: "💊💉",
+            selector: |h| h.drugs.as_ref(),
+            onchange: |h, f| h.drugs = f,
+            option { value: "", "Drugs?" }
+        }
+
     }
 }
