@@ -42,8 +42,15 @@ pub enum WsRequest {
     ImageOp(u8, Image),
 }
 
+#[cfg(debug_assertions)]
+type WsEncoding = dioxus_fullstack::JsonEncoding;
+#[cfg(not(debug_assertions))]
+type WsEncoding = dioxus_fullstack::CborEncoding;
+
 #[get("/api/ws")]
-async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, WsResponse>> {
+async fn ws_endpoint(
+    options: WebSocketOptions,
+) -> Result<Websocket<WsRequest, WsResponse, WsEncoding>> {
     use crate::state::{
         details::update_details,
         image::ops::image_crud,
@@ -51,6 +58,8 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
         server::{get_ctx, ServerCtx},
         websocket::server::{ws_notify, ws_register, ws_unregister},
     };
+
+    type TypedWs = dioxus_fullstack::TypedWebsocket<WsRequest, WsResponse, WsEncoding>;
 
     let (mut sess_id, pool) = get_ctx().await;
 
@@ -69,11 +78,8 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
     let sess_id = sess_id.ok_or(anyhow::anyhow!(StatusCode::UNAUTHORIZED))?;
 
     /// rustfmt did not work within tokio::select! macro
-    async fn handle_req(
-        ctx: &ServerCtx,
-        req: WsRequest,
-        socket: &mut dioxus_fullstack::TypedWebsocket<WsRequest, WsResponse>,
-    ) {
+    async fn handle_req(ctx: &ServerCtx, req: WsRequest, socket: &mut TypedWs) {
+
         if !matches!(req, WsRequest::KeepAlive) {
             info!("Received {req:?}");
         }
@@ -103,7 +109,7 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
         }
     }
 
-    Ok(options.on_upgrade(move |mut socket| async move {
+    Ok(options.on_upgrade(move |mut socket: TypedWs| async move {
         // determine session for this websocket and register a sender for notifications
         let (tx, mut rx) = tokio::sync::mpsc::channel::<WsResponse>(32);
         ws_register(sess_id.clone(), tx).await;
@@ -143,7 +149,7 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
     }))
 }
 
-pub struct WsCtx(UseWebsocket<WsRequest, WsResponse>);
+pub struct WsCtx(UseWebsocket<WsRequest, WsResponse, WsEncoding>);
 
 impl Copy for WsCtx {}
 impl Clone for WsCtx {
@@ -152,7 +158,7 @@ impl Clone for WsCtx {
     }
 }
 impl std::ops::Deref for WsCtx {
-    type Target = UseWebsocket<WsRequest, WsResponse>;
+    type Target = UseWebsocket<WsRequest, WsResponse, WsEncoding>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
