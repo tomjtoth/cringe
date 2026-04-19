@@ -30,21 +30,24 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
-    PromptOp(u128, PromptOpResult),
-    ImageOp(u128, ImageOpResult),
+    PromptOp(u8, PromptOpResult),
+    ImageOp(u8, ImageOpResult),
     ImageConversion(ImageConversionResult),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
-    PromptOp(u128, Prompt),
-    ImageOp(u128, Image),
+    PromptOp(u8, Prompt),
+    ImageOp(u8, Image),
 }
 
 #[get("/api/ws")]
 async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, WsResponse>> {
     use crate::state::{
+        details::update_details,
+        image::ops::image_crud,
+        prompt::crud::prompt_crud,
         server::{get_ctx, ServerCtx},
         websocket::server::{ws_notify, ws_register, ws_unregister},
     };

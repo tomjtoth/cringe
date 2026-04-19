@@ -2,14 +2,11 @@ use dioxus::prelude::*;
 
 use crate::{
     models::image::Image,
-    state::{
-        websocket::{ops::ws_clear_op_id, WsCtx, WsRequest},
-        ME,
-    },
+    state::websocket::{WsCtx, WsRequest},
     views::people::profile::{
         container::Container,
         image::{masterpiece::Masterpiece, ribbon::Ribbon},
-        utils::{container_class, ButtonOverride},
+        utils::{container_class, get_max_pos_and_user_id, ButtonOverride},
         ResourceCtx,
     },
 };
@@ -19,25 +16,13 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
     let mut rcx = use_context::<ResourceCtx>();
     let wscx = use_context::<WsCtx>();
 
-    let max = ME
-        .read()
-        .profile
-        .as_ref()
-        .map(|p| p.images().len() as i16)
-        .unwrap_or(0)
-        + {
-            // only a new image can be added as additional
-            if src.is_none() {
-                1
-            } else {
-                0
-            }
-        };
+    let is_new = src.is_none();
+    let (max, user_id) = get_max_pos_and_user_id(|p| (p.images.len() as i16, p.id), is_new);
 
     let mut sig = use_signal(|| {
         src.clone().unwrap_or(Image::Uploaded {
             id: None,
-            user_id: None,
+            user_id,
             bytes: None,
             url: None,
             prompt: None,
@@ -45,11 +30,10 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         })
     });
 
-    use_effect(move || ws_clear_op_id(&mut rcx));
+    use_effect(move || rcx.await_op());
 
-    let (is_new, is_empty, has_changes) = sig.with(|sig| {
+    let (is_empty, has_changes) = sig.with(|sig| {
         (
-            sig.id().is_none(),
             !sig.has_bytes() && !sig.has_url() || sig.pos().is_none(),
             src.map(|src| {
                 src.pos() != sig.pos() || src.prompt() != sig.prompt() || src.src() != sig.src()

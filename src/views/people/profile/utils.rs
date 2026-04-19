@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::{models::person::Person, state::ME};
+
 #[component]
 fn Despair() -> Element {
     let cls = "absolute select-none text-shadow-[0_0_5px,0_0_15px] shadow-purple-500 text-red-500";
@@ -36,4 +38,19 @@ pub(super) fn container_class(is_empty: bool, has_changes: bool) -> String {
             ""
         }
     )
+}
+
+pub(super) fn get_max_pos_and_user_id(
+    selector: fn(&Person) -> (i16, Option<i32>),
+    is_new: bool,
+) -> (i16, Option<i32>) {
+    ME.with(|me| {
+        let (mut max, uid) = me.profile.as_ref().map(selector).unwrap_or((0, None));
+
+        if is_new {
+            max += 1;
+        }
+
+        (max, uid)
+    })
 }

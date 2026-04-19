@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
+    state::websocket::ops::{OpState, OPS},
     views::people::{
         listing::ListingCtx,
         profile::{button::SkipButton, details::Details},
@@ -52,6 +53,27 @@ impl ResourceCtx {
     pub(crate) fn toggle_editing(&mut self) {
         self.state.toggle();
         debug!("rcx.toggle() -> {}", self.editing());
+    }
+
+    pub fn await_op(&mut self) {
+        let id = self.op_id;
+
+        let returned = OPS.with(|ops| {
+            debug!("WS op #{id} polled {ops:?}");
+            ops.get(&id).cloned()
+        });
+
+        if let Some(state) = returned {
+            OPS.with_mut(|ops| ops.remove(&id));
+
+            match state {
+                OpState::Success => self.toggle_editing(),
+                OpState::Failure => {
+                    // TODO: show a modal or simple toast
+                    error!("WS op #{id} failed");
+                }
+            };
+        }
     }
 }
 

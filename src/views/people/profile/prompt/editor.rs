@@ -1,11 +1,10 @@
 use dioxus::prelude::*;
 
 use crate::models::person::Prompt;
-use crate::state::websocket::ops::ws_clear_op_id;
 use crate::state::websocket::{WsCtx, WsRequest};
-use crate::state::ME;
 use crate::views::people::profile::{
     container::Container,
+    utils::get_max_pos_and_user_id,
     utils::{container_class, ButtonOverride},
     ResourceCtx,
 };
@@ -15,33 +14,21 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
     let mut rcx = use_context::<ResourceCtx>();
     let wscx = use_context::<WsCtx>();
 
-    let max = ME
-        .read()
-        .profile
-        .as_ref()
-        .map(|p| p.prompts().len() as i16)
-        .unwrap_or(0)
-        + {
-            // only a new prompt can be added as additional
-            if src.is_none() {
-                1
-            } else {
-                0
-            }
-        };
+    let is_new = src.is_none();
+    let (max, user_id) = get_max_pos_and_user_id(|p| (p.prompts.len() as i16, p.id), is_new);
 
     let mut sig = use_signal(|| {
         src.clone().unwrap_or(Prompt {
+            user_id,
             position: Some(max - 1),
             ..Default::default()
         })
     });
 
-    use_effect(move || ws_clear_op_id(&mut rcx));
+    use_effect(move || rcx.await_op());
 
-    let (is_new, is_empty, has_changes) = sig.with(|p| {
+    let (is_empty, has_changes) = sig.with(|p| {
         (
-            p.id.is_none(),
             p.title == "" || p.body == "" || p.position == None,
             src.map(|src| src.title != p.title || src.body != p.body || src.position != p.position)
                 .unwrap_or(true),
