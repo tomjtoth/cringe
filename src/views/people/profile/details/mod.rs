@@ -1,11 +1,10 @@
+mod dropdowns;
 mod education;
 mod habits;
 mod hometown;
 mod kids;
 mod location;
 mod occupation;
-mod relationship_type;
-mod seeking;
 
 use dioxus::prelude::*;
 
@@ -138,9 +137,9 @@ pub fn Details() -> Element {
 
             hometown::Hometown {}
 
-            seeking::Seeking {}
+            dropdowns::Seeking {}
 
-            relationship_type::RelationshipType {}
+            dropdowns::RelationshipType {}
         }
     }
 }
