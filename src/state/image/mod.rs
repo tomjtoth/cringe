@@ -33,7 +33,7 @@ pub(super) fn handle_image_crud_res(
         sorted,
     }: ImageOpResult,
 ) {
-    fn do_op(profile: &mut Person, image: &Image, sorted: &Sorted) {
+    fn do_op(profile: &mut Person, image: Image, sorted: &Sorted) {
         profile.images.retain(|img| img.id() != image.id());
 
         for img in profile.images.iter_mut() {
@@ -47,7 +47,7 @@ pub(super) fn handle_image_crud_res(
         profile.images.sort_by_key(|img| *img.pos());
 
         if let Some(pos) = image.pos() {
-            profile.images.insert(*pos as usize, image.clone());
+            profile.images.insert(*pos as usize, image);
         }
     }
     ME.with_mut(|me| {
@@ -55,7 +55,7 @@ pub(super) fn handle_image_crud_res(
             if *image.user_id() == me.id {
                 OPS.with_mut(|ops| {
                     if authorized {
-                        do_op(me, &image, &sorted);
+                        do_op(me, image, &sorted);
                         ops.insert(op_id, OpState::Success);
                     } else {
                         ops.insert(op_id, OpState::Failure);
@@ -65,7 +65,7 @@ pub(super) fn handle_image_crud_res(
                 OTHERS.with_mut(|profs| {
                     if let Some(profile) = profs.iter_mut().find(|prof| prof.id == *image.user_id())
                     {
-                        do_op(profile, &image, &sorted);
+                        do_op(profile, image, &sorted);
                     }
                 });
             }

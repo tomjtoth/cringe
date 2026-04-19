@@ -28,7 +28,7 @@ pub(super) fn handle_prompt_crud_res(
         sorted,
     }: PromptOpResult,
 ) {
-    fn do_op(profile: &mut Person, prompt: &Prompt, sorted: &Sorted) {
+    fn do_op(profile: &mut Person, prompt: Prompt, sorted: &Sorted) {
         profile.prompts.retain(|p| p.id != prompt.id);
 
         for p in profile.prompts.iter_mut() {
@@ -42,7 +42,7 @@ pub(super) fn handle_prompt_crud_res(
         profile.prompts.sort_by_key(|p| p.position);
 
         if let Some(pos) = prompt.position {
-            profile.prompts.insert(pos as usize, prompt.clone());
+            profile.prompts.insert(pos as usize, prompt);
         }
     }
 
@@ -51,7 +51,7 @@ pub(super) fn handle_prompt_crud_res(
             if prompt.user_id == me.id {
                 OPS.with_mut(|ops| {
                     if authorized {
-                        do_op(me, &prompt, &sorted);
+                        do_op(me, prompt, &sorted);
                         ops.insert(op_id, OpState::Success);
                     } else {
                         ops.insert(op_id, OpState::Failure);
@@ -60,7 +60,7 @@ pub(super) fn handle_prompt_crud_res(
             } else if authorized {
                 OTHERS.with_mut(|profs| {
                     if let Some(profile) = profs.iter_mut().find(|prof| prof.id == prompt.user_id) {
-                        do_op(profile, &prompt, &sorted);
+                        do_op(profile, prompt, &sorted);
                     }
                 });
             }
