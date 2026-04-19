@@ -1,0 +1,59 @@
+#[cfg(feature = "server")]
+pub(super) mod server;
+
+use serde::{Deserialize, Serialize};
+
+use crate::{
+    models::person::Person,
+    state::{
+        websocket::ops::{OpState, OPS},
+        ME,
+    },
+    views::people::listing::OTHERS,
+};
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DetailsUpateRes {
+    pub authorized: bool,
+    pub profile: Person,
+}
+
+pub(super) fn handle_details_update_res(
+    op_id: u8,
+    DetailsUpateRes {
+        authorized,
+        profile,
+    }: DetailsUpateRes,
+) {
+    fn do_op(target: &mut Person, source: Person) {
+        target.education = source.education;
+        target.occupation = source.occupation;
+        target.location = source.location;
+        target.hometown = source.hometown;
+        target.seeking = source.seeking;
+        target.relationship_type = source.relationship_type;
+        target.kids = source.kids;
+        target.habits = source.habits;
+    }
+
+    ME.with_mut(|me| {
+        if let Some(me) = me.profile.as_mut() {
+            if profile.id == me.id {
+                OPS.with_mut(|ops| {
+                    if authorized {
+                        do_op(me, profile);
+                        ops.insert(op_id, OpState::Success);
+                    } else {
+                        ops.insert(op_id, OpState::Failure);
+                    }
+                })
+            } else if authorized {
+                OTHERS.with_mut(|profs| {
+                    if let Some(prof) = profs.iter_mut().find(|p| p.id == profile.id) {
+                        do_op(prof, profile);
+                    }
+                });
+            }
+        }
+    });
+}

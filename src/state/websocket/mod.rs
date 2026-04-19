@@ -14,10 +14,13 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{image::Image, person::Prompt},
+    models::{
+        image::Image,
+        person::{Person, Prompt},
+    },
     router::Route,
     state::{
-        image::{handle_image_crud_res, image_cli_converted, ImageConversionResult, ImageOpResult},
+        details::{handle_details_update_res, DetailsUpateRes},
         image::{
             handle_conversion_res, handle_image_crud_res, ImageConversionResult, ImageOpResult,
         },
@@ -30,6 +33,7 @@ use crate::{
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsResponse {
     ServerAlive,
+    DetailsUpdate(u8, DetailsUpateRes),
     PromptOp(u8, PromptOpResult),
     ImageOp(u8, ImageOpResult),
     ImageConversion(ImageConversionResult),
@@ -38,6 +42,7 @@ pub enum WsResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
+    DetailsUpdate(u8, Person),
     PromptOp(u8, Prompt),
     ImageOp(u8, Image),
 }
@@ -52,7 +57,6 @@ async fn ws_endpoint(
     options: WebSocketOptions,
 ) -> Result<Websocket<WsRequest, WsResponse, WsEncoding>> {
     use crate::state::{
-        details::update_details,
         image::ops::image_crud,
         prompt::crud::prompt_crud,
         server::{get_ctx, ServerCtx},
@@ -79,6 +83,7 @@ async fn ws_endpoint(
 
     /// rustfmt did not work within tokio::select! macro
     async fn handle_req(ctx: &ServerCtx, req: WsRequest, socket: &mut TypedWs) {
+        use crate::state::details::server::update_details;
 
         if !matches!(req, WsRequest::KeepAlive) {
             info!("Received {req:?}");
@@ -96,6 +101,17 @@ async fn ws_endpoint(
             WsRequest::KeepAlive => {
                 _ = socket.send(WsResponse::ServerAlive).await;
             }
+
+            WsRequest::DetailsUpdate(op_id, me) => match update_details(&ctx, me).await {
+                Ok(res) => {
+                    ws_notify(
+                        target(res.authorized),
+                        WsResponse::DetailsUpdate(op_id, res),
+                    )
+                    .await
+                }
+                Err(e) => error!("PromptOp failed: {e:?}"),
+            },
 
             WsRequest::PromptOp(oid, prompt) => match prompt_crud(&ctx, prompt).await {
                 Ok(res) => ws_notify(target(res.authorized), WsResponse::PromptOp(oid, res)).await,
@@ -231,6 +247,8 @@ fn use_ws(mut state: Signal<u8>) {
 
             match from_server {
                 WsResponse::ServerAlive => ws.delayed_req(30, WsRequest::KeepAlive),
+
+                WsResponse::DetailsUpdate(op_id, res) => handle_details_update_res(op_id, res),
 
                 WsResponse::PromptOp(op_id, res) => handle_prompt_crud_res(op_id, res),
 

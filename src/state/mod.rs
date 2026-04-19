@@ -1,4 +1,5 @@
 mod crud_query;
+pub mod details;
 mod gps;
 mod image;
 mod prompt;
@@ -52,12 +53,12 @@ async fn get_me() -> Result<Me> {
                     seeking,
                     relationship_type,
 
-                    json_build_object(
+                    jsonb_build_object(
                         'has',      kids_has,
                         'wants',    kids_wants
                     ) AS kids,
 
-                    json_build_object(
+                    jsonb_build_object(
                         'drinking',     habits_drinking,
                         'smoking',      habits_smoking,
                         'marijuana',    habits_marijuana,
@@ -66,17 +67,17 @@ async fn get_me() -> Result<Me> {
 
                     (
                         SELECT coalesce(
-                            json_agg(row_to_json(pp) ORDER BY pp.position),
-                            '[]'
+                            jsonb_agg(to_jsonb(up) ORDER BY up.position),
+                            '[]'::jsonb
                         )
-                        FROM user_prompts pp
-                        WHERE pp.user_id = u.id
+                        FROM user_prompts up
+                        WHERE up.user_id = u.id
                     ) AS prompts,
 
                     (
                         SELECT coalesce(
-                            json_agg(row_to_json(ui) ORDER BY ui.position),
-                            '[]'
+                            jsonb_agg(to_jsonb(ui) ORDER BY ui.position),
+                            '[]'::jsonb
                         )
                         FROM user_images ui
                         WHERE ui.user_id = u.id

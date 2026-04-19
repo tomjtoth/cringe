@@ -1,14 +1,3 @@
-use dioxus::prelude::*;
-
-use crate::{
-    models::person::Person,
-    state::{AUTH_CTE, ME},
-    views::people::{
-        listing::ListingCtx,
-        profile::{container::Container, ProfileCtx, ResourceCtx},
-    },
-};
-
 mod education;
 mod habits;
 mod hometown;
@@ -18,56 +7,22 @@ mod occupation;
 mod relationship_type;
 mod seeking;
 
-#[put("/api/me")]
-async fn update_me(me: Person) -> Result<bool> {
-    let mut res = false;
+use dioxus::prelude::*;
 
-    if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-        let kids = me.kids.as_ref();
-        let habits = me.habits.as_ref();
+use crate::{
+    models::person::Person,
+    state::websocket::WsCtx,
+    views::people::{
+        listing::ListingCtx,
+        profile::{container::Container, ProfileCtx, ResourceCtx},
+    },
+};
 
-        let db_res = sqlx::query(&format!(
-            r#"
-            WITH {AUTH_CTE}
-
-            UPDATE users u
-            SET
-                education = $2,
-                occupation = $3,
-                location = $4,
-                hometown = $5,
-                seeking = $6,
-                relationship_type = $7,
-                kids_has = $8,
-                kids_wants = $9,
-                habits_drinking = $10,
-                habits_smoking = $11,
-                habits_marijuana = $12,
-                habits_drugs = $13
-            FROM auth a
-            WHERE a.email = u.email
-            "#
-        ))
-        .bind(sess_id)
-        .bind(&me.education)
-        .bind(&me.occupation)
-        .bind(&me.location)
-        .bind(&me.hometown)
-        .bind(&me.seeking)
-        .bind(&me.relationship_type)
-        .bind(&kids.map(|k| k.has.map(|n| n as i16)))
-        .bind(&kids.map(|k| k.wants.map(|n| n as i16)))
-        .bind(&habits.map(|h| h.drinking))
-        .bind(&habits.map(|h| h.smoking))
-        .bind(&habits.map(|h| h.marijuana))
-        .bind(&habits.map(|h| h.drugs))
-        .execute(&pool)
-        .await?;
-
-        res = db_res.rows_affected() > 0;
-    }
-
-    Ok(res)
+#[derive(Clone)]
+struct DetailsCtx {
+    ro: ReadSignal<Person>,
+    rw: Signal<Person>,
+    editing: Signal<bool>,
 }
 
 #[component]

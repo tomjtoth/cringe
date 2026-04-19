@@ -23,10 +23,10 @@ pub struct Habits {
 }
 
 #[cfg(feature = "server")]
-type THabits = Json<Habits>;
+pub type THabits = Json<Habits>;
 
 #[cfg(not(feature = "server"))]
-type THabits = Habits;
+pub type THabits = Habits;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
