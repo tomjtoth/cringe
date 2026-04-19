@@ -59,7 +59,14 @@ impl ResourceCtx {
         let id = self.op_id;
 
         let returned = OPS.with(|ops| {
-            debug!("WS op #{id} polled {ops:?}");
+            debug!(
+                "WS op {}({id}) polled {ops:?}",
+                match id {
+                    0 => "Details",
+                    1..7 => "Prompt",
+                    _ => "Image",
+                }
+            );
             ops.get(&id).cloned()
         });
 
