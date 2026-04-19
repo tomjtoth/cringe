@@ -24,22 +24,21 @@ pub(in crate::state) async fn image_crud(
         .fetch_one(&ctx.pool)
         .await?;
 
-    let inserting = img.id().is_none() && img.pos().is_some();
-    let updating = img.id().is_some() && img.pos().is_some();
+    if res.authorized {
+        let inserted = img.id().is_none() && img.pos().is_some();
+        let updated = img.id().is_some() && img.pos().is_some();
 
-    if let Some(from_db) = res.image.as_ref().filter(|_| res.authorized) {
-        if let Some(id) = from_db.id().filter(|_| inserting) {
+        if let Some(id) = res.image.id().filter(|_| inserted) {
             info!("Sending job #{id}");
             enqueue(id).await?;
-        }
-        // not transferring bytes over network, when we have it here already
-        else if updating {
+        } else if updated {
+            // not transferring bytes over network, when we have it here already
             if let Some(bytes) = img.bytes() {
-                if let Some(i) = res.image.as_mut() {
-                    i.set_bytes(bytes.clone());
-                }
+                res.image.set_bytes(bytes.clone());
             }
         }
+    } else {
+        res.image.set_user_id(img.user_id())
     }
 
     Ok(res)

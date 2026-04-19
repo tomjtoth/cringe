@@ -75,6 +75,12 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
 
     let result_name = if for_prompt { "prompt" } else { "image" };
 
+    let fallback = if for_prompt {
+        r#"jsonb_build_object('title', '', 'body', '')"#
+    } else {
+        r#"'{}'::jsonb"#
+    };
+
     format!(
         "WITH
 
@@ -169,7 +175,10 @@ pub(super) fn crud_query(for_prompt: bool) -> String {
             '{result_name}', (SELECT coalesce(
                 (SELECT to_jsonb(d) FROM deleted d),
                 (SELECT to_jsonb(u) FROM updated u),
-                (SELECT to_jsonb(i) FROM inserted i)
+                (SELECT to_jsonb(i) FROM inserted i),
+
+                -- falling back to arg when unauthorized
+                (SELECT {fallback})
             ))
         )
         ",

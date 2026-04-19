@@ -21,14 +21,12 @@ use crate::{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ImageOpResult {
     pub authorized: bool,
-
-    /// #### Will send this back anyways, so that clients can use .user_id and .id
-    pub image: Option<Image>,
+    pub image: Image,
     pub sorted: Sorted,
 }
 
 pub(super) fn handle_image_crud_res(
-    op_id: u128,
+    op_id: u8,
     ImageOpResult {
         authorized,
         image,
@@ -52,23 +50,25 @@ pub(super) fn handle_image_crud_res(
             profile.images.insert(*pos as usize, image.clone());
         }
     }
-
-    OPS.with_mut(|ops| {
-        if let Some(OpState::Pending) = ops.get(&op_id) {
-            if let Some(image) = image.as_ref().filter(|_| authorized) {
-                if let Some(me) = ME.write().profile.as_mut() {
-                    do_op(me, image, &sorted);
-                }
-                ops.insert(op_id, OpState::Success);
-            } else {
-                ops.insert(op_id, OpState::Failure);
+    ME.with_mut(|me| {
+        if let Some(me) = me.profile.as_mut() {
+            if *image.user_id() == me.id {
+                OPS.with_mut(|ops| {
+                    if authorized {
+                        do_op(me, &image, &sorted);
+                        ops.insert(op_id, OpState::Success);
+                    } else {
+                        ops.insert(op_id, OpState::Failure);
+                    }
+                });
+            } else if authorized {
+                OTHERS.with_mut(|profs| {
+                    if let Some(profile) = profs.iter_mut().find(|prof| prof.id == *image.user_id())
+                    {
+                        do_op(profile, &image, &sorted);
+                    }
+                });
             }
-        } else if let Some(image) = image.as_ref().filter(|_| authorized) {
-            OTHERS.with_mut(|profs| {
-                if let Some(profile) = profs.iter_mut().find(|prof| prof.id == *image.user_id()) {
-                    do_op(profile, image, &sorted);
-                }
-            });
         }
     });
 }
@@ -79,7 +79,7 @@ pub struct ImageConversionResult {
     pub placeholders: HashMap<i32, String>,
 }
 
-pub(super) fn image_cli_converted(
+pub(super) fn handle_conversion_res(
     ImageConversionResult {
         image,
         placeholders,

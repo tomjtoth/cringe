@@ -16,12 +16,12 @@ use crate::{
 #[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct PromptOpResult {
     pub authorized: bool,
-    pub prompt: Option<Prompt>,
+    pub prompt: Prompt,
     pub sorted: Sorted,
 }
 
 pub(super) fn handle_prompt_crud_res(
-    op_id: u128,
+    op_id: u8,
     PromptOpResult {
         authorized,
         prompt,
@@ -46,22 +46,24 @@ pub(super) fn handle_prompt_crud_res(
         }
     }
 
-    OPS.with_mut(|ops| {
-        if let Some(OpState::Pending) = ops.get(&op_id) {
-            if let Some(prompt) = prompt.as_ref().filter(|_| authorized) {
-                if let Some(me) = ME.write().profile.as_mut() {
-                    do_op(me, prompt, &sorted);
-                }
-                ops.insert(op_id, OpState::Success);
-            } else {
-                ops.insert(op_id, OpState::Failure);
+    ME.with_mut(|me| {
+        if let Some(me) = me.profile.as_mut() {
+            if prompt.user_id == me.id {
+                OPS.with_mut(|ops| {
+                    if authorized {
+                        do_op(me, &prompt, &sorted);
+                        ops.insert(op_id, OpState::Success);
+                    } else {
+                        ops.insert(op_id, OpState::Failure);
+                    }
+                });
+            } else if authorized {
+                OTHERS.with_mut(|profs| {
+                    if let Some(profile) = profs.iter_mut().find(|prof| prof.id == prompt.user_id) {
+                        do_op(profile, &prompt, &sorted);
+                    }
+                });
             }
-        } else if let Some(prompt) = prompt.as_ref().filter(|_| authorized) {
-            OTHERS.with_mut(|profs| {
-                if let Some(profile) = profs.iter_mut().find(|prof| prof.id == prompt.user_id) {
-                    do_op(profile, prompt, &sorted);
-                }
-            });
         }
     });
 }

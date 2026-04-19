@@ -64,7 +64,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         }
 
         spawn(async move {
-            _ = wscx.req(WsRequest::ImageOp(rcx.op_id(), sig())).await;
+            _ = wscx.req(WsRequest::ImageOp(rcx.op_id, sig())).await;
         });
     });
 

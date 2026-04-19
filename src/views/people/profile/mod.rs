@@ -2,7 +2,6 @@ use dioxus::prelude::*;
 
 use crate::{
     models::person::Person as MPerson,
-    utils::random_id,
     views::people::{
         listing::ListingCtx,
         profile::{button::SkipButton, details::Details},
@@ -27,7 +26,7 @@ struct ProfileCtx {
 /// This might be a Prompt, an Image or the whole Details section
 pub(crate) struct ResourceCtx {
     state: Signal<bool>,
-    op_id: u128,
+    pub(crate) op_id: u8,
 }
 
 impl Copy for ResourceCtx {}
@@ -38,16 +37,12 @@ impl Clone for ResourceCtx {
 }
 
 impl ResourceCtx {
-    fn provide() -> Self {
+    fn provide(idx: usize) -> Self {
         let state = use_signal(|| false);
         use_context_provider(|| ResourceCtx {
             state,
-            op_id: random_id(),
+            op_id: idx as u8,
         })
-    }
-
-    pub(crate) fn op_id(&self) -> u128 {
-        self.op_id
     }
 
     fn editing(&self) -> bool {
@@ -67,7 +62,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
     use_context_provider(move || ProfileCtx { profile });
 
     // for the SkipButton and Details
-    ResourceCtx::provide();
+    ResourceCtx::provide(0);
 
     rsx! {
         div {

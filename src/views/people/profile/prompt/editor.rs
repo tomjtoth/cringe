@@ -54,7 +54,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         }
 
         spawn(async move {
-            _ = wscx.req(WsRequest::PromptOp(rcx.op_id(), sig())).await;
+            _ = wscx.req(WsRequest::PromptOp(rcx.op_id, sig())).await;
         });
     });
 

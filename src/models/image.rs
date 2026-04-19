@@ -67,6 +67,15 @@ impl Image {
             _ => &None,
         }
     }
+    pub fn set_user_id(&mut self, user_id: &Option<i32>) {
+        if let Self::Uploaded {
+            user_id: my_user_id,
+            ..
+        } = self
+        {
+            *my_user_id = *user_id;
+        }
+    }
 
     #[cfg(feature = "server")]
     pub fn convert(&mut self) -> anyhow::Result<()> {

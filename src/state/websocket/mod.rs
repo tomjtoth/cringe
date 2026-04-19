@@ -18,8 +18,10 @@ use crate::{
     router::Route,
     state::{
         image::{handle_image_crud_res, image_cli_converted, ImageConversionResult, ImageOpResult},
+        image::{
+            handle_conversion_res, handle_image_crud_res, ImageConversionResult, ImageOpResult,
+        },
         prompt::{handle_prompt_crud_res, PromptOpResult},
-        websocket::ops::ws_register_op_id,
         AUTH_CTE, ME,
     },
     utils::sleep,
@@ -63,6 +65,41 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
 
     let sess_id = sess_id.ok_or(anyhow::anyhow!(StatusCode::UNAUTHORIZED))?;
 
+    /// rustfmt did not work within tokio::select! macro
+    async fn handle_req(
+        ctx: &ServerCtx,
+        req: WsRequest,
+        socket: &mut dioxus_fullstack::TypedWebsocket<WsRequest, WsResponse>,
+    ) {
+        if !matches!(req, WsRequest::KeepAlive) {
+            info!("Received {req:?}");
+        }
+
+        let target = |authorized: bool| {
+            if authorized {
+                None
+            } else {
+                Some(vec![ctx.session_id.clone()])
+            }
+        };
+
+        match req {
+            WsRequest::KeepAlive => {
+                _ = socket.send(WsResponse::ServerAlive).await;
+            }
+
+            WsRequest::PromptOp(oid, prompt) => match prompt_crud(&ctx, prompt).await {
+                Ok(res) => ws_notify(target(res.authorized), WsResponse::PromptOp(oid, res)).await,
+                Err(e) => error!("PromptOp failed: {e:?}"),
+            },
+
+            WsRequest::ImageOp(oid, img) => match image_crud(&ctx, img).await {
+                Ok(res) => ws_notify(target(res.authorized), WsResponse::ImageOp(oid, res)).await,
+                Err(e) => error!("ImageOp failed: {e:?}"),
+            },
+        }
+    }
+
     Ok(options.on_upgrade(move |mut socket| async move {
         // determine session for this websocket and register a sender for notifications
         let (tx, mut rx) = tokio::sync::mpsc::channel::<WsResponse>(32);
@@ -82,33 +119,12 @@ async fn ws_endpoint(options: WebSocketOptions) -> Result<Websocket<WsRequest, W
                 }
 
                 from_client = socket.recv() => {
-                    match from_client.map(|req|{
-                        if !matches!(req, WsRequest::KeepAlive) {
-                            info!("Received {req:?}");
-                        }
-                        req
-                    }) {
-                        Ok(WsRequest::KeepAlive) => {
-                            _ = socket.send(WsResponse::ServerAlive).await;
-                        }
-
-                        Ok(WsRequest::PromptOp(oid, prompt)) => {
-                            match crate::state::prompt::crud::prompt_crud(&ctx, prompt).await {
-                                Ok(res) => ws_notify(None, WsResponse::PromptOp(oid, res)).await,
-                                Err(e) => error!("PromptOp failed: {e:?}"),
-                            }
-                        }
-
-                        Ok(WsRequest::ImageOp(oid, img)) => {
-                            match crate::state::image::ops::image_crud(&ctx, img).await {
-                                Ok(res) => ws_notify(None, WsResponse::ImageOp(oid, res)).await,
-                                Err(e) => error!("ImageOp failed: {e:?}"),
-                            }
-                        }
+                    match from_client {
+                        Ok(req) => handle_req(&ctx, req, &mut socket).await,
 
                         // this gets logged in ws_unregister
-                        Err(ConnectionClosed { code: Normal, ..})
-                        | Err(ConnectionClosed { code: Away, ..}) => break,
+                        Err(ConnectionClosed { code: Normal, .. })
+                        | Err(ConnectionClosed { code: Away, .. }) => break,
 
                         Err(e) => {
                             error!("WS error: {e:?}");
@@ -141,10 +157,7 @@ impl std::ops::Deref for WsCtx {
 }
 
 impl WsCtx {
-    /// #### Registers outgoing requests' operation id and logs errors
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
-        ws_register_op_id(&request);
-
         self.send(request).await.map_err(|e| {
             error!("WS error: {e:?}");
             e
@@ -214,7 +227,7 @@ fn use_ws(mut state: Signal<u8>) {
 
                 WsResponse::ImageOp(op_id, res) => handle_image_crud_res(op_id, res),
 
-                WsResponse::ImageConversion(res) => image_cli_converted(res),
+                WsResponse::ImageConversion(res) => handle_conversion_res(res),
             }
         }
 

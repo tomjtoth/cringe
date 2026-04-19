@@ -9,7 +9,7 @@ pub(in crate::state) async fn prompt_crud(
     ctx: &ServerCtx,
     prompt: Prompt,
 ) -> anyhow::Result<PromptOpResult> {
-    let Json(res) = sqlx::query_scalar(&crud_query(true))
+    let Json(mut res) = sqlx::query_scalar::<_, Json<PromptOpResult>>(&crud_query(true))
         .bind(&ctx.session_id)
         .bind(&prompt.id)
         .bind(&prompt.position)
@@ -17,6 +17,10 @@ pub(in crate::state) async fn prompt_crud(
         .bind(&prompt.body)
         .fetch_one(&ctx.pool)
         .await?;
+
+    if !res.authorized {
+        res.prompt.user_id = prompt.user_id;
+    }
 
     Ok(res)
 }
