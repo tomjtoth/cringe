@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{models::person::Person, views::people::profile::details::DetailsCtx};
+use crate::views::people::profile::details::DetailsCtx;
 
 mod has;
 mod wants;

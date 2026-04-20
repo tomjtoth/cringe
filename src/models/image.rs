@@ -351,8 +351,3 @@ where
         _ => Err(D::Error::custom("invalid bytes value")),
     }
 }
-
-#[cfg(feature = "server")]
-pub type TImages = sqlx::types::Json<Vec<Image>>;
-#[cfg(not(feature = "server"))]
-pub type TImages = Vec<Image>;

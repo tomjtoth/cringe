@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::models::person::{Frequency, THabits};
+use crate::models::person::{Frequency, Habits as MHabits};
 use crate::views::people::profile::details::DetailsCtx;
 
 #[component]
@@ -31,8 +31,8 @@ fn habit(
     emoji: &str,
     question: &str,
     dcx: &DetailsCtx,
-    selector: fn(&THabits) -> Option<&Frequency>,
-    onchange: fn(&mut THabits, Option<Frequency>),
+    selector: fn(&MHabits) -> Option<&Frequency>,
+    onchange: fn(&mut MHabits, Option<Frequency>),
 ) -> Element {
     let tmp_ro = &dcx.ro.read().habits;
     let ro = tmp_ro.as_ref();

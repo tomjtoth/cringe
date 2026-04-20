@@ -21,10 +21,10 @@ pub fn Image(idx: usize) -> Element {
     let (src, show_adder) = {
         let pcx = use_context::<ProfileCtx>();
         let person = (pcx.profile)();
-        let pics = person.images();
-        let op = pics.get(idx);
+        let images = person.images;
+        let op = images.get(idx);
 
-        (op.cloned(), idx == pics.len())
+        (op.cloned(), idx == images.len())
     };
 
     let ordinal_idx = vec!["🥳 1st", "🎉 2nd", "🎊 3rd"]

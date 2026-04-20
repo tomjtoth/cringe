@@ -15,7 +15,7 @@ pub fn Prompt(idx: usize) -> Element {
     let (src, show_adder) = {
         let pcx = use_context::<ProfileCtx>();
         let person = (pcx.profile)();
-        let prompts = person.prompts();
+        let prompts = person.prompts;
         let op = prompts.get(idx);
 
         (op.cloned(), idx == prompts.len())

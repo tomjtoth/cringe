@@ -82,7 +82,7 @@ pub async fn seed(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .fetch_one(&mut *tx)
         .await?;
 
-        for (position, prompt) in bot.prompts().iter().enumerate() {
+        for (position, prompt) in bot.prompts.iter().enumerate() {
             sqlx::query(
                 "INSERT INTO user_prompts (user_id, position, title, body) VALUES ($1, $2, $3, $4)",
             )

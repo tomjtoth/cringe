@@ -38,7 +38,7 @@ pub fn Navbar() -> Element {
             li {
                 if me.authenticated {
                     Link { to: Route::Me {},
-                        if let Some(image) = me.profile.as_ref().and_then(|p| p.images().get(0)) {
+                        if let Some(image) = me.profile.as_ref().and_then(|p| p.images.get(0)) {
                             img {
                                 class: "w-6 border rounded-full",
                                 src: image.src(),

@@ -1,16 +1,9 @@
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-#[cfg(feature = "server")]
-use sqlx::types::Json;
-
 use crate::models::{
-    gender::Gender,
-    image::{Image, TImages},
-    kids::TKids,
-    relationship_type::RelationshipType,
-    seeking::Seeking,
-    zodiac_sign::ZodiacSign,
+    gender::Gender, image::Image, kids::Kids, relationship_type::RelationshipType,
+    seeking::Seeking, zodiac_sign::ZodiacSign,
 };
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -21,12 +14,6 @@ pub struct Habits {
     pub marijuana: Option<Frequency>,
     pub drugs: Option<Frequency>,
 }
-
-#[cfg(feature = "server")]
-pub type THabits = Json<Habits>;
-
-#[cfg(not(feature = "server"))]
-pub type THabits = Habits;
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -90,11 +77,6 @@ pub struct Prompt {
     pub body: String,
 }
 
-#[cfg(feature = "server")]
-type TPrompts = Json<Vec<Prompt>>;
-#[cfg(not(feature = "server"))]
-type TPrompts = Vec<Prompt>;
-
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Gps {
@@ -140,17 +122,17 @@ pub struct Person {
     #[serde(default)]
     pub relationship_type: Option<RelationshipType>,
     #[serde(default)]
-    pub kids: Option<TKids>,
+    pub kids: Option<Kids>,
     #[serde(default)]
-    pub habits: Option<THabits>,
-    pub prompts: TPrompts,
-    pub images: TImages,
+    pub habits: Option<Habits>,
+    pub prompts: Vec<Prompt>,
+    pub images: Vec<Image>,
 }
 
 #[cfg(feature = "server")]
 impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
     fn from_row(row: &'r sqlx::postgres::PgRow) -> Result<Self, sqlx::Error> {
-        use sqlx::Row;
+        use sqlx::{types::Json, Row};
 
         macro_rules! try_opt {
             ($ty:ty, $name:expr) => {
@@ -188,18 +170,18 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let hometown = try_opt!(String, "hometown");
         let seeking = try_opt!(Seeking, "seeking");
         let relationship_type = try_opt!(RelationshipType, "relationship_type");
-        let kids = try_opt!(TKids, "kids");
-        let habits = try_opt!(THabits, "habits");
+        let kids = try_opt!(Json<Kids>, "kids").map(|json| json.0);
+        let habits = try_opt!(Json<Habits>, "habits").map(|json| json.0);
 
-        let prompts = match row.try_get::<TPrompts, _>("prompts") {
-            Ok(v) => v,
-            Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
+        let prompts = match row.try_get::<Json<Vec<Prompt>>, _>("prompts") {
+            Ok(Json(v)) => v,
+            Err(sqlx::Error::ColumnNotFound(_)) => Vec::new(),
             Err(e) => return Err(e),
         };
 
-        let images = match row.try_get::<TImages, _>("images") {
-            Ok(v) => v,
-            Err(sqlx::Error::ColumnNotFound(_)) => Json(Vec::new()),
+        let images = match row.try_get::<Json<Vec<Image>>, _>("images") {
+            Ok(Json(v)) => v,
+            Err(sqlx::Error::ColumnNotFound(_)) => Vec::new(),
             Err(e) => return Err(e),
         };
 
@@ -259,25 +241,5 @@ impl Person {
             };
             format!("{emoji} ~{d}km away")
         })
-    }
-
-    pub fn images(&self) -> &Vec<Image> {
-        #[cfg(feature = "server")]
-        {
-            self.images.as_ref()
-        }
-
-        #[cfg(not(feature = "server"))]
-        &self.images
-    }
-
-    pub fn prompts(&self) -> &Vec<Prompt> {
-        #[cfg(feature = "server")]
-        {
-            self.prompts.0.as_ref()
-        }
-
-        #[cfg(not(feature = "server"))]
-        &self.prompts
     }
 }
