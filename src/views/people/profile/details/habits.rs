@@ -34,15 +34,9 @@ fn habit(
     selector: fn(&MHabits) -> Option<&Frequency>,
     onchange: fn(&mut MHabits, Option<Frequency>),
 ) -> Element {
-    let tmp_ro = &dcx.ro.read().habits;
-    let ro = tmp_ro.as_ref();
-
-    let tmp_rw = &dcx.rw.read().habits;
-    let rw = tmp_rw.as_ref();
-    let value = rw
-        .and_then(selector)
-        .map(|d| d.to_string())
-        .unwrap_or_default();
+    let rw_habits = &dcx.rw.read().habits;
+    let rw_freq = selector(rw_habits);
+    let value = rw_freq.map(|d| d.to_string()).unwrap_or_default();
 
     let mut rw = dcx.rw;
 
@@ -60,9 +54,7 @@ fn habit(
                             .with_mut(|p| {
                             let freq = Frequency::from_str(&evt.value());
                             // TODO: fallback could be implemented, but this is always populated as of 19.4
-                            if let Some(h) = p.habits.as_mut() {
-                                onchange(h, freq);
-                            }
+                            onchange(&mut p.habits, freq);
                         });
                     },
 
@@ -74,7 +66,7 @@ fn habit(
                 }
             }
         } else {
-            if let Some(frequency) = ro.and_then(selector) {
+            if let Some(frequency) = selector(&dcx.ro.read().habits) {
                 li { "{emoji} {frequency}" }
             }
         }

@@ -9,9 +9,16 @@ use crate::models::{
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Habits {
+    #[serde(rename = "habits_drinking")]
     pub drinking: Option<Frequency>,
+
+    #[serde(rename = "habits_smoking")]
     pub smoking: Option<Frequency>,
+
+    #[serde(rename = "habits_marijuana")]
     pub marijuana: Option<Frequency>,
+
+    #[serde(rename = "habits_drugs")]
     pub drugs: Option<Frequency>,
 }
 
@@ -123,8 +130,8 @@ pub struct Person {
     pub relationship_type: Option<RelationshipType>,
     #[serde(default)]
     pub kids: Option<Kids>,
-    #[serde(default)]
-    pub habits: Option<Habits>,
+    #[serde(default, flatten)]
+    pub habits: Habits,
     pub prompts: Vec<Prompt>,
     pub images: Vec<Image>,
 }
@@ -171,7 +178,18 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let seeking = try_opt!(Seeking, "seeking");
         let relationship_type = try_opt!(RelationshipType, "relationship_type");
         let kids = try_opt!(Json<Kids>, "kids").map(|json| json.0);
-        let habits = try_opt!(Json<Habits>, "habits").map(|json| json.0);
+
+        let habits_drinking = try_opt!(Frequency, "habits_drinking");
+        let habits_smoking = try_opt!(Frequency, "habits_smoking");
+        let habits_marijuana = try_opt!(Frequency, "habits_marijuana");
+        let habits_drugs = try_opt!(Frequency, "habits_drugs");
+
+        let habits = Habits {
+            drinking: habits_drinking,
+            smoking: habits_smoking,
+            marijuana: habits_marijuana,
+            drugs: habits_drugs,
+        };
 
         let prompts = match row.try_get::<Json<Vec<Prompt>>, _>("prompts") {
             Ok(Json(v)) => v,

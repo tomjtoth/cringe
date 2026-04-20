@@ -58,12 +58,10 @@ async fn get_me() -> Result<Me> {
                         'wants',    kids_wants
                     ) AS kids,
 
-                    jsonb_build_object(
-                        'drinking',     habits_drinking,
-                        'smoking',      habits_smoking,
-                        'marijuana',    habits_marijuana,
-                        'drugs',        habits_drugs
-                    ) AS habits,
+                    habits_drinking,
+                    habits_smoking,
+                    habits_marijuana,
+                    habits_drugs,
 
                     (
                         SELECT coalesce(

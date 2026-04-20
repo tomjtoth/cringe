@@ -48,12 +48,10 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
                         'wants',    kids_wants
                     ) AS kids,
 
-                    json_build_object(
-                        'drinking',     habits_drinking,
-                        'smoking',      habits_smoking,
-                        'marijuana',    habits_marijuana,
-                        'drugs',        habits_drugs
-                    ) AS habits,
+                    habits_drinking,
+                    habits_smoking,
+                    habits_marijuana,
+                    habits_drugs,
 
                     (
                         SELECT coalesce(
