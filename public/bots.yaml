@@ -13,15 +13,12 @@
     lon: -80.1918
     lat: 25.7617
 
-  kids:
-    has: 0
-    wants: 0
+  has_children: true
 
-  habits:
-    drinking: rarely
-    smoking: never
-    marijuana: never
-    drugs: never
+  drinking: rarely
+  smoking: never
+  marijuana: never
+  drugs: never
 
   prompts:
     - title: Two truths and a lie
@@ -65,15 +62,13 @@
     lon: -70.2553
     lat: 43.6615
 
-  kids:
-    has: 0
-    wants: 0
+  has_children: false
+  family_plans: doesn't want children
 
-  habits:
-    drinking: rarely
-    smoking: never
-    marijuana: never
-    drugs: never
+  drinking: rarely
+  smoking: never
+  marijuana: never
+  drugs: never
 
   prompts:
     - title: Dream date
@@ -114,14 +109,12 @@
     lon: 60.16939565786756
     lat: 24.937965044432058
 
-  kids:
-    has: 2
-    wants: 0
+  has_children: true
+  family_plans: doesn't want children
 
-  habits:
-    drinking: never
-    marijuana: rarely
-    drugs: often
+  drinking: never
+  marijuana: rarely
+  drugs: often
 
   prompts:
     - title: Two truths and a lie
@@ -194,11 +187,10 @@
   education: Electric Engineer PhD, minor in beer tasting
   occupation: God of Thunder & resource provider at Helen ⚡
 
-  habits:
-    drinking: yes
-    smoking: rarely
-    marijuana: rarely
-    drugs: never
+  drinking: yes
+  smoking: rarely
+  marijuana: rarely
+  drugs: never
 
   hometown: Asgard 👽
   seeking: short-term fun
@@ -266,13 +258,11 @@
     lon: 60.2922284791505
     lat: 25.041045406539975
 
-  kids:
-    wants: 0
+  family_plans: doesn't want children
 
-  habits:
-    drinking: yes
-    smoking: yes
-    marijuana: never
+  drinking: yes
+  smoking: yes
+  marijuana: never
 
   prompts:
     - title: About me
@@ -296,10 +286,9 @@
   education: Diplomatic Academy valedictorian, rage management unfinished
   occupation: Princess
 
-  habits:
-    drinking: rarely
-    smoking: never
-    marijuana: never
+  drinking: rarely
+  smoking: never
+  marijuana: never
 
   hometown: Alderaan
   seeking: long-term
@@ -309,9 +298,8 @@
     lon: 60.19836313262283
     lat: 24.930237843971767
 
-  kids:
-    has: 0
-    wants: -1
+  has_children: false
+  family_plans: not sure yet
 
   prompts:
     - title: A non-negotiable
@@ -351,11 +339,10 @@
   occupation: Burglar
   relationship_type: monogamy
 
-  habits:
-    drinking: yes
-    smoking: never
-    marijuana: often
-    drugs: rarely
+  drinking: yes
+  smoking: never
+  marijuana: often
+  drugs: rarely
 
   # Santa Claus village
   location: Santa Claus Village
