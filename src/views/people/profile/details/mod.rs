@@ -22,7 +22,6 @@ use crate::{
 struct DetailsCtx {
     ro: ReadSignal<Person>,
     rw: Signal<Person>,
-    editing: Signal<bool>,
 }
 
 #[component]
@@ -37,7 +36,6 @@ pub fn Details() -> Element {
     use_context_provider(|| DetailsCtx {
         rw: sig,
         ro: person,
-        editing,
     });
 
     use_effect(move || editing.set(olcx.is_none() && rcx.editing()));

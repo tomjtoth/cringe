@@ -3,15 +3,17 @@ use strum::IntoEnumIterator;
 
 use crate::models::family_plans::FamilyPlans as EFP;
 use crate::views::people::profile::details::DetailsCtx;
+use crate::views::people::profile::ResourceCtx;
 
 #[component]
 pub(super) fn FamilyPlans() -> Element {
     let mut dcx = use_context::<DetailsCtx>();
+    let rcx = use_context::<ResourceCtx>();
 
     let plans = &dcx.rw.read().family_plans;
 
     rsx! {
-        if (dcx.editing)() {
+        if rcx.editing() {
             li {
                 "🍼"
                 select {

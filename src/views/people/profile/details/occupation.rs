@@ -1,13 +1,14 @@
 use dioxus::prelude::*;
 
-use crate::views::people::profile::details::DetailsCtx;
+use crate::views::people::profile::{details::DetailsCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Occupation() -> Element {
     let mut dcx = use_context::<DetailsCtx>();
+    let rcx = use_context::<ResourceCtx>();
 
     rsx! {
-        if (dcx.editing)() {
+        if rcx.editing() {
             div {
                 "💼"
                 input {

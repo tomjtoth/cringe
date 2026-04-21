@@ -1,20 +1,20 @@
 use dioxus::prelude::*;
 
-use crate::views::people::profile::details::DetailsCtx;
+use crate::views::people::profile::{details::DetailsCtx, ResourceCtx};
 
 #[component]
 pub(super) fn HasChildren() -> Element {
     let mut dcx = use_context::<DetailsCtx>();
+    let rcx = use_context::<ResourceCtx>();
 
     let value = dcx.rw.read().has_children;
 
     rsx! {
-        if (dcx.editing)() {
+        if rcx.editing() {
             li {
                 "🧑‍🧒‍🧒"
                 select {
                     class: if value.is_none() { "text-gray-500" },
-                    value,
                     onchange: move |evt| dcx.rw.write().has_children = evt.value().parse::<bool>().ok(),
 
                     option { value: "", "Any children?" }

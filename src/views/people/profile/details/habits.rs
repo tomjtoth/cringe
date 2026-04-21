@@ -1,28 +1,50 @@
 use dioxus::prelude::*;
+use strum::IntoEnumIterator;
 
 use crate::models::person::{Frequency, Habits as MHabits};
 use crate::views::people::profile::details::DetailsCtx;
+use crate::views::people::profile::ResourceCtx;
 
 #[component]
 pub(super) fn Habits() -> Element {
     let dcx = use_context::<DetailsCtx>();
+    let rcx = use_context::<ResourceCtx>();
 
     rsx! {
-        {habit("🍷", "Drinking", &dcx, |h| h.drinking.as_ref(), |h, f| h.drinking = f)}
+        {
+            habit(
+                "🍷",
+                "Drinking",
+                &dcx,
+                &rcx,
+                |h| h.drinking.as_ref(),
+                |h, f| h.drinking = f,
+            )
+        }
 
-        {habit("🚬", "Smoking", &dcx, |h| h.smoking.as_ref(), |h, f| h.smoking = f)}
+        {
+            habit(
+                "🚬",
+                "Smoking",
+                &dcx,
+                &rcx,
+                |h| h.smoking.as_ref(),
+                |h, f| h.smoking = f,
+            )
+        }
 
         {
             habit(
                 "🌿🚬",
                 "Marijuana",
                 &dcx,
+                &rcx,
                 |h| h.marijuana.as_ref(),
                 |h, f| h.marijuana = f,
             )
         }
 
-        {habit("💊💉", "Drugs", &dcx, |h| h.drugs.as_ref(), |h, f| h.drugs = f)}
+        {habit("💊💉", "Drugs", &dcx, &rcx, |h| h.drugs.as_ref(), |h, f| h.drugs = f)}
     }
 }
 
@@ -31,6 +53,7 @@ fn habit(
     emoji: &str,
     question: &str,
     dcx: &DetailsCtx,
+    rcx: &ResourceCtx,
     selector: fn(&MHabits) -> Option<&Frequency>,
     onchange: fn(&mut MHabits, Option<Frequency>),
 ) -> Element {
@@ -41,7 +64,7 @@ fn habit(
     let mut rw = dcx.rw;
 
     rsx! {
-        if (dcx.editing)() {
+        if rcx.editing() {
             li {
                 "{emoji}"
 
@@ -59,10 +82,10 @@ fn habit(
                     },
 
                     option { value: "", "{question}?" }
-                    option { value: "{Frequency::Never}", "{Frequency::Never}" }
-                    option { value: "{Frequency::Rarely}", "{Frequency::Rarely}" }
-                    option { value: "{Frequency::Often}", "{Frequency::Often}" }
-                    option { value: "{Frequency::YesPlease}", "{Frequency::YesPlease}" }
+
+                    for val in Frequency::iter() {
+                        option { value: "{val}", selected: rw_freq == Some(&val), "{val}" }
+                    }
                 }
             }
         } else {
