@@ -32,9 +32,14 @@ pub(super) fn handle_details_update_res(
         target.hometown = source.hometown;
         target.seeking = source.seeking;
         target.relationship_type = source.relationship_type;
+
         target.has_children = source.has_children;
         target.family_plans = source.family_plans;
-        target.habits = source.habits;
+
+        target.drinking = source.drinking;
+        target.smoking = source.smoking;
+        target.marijuana = source.marijuana;
+        target.drugs = source.drugs;
     }
 
     ME.with_mut(|me| {

@@ -6,22 +6,6 @@ use crate::models::{
     seeking::Seeking, zodiac_sign::ZodiacSign,
 };
 
-#[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
-pub struct Habits {
-    #[serde(rename = "habits_drinking")]
-    pub drinking: Option<Frequency>,
-
-    #[serde(rename = "habits_smoking")]
-    pub smoking: Option<Frequency>,
-
-    #[serde(rename = "habits_marijuana")]
-    pub marijuana: Option<Frequency>,
-
-    #[serde(rename = "habits_drugs")]
-    pub drugs: Option<Frequency>,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
@@ -132,8 +116,11 @@ pub struct Person {
     pub has_children: Option<bool>,
     pub family_plans: Option<FamilyPlans>,
 
-    #[serde(flatten)]
-    pub habits: Habits,
+    pub drinking: Option<Frequency>,
+    pub smoking: Option<Frequency>,
+    pub marijuana: Option<Frequency>,
+    pub drugs: Option<Frequency>,
+
     pub prompts: Vec<Prompt>,
     pub images: Vec<Image>,
 }
@@ -183,17 +170,10 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let has_children = try_opt!(bool, "has_children");
         let family_plans = try_opt!(FamilyPlans, "family_plans");
 
-        let habits_drinking = try_opt!(Frequency, "habits_drinking");
-        let habits_smoking = try_opt!(Frequency, "habits_smoking");
-        let habits_marijuana = try_opt!(Frequency, "habits_marijuana");
-        let habits_drugs = try_opt!(Frequency, "habits_drugs");
-
-        let habits = Habits {
-            drinking: habits_drinking,
-            smoking: habits_smoking,
-            marijuana: habits_marijuana,
-            drugs: habits_drugs,
-        };
+        let drinking = try_opt!(Frequency, "habits_drinking");
+        let smoking = try_opt!(Frequency, "habits_smoking");
+        let marijuana = try_opt!(Frequency, "habits_marijuana");
+        let drugs = try_opt!(Frequency, "habits_drugs");
 
         let prompts = match row.try_get::<Json<Vec<Prompt>>, _>("prompts") {
             Ok(Json(v)) => v,
@@ -224,9 +204,15 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             hometown,
             seeking,
             relationship_type,
+
             has_children,
             family_plans,
-            habits,
+
+            drinking,
+            smoking,
+            marijuana,
+            drugs,
+
             prompts,
             images,
         })

@@ -6,8 +6,6 @@ use crate::{
 };
 
 pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<DetailsUpateRes> {
-    let h = &details.habits;
-
     let Json(mut res) = sqlx::query_scalar::<_, Json<DetailsUpateRes>>(&format!(
         r#"
         WITH {AUTH_CTE},
@@ -79,10 +77,10 @@ pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<
     .bind(&details.relationship_type)
     .bind(&details.has_children)
     .bind(&details.family_plans)
-    .bind(&h.drinking)
-    .bind(&h.smoking)
-    .bind(&h.marijuana)
-    .bind(&h.drugs)
+    .bind(&details.drinking)
+    .bind(&details.smoking)
+    .bind(&details.marijuana)
+    .bind(&details.drugs)
     .fetch_one(&ctx.pool)
     .await?;
 

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::models::person::{Frequency, Habits as MHabits};
+use crate::models::person::{Frequency, Person};
 use crate::views::people::profile::details::DetailsCtx;
 use crate::views::people::profile::ResourceCtx;
 
@@ -54,12 +54,11 @@ fn habit(
     question: &str,
     dcx: &DetailsCtx,
     rcx: &ResourceCtx,
-    selector: fn(&MHabits) -> Option<&Frequency>,
-    onchange: fn(&mut MHabits, Option<Frequency>),
+    selector: fn(&Person) -> Option<&Frequency>,
+    onchange: fn(&mut Person, Option<Frequency>),
 ) -> Element {
-    let rw_habits = &dcx.rw.read().habits;
-    let rw_freq = selector(rw_habits);
-    let value = rw_freq.map(|d| d.to_string()).unwrap_or_default();
+    let tmp = dcx.rw.read();
+    let freq = selector(&tmp);
 
     let mut rw = dcx.rw;
 
@@ -69,27 +68,26 @@ fn habit(
                 "{emoji}"
 
                 select {
-                    class: if value == "" { "text-gray-500" },
-                    value,
+                    class: if freq == None { "text-gray-500" },
 
                     onchange: move |evt| {
                         rw
                             .with_mut(|p| {
                             let freq = Frequency::from_str(&evt.value());
                             // TODO: fallback could be implemented, but this is always populated as of 19.4
-                            onchange(&mut p.habits, freq);
+                            onchange(p, freq);
                         });
                     },
 
                     option { value: "", "{question}?" }
 
                     for val in Frequency::iter() {
-                        option { value: "{val}", selected: rw_freq == Some(&val), "{val}" }
+                        option { value: "{val}", selected: freq == Some(&val), "{val}" }
                     }
                 }
             }
         } else {
-            if let Some(frequency) = selector(&dcx.ro.read().habits) {
+            if let Some(frequency) = selector(&dcx.ro.read()) {
                 li { "{emoji} {frequency}" }
             }
         }
