@@ -1,10 +1,10 @@
 use dioxus::prelude::info;
 
-use crate::models::Person;
+use crate::models::Profile;
 
-fn parse_yaml() -> anyhow::Result<Vec<Person>> {
+fn parse_yaml() -> anyhow::Result<Vec<Profile>> {
     let yaml_content = std::fs::read_to_string("public/bots.yaml")?;
-    let mut bots = serde_yaml::from_str::<Vec<Person>>(&yaml_content)?;
+    let mut bots = serde_yaml::from_str::<Vec<Profile>>(&yaml_content)?;
 
     // assign negative IDs to bots
     for (idx, bot) in bots.iter_mut().enumerate() {

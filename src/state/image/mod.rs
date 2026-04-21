@@ -9,7 +9,7 @@ use dioxus::prelude::info;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{Image, Person},
+    models::{Image, Profile},
     state::{
         crud_query::Sorted,
         websocket::ops::{OpState, OPS},
@@ -33,7 +33,7 @@ pub(super) fn handle_image_crud_res(
         sorted,
     }: ImageOpResult,
 ) {
-    fn do_op(profile: &mut Person, image: Image, sorted: &Sorted) {
+    fn do_op(profile: &mut Profile, image: Image, sorted: &Sorted) {
         profile.images.retain(|img| img.id() != image.id());
 
         for img in profile.images.iter_mut() {
@@ -85,7 +85,7 @@ pub(super) fn handle_conversion_res(
         placeholders,
     }: ImageConversionResult,
 ) {
-    fn do_op(profile: &mut Person, image: &Image, placeholders: &HashMap<i32, String>) {
+    fn do_op(profile: &mut Profile, image: &Image, placeholders: &HashMap<i32, String>) {
         if placeholders.len() > 0 {
             for img in profile.images.iter_mut() {
                 if let Some(id) = img.id() {

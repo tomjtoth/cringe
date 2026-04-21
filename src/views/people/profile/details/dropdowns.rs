@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::models::{Person, RelationshipType as ERT, Seeking as ES};
+use crate::models::{Profile, RelationshipType as ERT, Seeking as ES};
 use crate::views::people::profile::details::DetailsCtx;
 use crate::views::people::profile::ResourceCtx;
 
@@ -29,8 +29,8 @@ pub(super) fn Seeking() -> Element {
 
 fn helper_wo_cx<T>(
     placeholder: &str,
-    selector: fn(&Person) -> Option<&T>,
-    onchange: fn(&mut Person, String),
+    selector: fn(&Profile) -> Option<&T>,
+    onchange: fn(&mut Profile, String),
     parts_mapper: fn(&T) -> (&str, &str),
     map_these: Vec<T>,
 ) -> Element
@@ -55,8 +55,8 @@ fn helper<T>(
     placeholder: &str,
     dcx: &DetailsCtx,
     rcx: &ResourceCtx,
-    selector: fn(&Person) -> Option<&T>,
-    onchange: fn(&mut Person, String),
+    selector: fn(&Profile) -> Option<&T>,
+    onchange: fn(&mut Profile, String),
     parts_mapper: fn(&T) -> (&str, &str),
     map_these: Vec<T>,
 ) -> Element

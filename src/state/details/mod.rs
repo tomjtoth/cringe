@@ -4,7 +4,7 @@ pub(super) mod server;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::Person,
+    models::Profile,
     state::{
         websocket::ops::{OpState, OPS},
         ME,
@@ -15,7 +15,7 @@ use crate::{
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DetailsUpateRes {
     pub authorized: bool,
-    pub profile: Person,
+    pub profile: Profile,
 }
 
 pub(super) fn handle_details_update_res(
@@ -25,7 +25,7 @@ pub(super) fn handle_details_update_res(
         profile,
     }: DetailsUpateRes,
 ) {
-    fn do_op(target: &mut Person, source: Person) {
+    fn do_op(target: &mut Profile, source: Profile) {
         target.education = source.education;
         target.occupation = source.occupation;
         target.location = source.location;

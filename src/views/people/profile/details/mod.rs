@@ -10,7 +10,7 @@ mod occupation;
 use dioxus::prelude::*;
 
 use crate::{
-    models::Person,
+    models::Profile,
     state::websocket::WsCtx,
     views::people::{
         listing::ListingCtx,
@@ -20,8 +20,8 @@ use crate::{
 
 #[derive(Clone)]
 struct DetailsCtx {
-    ro: ReadSignal<Person>,
-    rw: Signal<Person>,
+    ro: ReadSignal<Profile>,
+    rw: Signal<Profile>,
 }
 
 #[component]

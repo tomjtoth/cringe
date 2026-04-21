@@ -10,7 +10,7 @@ pub mod websocket;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::{Decision, Person};
+use crate::models::{Decision, Profile};
 #[cfg(feature = "server")]
 use crate::state::server::get_ctx;
 
@@ -100,7 +100,7 @@ async fn get_me() -> Result<Me> {
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Me {
     pub authenticated: bool,
-    pub profile: Option<Person>,
+    pub profile: Option<Profile>,
 }
 
 #[post("/api/decide")]

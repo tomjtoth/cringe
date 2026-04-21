@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{models::Person, state::ME};
+use crate::{models::Profile, state::ME};
 
 #[component]
 fn Despair() -> Element {
@@ -41,7 +41,7 @@ pub(super) fn container_class(is_empty: bool, has_changes: bool) -> String {
 }
 
 pub(super) fn get_max_pos_and_user_id(
-    selector: fn(&Person) -> (i16, Option<i32>),
+    selector: fn(&Profile) -> (i16, Option<i32>),
     is_new: bool,
 ) -> (i16, Option<i32>) {
     ME.with(|me| {

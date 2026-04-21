@@ -34,7 +34,7 @@ pub struct Gps {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Person {
+pub struct Profile {
     #[serde(default)]
     pub id: Option<i32>,
     pub name: String,
@@ -84,7 +84,7 @@ pub struct Person {
 }
 
 #[cfg(feature = "server")]
-impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
     fn from_row(row: &'r sqlx::postgres::PgRow) -> Result<Self, sqlx::Error> {
         use sqlx::{types::Json, Row};
 
@@ -145,7 +145,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             Err(e) => return Err(e),
         };
 
-        Ok(Person {
+        Ok(Profile {
             id,
             name,
             email,
@@ -177,7 +177,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
     }
 }
 
-impl Person {
+impl Profile {
     pub fn age(&self) -> Option<u16> {
         if self.age.is_some() {
             return self.age;

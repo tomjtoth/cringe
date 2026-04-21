@@ -14,7 +14,7 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{Image, Person, Prompt},
+    models::{Image, Profile, Prompt},
     router::Route,
     state::{
         details::{handle_details_update_res, DetailsUpateRes},
@@ -39,7 +39,7 @@ pub enum WsResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum WsRequest {
     KeepAlive,
-    DetailsUpdate(u8, Person),
+    DetailsUpdate(u8, Profile),
     PromptOp(u8, Prompt),
     ImageOp(u8, Image),
 }
@@ -107,7 +107,7 @@ async fn ws_endpoint(
                     )
                     .await
                 }
-                Err(e) => error!("PromptOp failed: {e:?}"),
+                Err(e) => error!("DetailsUpdate failed: {e:?}"),
             },
 
             WsRequest::PromptOp(oid, prompt) => match prompt_crud(&ctx, prompt).await {

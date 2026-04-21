@@ -4,7 +4,7 @@ pub(super) mod crud;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{Person, Prompt},
+    models::{Profile, Prompt},
     state::{
         crud_query::Sorted,
         websocket::ops::{OpState, OPS},
@@ -28,7 +28,7 @@ pub(super) fn handle_prompt_crud_res(
         sorted,
     }: PromptOpResult,
 ) {
-    fn do_op(profile: &mut Person, prompt: Prompt, sorted: &Sorted) {
+    fn do_op(profile: &mut Profile, prompt: Prompt, sorted: &Sorted) {
         profile.prompts.retain(|p| p.id != prompt.id);
 
         for p in profile.prompts.iter_mut() {

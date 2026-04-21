@@ -4,7 +4,7 @@ use chrono::{Local, Months, NaiveDate};
 use dioxus::prelude::*;
 
 use crate::{
-    models::{Gender, Person},
+    models::{Gender, Profile},
     state::{AUTH_CTE, ME},
 };
 
@@ -14,7 +14,7 @@ async fn post_basics(
     sex: Gender,
     dob: NaiveDate,
     height: u8,
-) -> Result<Option<Person>> {
+) -> Result<Option<Profile>> {
     info!(
         r#"ℹ️  Attempting to insert "{}", "{}", "{}", "{}" into users"#,
         name, sex, dob, height
@@ -25,7 +25,7 @@ async fn post_basics(
     if let Some(age) = legal_dob().years_since(dob) {
         debug!(r#"✅ Is above legal age ({} years old)"#, 18 + age);
         if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-            res = sqlx::query_as::<_, Person>(&format!(
+            res = sqlx::query_as::<_, Profile>(&format!(
                 r#"
                 WITH {AUTH_CTE}
 

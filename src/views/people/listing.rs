@@ -1,17 +1,17 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::{Decision, Person},
+    models::{Decision, Profile},
     state::AUTH_CTE,
     views::{people::profile::Profile as VPerson, protector::NeedsLoginAndProfile},
 };
 
 #[get("/api/profiles?wants")]
-async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
+async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
     let mut res = vec![];
 
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-        res = sqlx::query_as::<_, Person>(&format!(
+        res = sqlx::query_as::<_, Profile>(&format!(
                 r#"
                 WITH {AUTH_CTE},
 
@@ -108,7 +108,7 @@ pub fn SwipeProfiles() -> Element {
     }
 }
 
-pub static OTHERS: GlobalSignal<Vec<Person>> = GlobalSignal::new(|| vec![]);
+pub static OTHERS: GlobalSignal<Vec<Profile>> = GlobalSignal::new(|| vec![]);
 
 pub type ListingCtx = Option<Decision>;
 

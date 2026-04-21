@@ -1,11 +1,11 @@
 use sqlx::types::Json;
 
 use crate::{
-    models::Person,
+    models::Profile,
     state::{details::DetailsUpateRes, server::ServerCtx, AUTH_CTE},
 };
 
-pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<DetailsUpateRes> {
+pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result<DetailsUpateRes> {
     let Json(mut res) = sqlx::query_scalar::<_, Json<DetailsUpateRes>>(&format!(
         r#"
         WITH {AUTH_CTE},

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::models::{Frequency, Person};
+use crate::models::{Frequency, Profile};
 use crate::views::people::profile::details::DetailsCtx;
 use crate::views::people::profile::ResourceCtx;
 
@@ -54,8 +54,8 @@ fn habit(
     question: &str,
     dcx: &DetailsCtx,
     rcx: &ResourceCtx,
-    selector: fn(&Person) -> Option<&Frequency>,
-    onchange: fn(&mut Person, Option<Frequency>),
+    selector: fn(&Profile) -> Option<&Frequency>,
+    onchange: fn(&mut Profile, Option<Frequency>),
 ) -> Element {
     let tmp = dcx.rw.read();
     let freq = selector(&tmp);
