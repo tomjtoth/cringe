@@ -21,10 +21,10 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
                 relationship_type = $7,
                 has_children = $8,
                 family_plans = $9,
-                habits_drinking = $10,
-                habits_smoking = $11,
-                habits_marijuana = $12,
-                habits_drugs = $13
+                drinking = $10,
+                smoking = $11,
+                marijuana = $12,
+                drugs = $13
             FROM auth a
             WHERE a.email = u.email
             RETURNING 
@@ -42,10 +42,10 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
                 has_children,
                 family_plans,
 
-                habits_drinking,
-                habits_smoking,
-                habits_marijuana,
-                habits_drugs,
+                drinking,
+                smoking,
+                marijuana,
+                drugs,
 
                 '[]'::jsonb AS images,
                 '[]'::jsonb AS prompts

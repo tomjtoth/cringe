@@ -130,10 +130,10 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
         let has_children = try_opt!(bool, "has_children");
         let family_plans = try_opt!(FamilyPlans, "family_plans");
 
-        let drinking = try_opt!(Frequency, "habits_drinking");
-        let smoking = try_opt!(Frequency, "habits_smoking");
-        let marijuana = try_opt!(Frequency, "habits_marijuana");
-        let drugs = try_opt!(Frequency, "habits_drugs");
+        let drinking = try_opt!(Frequency, "drinking");
+        let smoking = try_opt!(Frequency, "smoking");
+        let marijuana = try_opt!(Frequency, "marijuana");
+        let drugs = try_opt!(Frequency, "drugs");
 
         let prompts = match row.try_get::<Json<Vec<Prompt>>, _>("prompts") {
             Ok(Json(v)) => v,

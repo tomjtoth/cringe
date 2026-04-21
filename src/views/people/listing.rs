@@ -46,10 +46,10 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
                     has_children,
                     family_plans,
 
-                    habits_drinking,
-                    habits_smoking,
-                    habits_marijuana,
-                    habits_drugs,
+                    drinking,
+                    smoking,
+                    marijuana,
+                    drugs,
 
                     (
                         SELECT coalesce(
