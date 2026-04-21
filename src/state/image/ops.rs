@@ -1,7 +1,7 @@
 use dioxus::prelude::info;
 
 use crate::{
-    models::image::Image,
+    models::Image,
     state::{
         crud_query::crud_query,
         image::{converter::enqueue, ImageOpResult},

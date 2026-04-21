@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::Person as MPerson,
+    models::Person as MPerson,
     state::websocket::ops::{OpState, OPS},
     views::people::{
         listing::ListingCtx,

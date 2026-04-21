@@ -14,10 +14,7 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{
-        image::Image,
-        person::{Person, Prompt},
-    },
+    models::{Image, Person, Prompt},
     router::Route,
     state::{
         details::{handle_details_update_res, DetailsUpateRes},

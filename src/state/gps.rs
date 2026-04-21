@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use dioxus::prelude::*;
 
-use crate::{models::person::Gps, state::AUTH_CTE};
+use crate::{models::Gps, state::AUTH_CTE};
 
 #[post("/api/gps")]
 async fn post_gps(coords: Gps) -> Result<()> {
@@ -35,7 +35,7 @@ pub(super) fn use_gps_watch() {
     let _gps = use_hook(|| {
         #[cfg(target_arch = "wasm32")]
         {
-            use crate::{models::person::Gps, state::ME};
+            use crate::{models::Gps, state::ME};
 
             if ME.with(|me| me.authenticated && me.profile.is_some()) {
                 use wasm_bindgen::{closure::Closure, JsCast};

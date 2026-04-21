@@ -1,7 +1,7 @@
 use sqlx::types::Json;
 
 use crate::{
-    models::person::Person,
+    models::Person,
     state::{details::DetailsUpateRes, server::ServerCtx, AUTH_CTE},
 };
 

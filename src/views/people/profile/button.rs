@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::Decision,
+    models::Decision,
     state::decide,
     views::people::{
         listing::{ListingCtx, OTHERS},

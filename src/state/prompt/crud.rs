@@ -1,7 +1,7 @@
 use sqlx::types::Json;
 
 use crate::{
-    models::person::Prompt,
+    models::Prompt,
     state::{crud_query::crud_query, prompt::PromptOpResult, server::ServerCtx},
 };
 

@@ -5,7 +5,7 @@ use sqlx::{types::Json, PgPool};
 use tokio::sync::mpsc::{channel, Sender};
 
 use crate::{
-    models::image::Image,
+    models::Image,
     state::{
         image::ImageConversionResult,
         websocket::{server::ws_notify, WsResponse},

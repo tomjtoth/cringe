@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::models::family_plans::FamilyPlans as EFP;
+use crate::models::FamilyPlans as EFP;
 use crate::views::people::profile::details::DetailsCtx;
 use crate::views::people::profile::ResourceCtx;
 

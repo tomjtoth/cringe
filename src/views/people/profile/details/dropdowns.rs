@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
-use crate::models::{
-    person::Person, relationship_type::RelationshipType as ERT, seeking::Seeking as ES,
-};
+use crate::models::{Person, RelationshipType as ERT, Seeking as ES};
 use crate::views::people::profile::details::DetailsCtx;
 use crate::views::people::profile::ResourceCtx;
 

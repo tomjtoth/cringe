@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    models::image::Image,
+    models::Image,
     state::websocket::{WsCtx, WsRequest},
     views::people::profile::{
         container::Container,

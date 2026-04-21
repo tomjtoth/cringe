@@ -4,7 +4,7 @@ pub(super) mod crud;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::person::{Person, Prompt},
+    models::{Person, Prompt},
     state::{
         crud_query::Sorted,
         websocket::ops::{OpState, OPS},

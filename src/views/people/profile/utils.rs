@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{models::person::Person, state::ME};
+use crate::{models::Person, state::ME};
 
 #[component]
 fn Despair() -> Element {

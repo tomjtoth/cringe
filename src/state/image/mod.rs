@@ -9,7 +9,7 @@ use dioxus::prelude::info;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{image::Image, person::Person},
+    models::{Image, Person},
     state::{
         crud_query::Sorted,
         websocket::ops::{OpState, OPS},

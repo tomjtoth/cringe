@@ -4,7 +4,7 @@ pub(super) mod server;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::person::Person,
+    models::Person,
     state::{
         websocket::ops::{OpState, OPS},
         ME,

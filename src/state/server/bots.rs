@@ -1,6 +1,6 @@
 use dioxus::prelude::info;
 
-use crate::models::person::Person;
+use crate::models::Person;
 
 fn parse_yaml() -> anyhow::Result<Vec<Person>> {
     let yaml_content = std::fs::read_to_string("public/bots.yaml")?;

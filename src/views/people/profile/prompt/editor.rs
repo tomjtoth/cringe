@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::models::person::Prompt;
+use crate::models::Prompt;
 use crate::state::websocket::{WsCtx, WsRequest};
 use crate::views::people::profile::{
     container::Container,

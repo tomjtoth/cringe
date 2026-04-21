@@ -10,7 +10,7 @@ pub mod websocket;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::person::{Decision, Person};
+use crate::models::{Decision, Person};
 #[cfg(feature = "server")]
 use crate::state::server::get_ctx;
 

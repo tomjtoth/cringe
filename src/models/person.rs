@@ -1,10 +1,7 @@
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::models::{
-    family_plans::FamilyPlans, gender::Gender, image::Image, relationship_type::RelationshipType,
-    seeking::Seeking, zodiac_sign::ZodiacSign,
-};
+use crate::models::{FamilyPlans, Gender, Image, RelationshipType, Seeking, ZodiacSign};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -10,7 +10,7 @@ mod occupation;
 use dioxus::prelude::*;
 
 use crate::{
-    models::person::Person,
+    models::Person,
     state::websocket::WsCtx,
     views::people::{
         listing::ListingCtx,
