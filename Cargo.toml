@@ -34,8 +34,6 @@ server = [
     "dep:once_cell",
     "dep:serde_yaml",
     "dep:sqlx",
-    "dep:strum_macros",
-    "dep:strum",
     "dep:tokio",
 ]
 
@@ -64,8 +62,8 @@ sqlx = { version = "0.8.6", optional = true, features = [
     "postgres",
     "runtime-tokio-rustls",
 ] }
-strum = { version = "0.28.0", optional = true }
-strum_macros = { version = "0.28.0", optional = true }
+strum = "0.28.0"
+strum_macros = "0.28.0"
 tokio = { version = "1.51.0", optional = true, features = ["rt"] }
 wasm-bindgen = { version = "0.2.114", optional = true }
 wasm-bindgen-futures = { version = "0.4.67", optional = true }
