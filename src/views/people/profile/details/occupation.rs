@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
 
-use crate::views::people::profile::{details::DetailsCtx, ResourceCtx};
+use crate::state::ME;
+use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Occupation() -> Element {
-    let mut dcx = use_context::<DetailsCtx>();
+    let pcx = use_context::<ProfileCtx>();
     let rcx = use_context::<ResourceCtx>();
 
     rsx! {
@@ -13,15 +14,21 @@ pub(super) fn Occupation() -> Element {
                 "💼"
                 input {
                     placeholder: "Occupation",
-                    value: dcx.rw.read().occupation.clone(),
+                    value: ME.with(|me| me.draft.as_ref().and_then(|p| p.occupation.clone())),
                     onchange: move |evt| {
                         let val = evt.value();
-                        dcx.rw.write().occupation = if val.len() > 0 { Some(val) } else { None };
+                        ME.with_mut(|me| {
+                            me.draft.as_mut().unwrap().occupation = if val.len() > 0 {
+                                Some(val)
+                            } else {
+                                None
+                            };
+                        })
                     },
                 }
             }
         } else {
-            if let Some(job) = &dcx.ro.read().occupation {
+            if let Some(job) = &pcx.read().occupation {
                 div {
                     "💼"
                     div { "{job}" }

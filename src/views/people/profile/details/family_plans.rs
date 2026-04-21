@@ -2,17 +2,19 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::FamilyPlans as EFP;
-use crate::views::people::profile::details::DetailsCtx;
-use crate::views::people::profile::ResourceCtx;
+use crate::state::ME;
+use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn FamilyPlans() -> Element {
-    let mut dcx = use_context::<DetailsCtx>();
+    let pcx = use_context::<ProfileCtx>();
     let rcx = use_context::<ResourceCtx>();
 
-    let plans = &dcx.rw.read().family_plans;
+    let plans = ME.with(|me| me.draft.as_ref().and_then(|p| p.family_plans.clone()));
 
-    fn singular(e: &EFP) -> String {
+    let has_children = ME.with(|me| me.draft.as_ref().and_then(|p| p.has_children));
+
+    fn first_person(e: &EFP) -> String {
         e.to_string()
             .replace("Doesn't", "I don't")
             .replace("Wants", "I want")
@@ -24,14 +26,18 @@ pub(super) fn FamilyPlans() -> Element {
                 "🍼"
                 select {
                     class: if plans.is_none() { "text-gray-500" },
-                    onchange: move |evt| dcx.rw.with_mut(|p| p.family_plans = EFP::from_str(&evt.value())),
+                    onchange: move |evt| {
+                        ME.with_mut(|me| {
+                            me.draft.as_mut().unwrap().family_plans = EFP::from_str(&evt.value());
+                        })
+                    },
 
                     option { value: "", "Family plans?" }
                     for val in EFP::iter() {
-                        option { value: "{val}", selected: *plans == Some(val),
-                            "{singular(&val)}"
+                        option { value: "{val}", selected: plans == Some(val),
+                            "{first_person(&val)}"
                             if val != EFP::NotSureYet {
-                                if let Some(true) = dcx.rw.read().has_children {
+                                if let Some(true) = has_children {
                                     " more"
                                 }
                                 " children"
@@ -42,11 +48,11 @@ pub(super) fn FamilyPlans() -> Element {
                 }
             }
         } else {
-            if let Some(wants) = &dcx.ro.read().family_plans {
+            if let Some(wants) = &pcx.read().family_plans {
                 li {
                     "🍼 {wants}"
-                    if *plans != Some(EFP::NotSureYet) {
-                        if let Some(true) = dcx.ro.read().has_children {
+                    if plans != Some(EFP::NotSureYet) {
+                        if let Some(true) = pcx.read().has_children {
                             " more"
                         }
                         " children"

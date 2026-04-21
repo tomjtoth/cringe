@@ -2,12 +2,12 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::{Frequency, Profile};
-use crate::views::people::profile::details::DetailsCtx;
-use crate::views::people::profile::ResourceCtx;
+use crate::state::ME;
+use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Habits() -> Element {
-    let dcx = use_context::<DetailsCtx>();
+    let pcx = use_context::<ProfileCtx>();
     let rcx = use_context::<ResourceCtx>();
 
     rsx! {
@@ -15,7 +15,7 @@ pub(super) fn Habits() -> Element {
             habit(
                 "🍷",
                 "Drinking",
-                &dcx,
+                &pcx,
                 &rcx,
                 |h| h.drinking.as_ref(),
                 |h, f| h.drinking = f,
@@ -26,7 +26,7 @@ pub(super) fn Habits() -> Element {
             habit(
                 "🚬",
                 "Smoking",
-                &dcx,
+                &pcx,
                 &rcx,
                 |h| h.smoking.as_ref(),
                 |h, f| h.smoking = f,
@@ -37,14 +37,14 @@ pub(super) fn Habits() -> Element {
             habit(
                 "🌿🚬",
                 "Marijuana",
-                &dcx,
+                &pcx,
                 &rcx,
                 |h| h.marijuana.as_ref(),
                 |h, f| h.marijuana = f,
             )
         }
 
-        {habit("💊💉", "Drugs", &dcx, &rcx, |h| h.drugs.as_ref(), |h, f| h.drugs = f)}
+        {habit("💊💉", "Drugs", &pcx, &rcx, |h| h.drugs.as_ref(), |h, f| h.drugs = f)}
     }
 }
 
@@ -52,15 +52,13 @@ pub(super) fn Habits() -> Element {
 fn habit(
     emoji: &str,
     question: &str,
-    dcx: &DetailsCtx,
+    pcx: &ProfileCtx,
     rcx: &ResourceCtx,
     selector: fn(&Profile) -> Option<&Frequency>,
     onchange: fn(&mut Profile, Option<Frequency>),
 ) -> Element {
-    let tmp = dcx.rw.read();
-    let freq = selector(&tmp);
-
-    let mut rw = dcx.rw;
+    let tmp = ME.with(|me| me.draft.clone());
+    let freq = tmp.as_deref().map(selector).flatten();
 
     rsx! {
         if rcx.editing() {
@@ -71,12 +69,11 @@ fn habit(
                     class: if freq == None { "text-gray-500" },
 
                     onchange: move |evt| {
-                        rw
-                            .with_mut(|p| {
-                            let freq = Frequency::from_str(&evt.value());
-                            // TODO: fallback could be implemented, but this is always populated as of 19.4
-                            onchange(p, freq);
-                        });
+                        let v = evt.value();
+                        ME.with_mut(|me| {
+                            let freq = Frequency::from_str(&v);
+                            onchange(me.draft.as_mut().unwrap(), freq);
+                        })
                     },
 
                     option { value: "", "{question}?" }
@@ -87,7 +84,7 @@ fn habit(
                 }
             }
         } else {
-            if let Some(frequency) = selector(&dcx.ro.read()) {
+            if let Some(frequency) = selector(&pcx.read()) {
                 li { "{emoji} {frequency}" }
             }
         }

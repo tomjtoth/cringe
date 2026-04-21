@@ -2,8 +2,8 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::{Profile, RelationshipType as ERT, Seeking as ES};
-use crate::views::people::profile::details::DetailsCtx;
-use crate::views::people::profile::ResourceCtx;
+use crate::state::ME;
+use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn RelationshipType() -> Element {
@@ -37,12 +37,12 @@ fn helper_wo_cx<T>(
 where
     T: std::fmt::Display + PartialEq,
 {
-    let dcx = use_context::<DetailsCtx>();
+    let pcx = use_context::<ProfileCtx>();
     let rcx = use_context::<ResourceCtx>();
 
     helper(
         placeholder,
-        &dcx,
+        &pcx,
         &rcx,
         selector,
         onchange,
@@ -53,7 +53,7 @@ where
 
 fn helper<T>(
     placeholder: &str,
-    dcx: &DetailsCtx,
+    pcx: &ProfileCtx,
     rcx: &ResourceCtx,
     selector: fn(&Profile) -> Option<&T>,
     onchange: fn(&mut Profile, String),
@@ -63,18 +63,18 @@ fn helper<T>(
 where
     T: std::fmt::Display + PartialEq,
 {
-    let profile = dcx.rw.read();
-    let as_ref = selector(&profile);
-    let value = as_ref.map(|t| t.to_string());
-    let mut rw = dcx.rw;
+    let tmp = ME.with(|me| me.draft.clone());
+    let as_ref = tmp.as_deref().map(selector).flatten();
 
     rsx! {
         if rcx.editing() {
             div {
                 select {
-                    class: if value == None { "text-gray-500" },
-                    value,
-                    onchange: move |evt| onchange(&mut rw.write(), evt.value()),
+                    class: if as_ref == None { "text-gray-500" },
+                    onchange: move |evt| {
+                        let v = evt.value();
+                        ME.with_mut(|me| onchange(me.draft.as_mut().unwrap(), v))
+                    },
 
                     option { value: "", "{placeholder}" }
                     for val in map_these {
@@ -84,7 +84,7 @@ where
                 }
             }
         } else {
-            if let Some((emoji, text)) = as_ref.map(parts_mapper) {
+            if let Some((emoji, text)) = selector(&pcx.read()).map(parts_mapper) {
                 div {
                     "{emoji}"
                     div { "{text}" }

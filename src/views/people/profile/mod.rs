@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use dioxus::prelude::*;
 
 use crate::{
@@ -25,6 +27,14 @@ use prompt::Prompt;
 #[derive(Clone)]
 struct ProfileCtx {
     profile: ReadSignal<MPerson>,
+}
+
+impl Deref for ProfileCtx {
+    type Target = ReadSignal<MPerson>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.profile
+    }
 }
 
 /// This might be a Prompt, an Image or the whole Details section

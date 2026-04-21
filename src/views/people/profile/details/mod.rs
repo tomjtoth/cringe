@@ -11,69 +11,51 @@ use dioxus::prelude::*;
 
 use crate::{
     models::Profile,
-    state::websocket::WsCtx,
+    state::{
+        websocket::{WsCtx, WsRequest},
+        ME,
+    },
     views::people::{
         listing::ListingCtx,
         profile::{container::Container, ProfileCtx, ResourceCtx},
     },
 };
 
-#[derive(Clone)]
-struct DetailsCtx {
-    ro: ReadSignal<Profile>,
-    rw: Signal<Profile>,
-}
-
 #[component]
 pub fn Details() -> Element {
     let olcx = use_context::<Option<ListingCtx>>();
-    let person = use_context::<ProfileCtx>().profile;
+    let pcx = use_context::<ProfileCtx>();
     let mut rcx = use_context::<ResourceCtx>();
     let wscx = use_context::<WsCtx>();
-    let mut editing = use_signal(|| false);
-    let sig = use_signal(|| person());
-
-    use_context_provider(|| DetailsCtx {
-        rw: sig,
-        ro: person,
-    });
-
-    use_effect(move || editing.set(olcx.is_none() && rcx.editing()));
 
     use_effect(move || rcx.await_op());
 
     let onsubmit = use_callback(move |_: Event<FormData>| {
         spawn(async move {
-            // sending without images or prompts to save bandwidth
-            let mut me = sig();
-            me.prompts.truncate(0);
-            me.images.truncate(0);
-
-            _ = wscx
-                .req(crate::state::websocket::WsRequest::DetailsUpdate(
-                    rcx.op_id, me,
-                ))
-                .await;
+            if let Some(me) = ME.with(|me| me.draft.clone()) {
+                _ = wscx.req(WsRequest::DetailsUpdate(rcx.op_id, *me)).await;
+            }
         });
     });
 
-    let values_under_ul = [
-        sig.read().occupation.is_some(),
-        sig.read().education.is_some(),
-        sig.read().hometown.is_some(),
-        sig.read().seeking.is_some(),
-        sig.read().relationship_type.is_some(),
-    ]
-    .into_iter()
-    .filter(|&x| x)
-    .count();
+    let values_under_ul = pcx.with(|profile| {
+        let selectors: [fn(&Profile) -> bool; 5] = [
+            |p| p.occupation.is_some(),
+            |p| p.education.is_some(),
+            |p| p.hometown.is_some(),
+            |p| p.seeking.is_some(),
+            |p| p.relationship_type.is_some(),
+        ];
+
+        selectors.iter().filter(|sel| sel(&profile)).count()
+    });
 
     let class_container = format!(
         "px-2 [&>*+*]:border-t [&>*+*]:p-2 {} {} {}{}{}",
         "[&_input]:border-none! [&>div>input]:w-full",
         "[&_select]:border-none! [&>div>select]:px-0! [&>div>select]:w-full",
         "[&>div]:flex [&>div]:gap-2 [&>div]:items-center",
-        if editing() {
+        if rcx.editing() {
             " [&>div]:nth-last-2:mb-20"
         } else {
             ""
@@ -91,7 +73,7 @@ pub fn Details() -> Element {
         "p-2 flex overflow-x-scroll text-nowrap {} {}{}",
         "[&>*+*]:ml-2 [&>*+*]:border-l *:p-2",
         "[&>li]:flex [&>li]:gap-2 [&>li]:items-center",
-        if olcx.is_none() && !rcx.editing() && values_under_ul == 0 {
+        if olcx.is_none() && !rcx.editing() && values_under_ul < 2 {
             " [&>li:last-child]:mr-15"
         } else {
             ""
@@ -104,31 +86,31 @@ pub fn Details() -> Element {
         Container { class: class_container, wo_button: olcx.is_some(), onsubmit,
             ul { class: class_ul,
 
-                if let Some(age) = &sig.read().age() {
-                    li { class: if editing() { immutables }, "🎂 {age}" }
+                if let Some(age) = &pcx.read().age() {
+                    li { class: if rcx.editing() { immutables }, "🎂 {age}" }
                 }
 
-                if let Some(dist) = &sig.read().distance() {
-                    li { class: if editing() { immutables }, "{dist}" }
+                if let Some(dist) = &pcx.read().distance() {
+                    li { class: if rcx.editing() { immutables }, "{dist}" }
                 }
 
                 li { class: if editing() { immutables }, "{sig.read().gender}" }
 
-                li { class: if editing() { immutables }, "📏 {sig.read().height} cm" }
+                li { class: if rcx.editing() { immutables }, "📏 {pcx.read().height} cm" }
 
                 location::Location {}
 
                 has_children::HasChildren {}
                 family_plans::FamilyPlans {}
 
-                // TODO: include pets here
+                // TODO: include pets here, could be a u8/int2 in DB
+                // 0 - Doesn't have
                 //
-                if let Some(sign) = sig.read().zodiac_sign() {
-                    li { class: if editing() { "cursor-not-allowed" }, "{sign}" }
+                if let Some(sign) = pcx.read().zodiac_sign() {
+                    li { class: if rcx.editing() { "cursor-not-allowed" }, "{sign}" }
                 }
 
                 habits::Habits {}
-
             }
 
             occupation::Occupation {}
