@@ -43,10 +43,8 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Person>> {
                     seeking,
                     relationship_type,
 
-                    json_build_object(
-                        'has',      kids_has,
-                        'wants',    kids_wants
-                    ) AS kids,
+                    has_children,
+                    family_plans,
 
                     habits_drinking,
                     habits_smoking,

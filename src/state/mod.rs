@@ -53,10 +53,8 @@ async fn get_me() -> Result<Me> {
                     seeking,
                     relationship_type,
 
-                    jsonb_build_object(
-                        'has',      kids_has,
-                        'wants',    kids_wants
-                    ) AS kids,
+                    has_children,
+                    family_plans,
 
                     habits_drinking,
                     habits_smoking,
