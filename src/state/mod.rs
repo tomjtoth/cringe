@@ -101,6 +101,7 @@ async fn get_me() -> Result<Me> {
 pub struct Me {
     pub authenticated: bool,
     pub profile: Option<Profile>,
+    pub draft: Option<Box<Profile>>,
 }
 
 #[post("/api/decide")]

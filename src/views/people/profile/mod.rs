@@ -2,7 +2,10 @@ use dioxus::prelude::*;
 
 use crate::{
     models::Profile as MPerson,
-    state::websocket::ops::{OpState, OPS},
+    state::{
+        websocket::ops::{OpState, OPS},
+        ME,
+    },
     views::people::{
         listing::ListingCtx,
         profile::{button::SkipButton, details::Details},
@@ -51,8 +54,24 @@ impl ResourceCtx {
     }
 
     pub(crate) fn toggle_editing(&mut self) {
+        // before switching to editing mode, initialize draft
+        if self.op_id == 0 && !self.editing() {
+            ME.with_mut(|me| {
+                // after successful submit this is None
+                if me.draft.is_none() {
+                    me.draft = me.profile.clone().map(|me| Box::new(me));
+
+                    // not sending images, nor prompts
+                    me.draft.as_mut().map(|d| {
+                        d.images.truncate(0);
+                        d.prompts.truncate(0);
+                    });
+                }
+            })
+        }
+
         self.state.toggle();
-        debug!("rcx.toggle() -> {}", self.editing());
+        debug!("rcx.toggle_editing() -> {}", self.editing());
     }
 
     pub fn await_op(&mut self) {
@@ -78,7 +97,13 @@ impl ResourceCtx {
             OPS.with_mut(|ops| ops.remove(&id));
 
             match state {
-                OpState::Success => self.toggle_editing(),
+                OpState::Success => {
+                    self.toggle_editing();
+                    if id == 0 {
+                        ME.with_mut(|me| me.draft = None)
+                    }
+                }
+
                 OpState::Failure => {
                     // TODO: show a modal or simple toast
                     error!("WS op #{id} failed");
