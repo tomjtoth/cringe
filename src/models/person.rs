@@ -2,7 +2,7 @@ use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
-    gender::Gender, image::Image, kids::Kids, relationship_type::RelationshipType,
+    family_plans::FamilyPlans, gender::Gender, image::Image, relationship_type::RelationshipType,
     seeking::Seeking, zodiac_sign::ZodiacSign,
 };
 
@@ -128,9 +128,11 @@ pub struct Person {
     pub seeking: Option<Seeking>,
     #[serde(default)]
     pub relationship_type: Option<RelationshipType>,
-    #[serde(default)]
-    pub kids: Option<Kids>,
-    #[serde(default, flatten)]
+
+    pub has_children: Option<bool>,
+    pub family_plans: Option<FamilyPlans>,
+
+    #[serde(flatten)]
     pub habits: Habits,
     pub prompts: Vec<Prompt>,
     pub images: Vec<Image>,
@@ -177,7 +179,9 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
         let hometown = try_opt!(String, "hometown");
         let seeking = try_opt!(Seeking, "seeking");
         let relationship_type = try_opt!(RelationshipType, "relationship_type");
-        let kids = try_opt!(Json<Kids>, "kids").map(|json| json.0);
+
+        let has_children = try_opt!(bool, "has_children");
+        let family_plans = try_opt!(FamilyPlans, "family_plans");
 
         let habits_drinking = try_opt!(Frequency, "habits_drinking");
         let habits_smoking = try_opt!(Frequency, "habits_smoking");
@@ -220,7 +224,8 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Person {
             hometown,
             seeking,
             relationship_type,
-            kids,
+            has_children,
+            family_plans,
             habits,
             prompts,
             images,

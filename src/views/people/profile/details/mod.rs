@@ -1,8 +1,9 @@
 mod dropdowns;
 mod education;
+mod family_plans;
 mod habits;
+mod has_children;
 mod hometown;
-mod kids;
 mod location;
 mod occupation;
 
@@ -119,7 +120,8 @@ pub fn Details() -> Element {
 
                 location::Location {}
 
-                kids::Kids {}
+                has_children::HasChildren {}
+                family_plans::FamilyPlans {}
 
                 // TODO: include pets here
                 //

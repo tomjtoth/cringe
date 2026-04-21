@@ -32,7 +32,8 @@ pub(super) fn handle_details_update_res(
         target.hometown = source.hometown;
         target.seeking = source.seeking;
         target.relationship_type = source.relationship_type;
-        target.kids = source.kids;
+        target.has_children = source.has_children;
+        target.family_plans = source.family_plans;
         target.habits = source.habits;
     }
 

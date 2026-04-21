@@ -6,8 +6,7 @@ use crate::{
 };
 
 pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<DetailsUpateRes> {
-    let kids = details.kids.as_ref();
-    let habits = details.habits.as_ref();
+    let h = &details.habits;
 
     let Json(mut res) = sqlx::query_scalar::<_, Json<DetailsUpateRes>>(&format!(
         r#"
@@ -22,8 +21,8 @@ pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<
                 hometown = $5,
                 seeking = $6,
                 relationship_type = $7,
-                kids_has = $8,
-                kids_wants = $9,
+                has_children = $8,
+                family_plans = $9,
                 habits_drinking = $10,
                 habits_smoking = $11,
                 habits_marijuana = $12,
@@ -42,10 +41,8 @@ pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<
                 seeking,
                 relationship_type,
 
-                jsonb_build_object(
-                    'has', kids_has,
-                    'wants', kids_wants
-                ) AS kids,
+                has_children,
+                family_plans,
 
                 habits_drinking,
                 habits_smoking,
@@ -80,12 +77,12 @@ pub async fn update_details(ctx: &ServerCtx, details: Person) -> anyhow::Result<
     .bind(&details.hometown)
     .bind(&details.seeking)
     .bind(&details.relationship_type)
-    .bind(&kids.map(|k| k.has.map(|n| n as i16)))
-    .bind(&kids.map(|k| k.wants.map(|n| n as i16)))
-    .bind(&habits.map(|h| h.drinking))
-    .bind(&habits.map(|h| h.smoking))
-    .bind(&habits.map(|h| h.marijuana))
-    .bind(&habits.map(|h| h.drugs))
+    .bind(&details.has_children)
+    .bind(&details.family_plans)
+    .bind(&h.drinking)
+    .bind(&h.smoking)
+    .bind(&h.marijuana)
+    .bind(&h.drugs)
     .fetch_one(&ctx.pool)
     .await?;
 

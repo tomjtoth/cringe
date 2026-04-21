@@ -25,8 +25,7 @@ pub async fn seed(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .await?;
 
     for bot in bots {
-        let habits = bot.habits.as_ref();
-        let kids = bot.kids.as_ref();
+        let h = bot.habits;
         let gps = bot.gps.as_ref();
 
         sqlx::query(
@@ -46,8 +45,8 @@ pub async fn seed(pool: &sqlx::PgPool) -> anyhow::Result<()> {
                 gps_lon,
                 seeking,
                 relationship_type,
-                kids_has,
-                kids_wants,
+                has_children,
+                family_plans,
                 habits_drinking,
                 habits_smoking,
                 habits_marijuana,
@@ -73,12 +72,12 @@ pub async fn seed(pool: &sqlx::PgPool) -> anyhow::Result<()> {
         .bind(gps.map(|g| g.lon))
         .bind(bot.seeking)
         .bind(bot.relationship_type)
-        .bind(kids.and_then(|k| k.has).map(i16::from))
-        .bind(kids.and_then(|k| k.wants).map(i16::from))
-        .bind(habits.and_then(|h| h.drinking))
-        .bind(habits.and_then(|h| h.smoking))
-        .bind(habits.and_then(|h| h.marijuana))
-        .bind(habits.and_then(|h| h.drugs))
+        .bind(bot.has_children)
+        .bind(bot.family_plans)
+        .bind(h.drinking)
+        .bind(h.smoking)
+        .bind(h.marijuana)
+        .bind(h.drugs)
         .fetch_one(&mut *tx)
         .await?;
 
