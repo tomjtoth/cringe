@@ -13,25 +13,32 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
         updated AS (
             UPDATE users u
             SET
-                education = $2,
-                occupation = $3,
-                location = $4,
-                hometown = $5,
-                seeking = $6,
-                relationship_type = $7,
-                has_children = $8,
-                family_plans = $9,
-                drinking = $10,
-                smoking = $11,
-                marijuana = $12,
-                drugs = $13
+                name = $2,
+                height = $3,
+                gender = $4,
+                gender_identity = $5,
+                education = $6, 
+                occupation = $7, 
+                location = $8, 
+                hometown = $9, 
+                seeking = $10, 
+                relationship_type = $11, 
+                has_children = $12, 
+                family_plans = $13, 
+                drinking = $14, 
+                smoking = $15,
+                marijuana = $16,
+                drugs = $17
             FROM auth a
             WHERE a.email = u.email
             RETURNING 
                 id,
                 name,
                 height,
+
                 gender,
+                gender_identity,
+                
                 education,
                 occupation,
                 location,
@@ -45,10 +52,7 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
                 drinking,
                 smoking,
                 marijuana,
-                drugs,
-
-                '[]'::jsonb AS images,
-                '[]'::jsonb AS prompts
+                drugs
         )
 
         SELECT jsonb_build_object(
@@ -60,15 +64,17 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
                 (SELECT jsonb_build_object(
                     'name', '',
                     'height', 0,
-                    'gender', 'male',
-                    'prompts', '[]'::jsonb,
-                    'images', '[]'::jsonb
+                    'gender', 'male'
                 ))
             ))
         )
         "#
     ))
     .bind(&ctx.session_id)
+    .bind(&details.name)
+    .bind(details.height as i16)
+    .bind(&details.gender)
+    .bind(&details.gender_identity)
     .bind(&details.education)
     .bind(&details.occupation)
     .bind(&details.location)
