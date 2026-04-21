@@ -1,7 +1,7 @@
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::models::{FamilyPlans, Gender, Image, RelationshipType, Seeking, ZodiacSign};
+use crate::models::{FamilyPlans, Frequency, Gender, Image, RelationshipType, Seeking, ZodiacSign};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -13,45 +13,6 @@ use crate::models::{FamilyPlans, Gender, Image, RelationshipType, Seeking, Zodia
 pub enum Decision {
     Like,
     Skip,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-#[cfg_attr(feature = "server", derive(sqlx::Type))]
-#[cfg_attr(
-    feature = "server",
-    sqlx(type_name = "frequency", rename_all = "lowercase")
-)]
-pub enum Frequency {
-    Never,
-    Rarely,
-    Often,
-    #[serde(rename = "yes")]
-    #[cfg_attr(feature = "server", sqlx(rename = "yes"))]
-    YesPlease,
-}
-
-impl Frequency {
-    const fn label(&self) -> &str {
-        match self {
-            Self::Never => "Never",
-            Self::Rarely => "Rarely",
-            Self::Often => "Often",
-            Self::YesPlease => "Yes, please!",
-        }
-    }
-
-    pub fn from_str(s: &str) -> Option<Self> {
-        [Self::Never, Self::Rarely, Self::Often, Self::YesPlease]
-            .into_iter()
-            .find(|freq| freq.label() == s)
-    }
-}
-
-impl std::fmt::Display for Frequency {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(self.label())
-    }
 }
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
