@@ -70,9 +70,16 @@ impl Gender {
 )]
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumIter)]
 pub enum GenderIdentity {
+    #[serde(rename = "agender")]
     Agender,
+
+    #[serde(rename = "bigender")]
     Bigender,
+
+    #[serde(rename = "demimale")]
     Demimale,
+
+    #[serde(rename = "demifemale")]
     Demifemale,
 
     #[strum(to_string = "Gender fluid")]
@@ -94,7 +101,11 @@ pub enum GenderIdentity {
     #[serde(rename = "gender variant")]
     #[cfg_attr(feature = "server", sqlx(rename = "gender variant"))]
     GenderVariant,
+
+    #[serde(rename = "genderqueer")]
     Genderqueer,
+
+    #[serde(rename = "intersex")]
     Intersex,
 
     #[strum(to_string = "Intersex man")]
@@ -106,8 +117,14 @@ pub enum GenderIdentity {
     #[serde(rename = "intersex woman")]
     #[cfg_attr(feature = "server", sqlx(rename = "intersex woman"))]
     IntersexWoman,
+
+    #[serde(rename = "neutrosis")]
     Neutrosis,
+
+    #[serde(rename = "pangender")]
     Pangender,
+
+    #[serde(rename = "polygender")]
     Polygender,
 
     #[strum(to_string = "Trans man")]
@@ -119,8 +136,14 @@ pub enum GenderIdentity {
     #[serde(rename = "trans woman")]
     #[cfg_attr(feature = "server", sqlx(rename = "trans woman"))]
     TransWoman,
+
+    #[serde(rename = "transfeminine")]
     Transfeminine,
+
+    #[serde(rename = "transgender")]
     Transgender,
+
+    #[serde(rename = "transmasculine")]
     Transmasculine,
 
     #[strum(to_string = "Two-spirit")]
