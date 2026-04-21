@@ -42,11 +42,12 @@ pub struct Profile {
     pub email: Option<String>,
     pub gender: Gender,
     pub born: Option<NaiveDate>,
+
     #[serde(default)]
     pub age: Option<u16>,
     pub zodiac_sign: Option<ZodiacSign>,
 
-    pub height: i16,
+    pub height: u8,
     #[serde(default)]
     pub education: Option<String>,
     #[serde(default)]
@@ -107,6 +108,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
         let age = try_opt!(i32, "age").map(|a| a as u16);
         let zodiac_sign = try_opt!(ZodiacSign, "zodiac_sign");
         let height: i16 = row.try_get("height")?;
+        let height = height as u8;
 
         let education = try_opt!(String, "education");
         let occupation = try_opt!(String, "occupation");
