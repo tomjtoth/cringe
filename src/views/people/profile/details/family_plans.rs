@@ -12,6 +12,12 @@ pub(super) fn FamilyPlans() -> Element {
 
     let plans = &dcx.rw.read().family_plans;
 
+    fn singular(e: &EFP) -> String {
+        e.to_string()
+            .replace("Doesn't", "I don't")
+            .replace("Wants", "I want")
+    }
+
     rsx! {
         if rcx.editing() {
             li {
@@ -23,7 +29,7 @@ pub(super) fn FamilyPlans() -> Element {
                     option { value: "", "Family plans?" }
                     for val in EFP::iter() {
                         option { value: "{val}", selected: *plans == Some(val),
-                            "{val}"
+                            "{singular(&val)}"
                             if val != EFP::NotSureYet {
                                 if let Some(true) = dcx.rw.read().has_children {
                                     " more"
