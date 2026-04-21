@@ -9,15 +9,18 @@ use strum_macros::{Display, EnumIter};
 )]
 #[derive(Clone, PartialEq, Serialize, Deserialize, Debug, Display, EnumIter)]
 pub enum FamilyPlans {
-    #[cfg_attr(feature = "server", sqlx(rename = "wants"))]
+    #[cfg_attr(feature = "server", sqlx(rename = "wants children"))]
+    #[serde(rename = "wants children")]
     #[strum(to_string = "Wants")]
     WantsChildren,
 
-    #[cfg_attr(feature = "server", sqlx(rename = "doesn't want"))]
+    #[cfg_attr(feature = "server", sqlx(rename = "doesn't want children"))]
+    #[serde(rename = "doesn't want children")]
     #[strum(to_string = "Doesn't want")]
     DoesntWantChildren,
 
     #[cfg_attr(feature = "server", sqlx(rename = "not sure yet"))]
+    #[serde(rename = "not sure yet")]
     #[strum(to_string = "Not sure yet")]
     NotSureYet,
 }
