@@ -1,7 +1,9 @@
 use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::models::{FamilyPlans, Frequency, Gender, Image, RelationshipType, Seeking, ZodiacSign};
+use crate::models::{
+    FamilyPlans, Frequency, Gender, GenderIdentity, Image, RelationshipType, Seeking, ZodiacSign,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -35,41 +37,31 @@ pub struct Gps {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Profile {
-    #[serde(default)]
     pub id: Option<i32>,
     pub name: String,
-    #[serde(default)]
     pub email: Option<String>,
     pub gender: Gender,
+    pub gender_identity: Option<GenderIdentity>,
     pub born: Option<NaiveDate>,
 
-    #[serde(default)]
     pub age: Option<u16>,
     pub zodiac_sign: Option<ZodiacSign>,
 
     pub height: u8,
-    #[serde(default)]
     pub education: Option<String>,
-    #[serde(default)]
     pub occupation: Option<String>,
 
     // location is a human-readable city/area label shown to clients
-    #[serde(default)]
     pub location: Option<String>,
 
     // gps coordinates are server-side source data for distance calculations
-    #[serde(default)]
     pub gps: Option<Gps>,
 
     // u16::MAX = 65_535 vs. 40_075 largest Earth circumference
-    #[serde(default)]
     pub distance: Option<u16>,
 
-    #[serde(default)]
     pub hometown: Option<String>,
-    #[serde(default)]
     pub seeking: Option<Seeking>,
-    #[serde(default)]
     pub relationship_type: Option<RelationshipType>,
 
     pub has_children: Option<bool>,
@@ -80,7 +72,9 @@ pub struct Profile {
     pub marijuana: Option<Frequency>,
     pub drugs: Option<Frequency>,
 
+    #[serde(default)]
     pub prompts: Vec<Prompt>,
+    #[serde(default)]
     pub images: Vec<Image>,
 }
 
@@ -104,6 +98,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
 
         let name: String = row.try_get("name")?;
         let gender: Gender = row.try_get("gender")?;
+        let gender_identity = try_opt!(GenderIdentity, "gender_identity");
         let born = try_opt!(NaiveDate, "born");
         let age = try_opt!(i32, "age").map(|a| a as u16);
         let zodiac_sign = try_opt!(ZodiacSign, "zodiac_sign");
@@ -152,6 +147,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
             name,
             email,
             gender,
+            gender_identity,
             born,
             age,
             zodiac_sign,
