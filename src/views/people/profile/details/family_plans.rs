@@ -9,27 +9,41 @@ pub(super) fn FamilyPlans() -> Element {
     let mut dcx = use_context::<DetailsCtx>();
 
     let plans = &dcx.rw.read().family_plans;
-    let value = plans.as_ref().map(|e| e.to_string());
 
     rsx! {
         if (dcx.editing)() {
             li {
                 "🍼"
                 select {
-                    class: if value.is_none() { "text-gray-500" },
-                    value,
+                    class: if plans.is_none() { "text-gray-500" },
                     onchange: move |evt| dcx.rw.with_mut(|p| p.family_plans = EFP::from_str(&evt.value())),
 
                     option { value: "", "Family plans?" }
                     for val in EFP::iter() {
-                        option { value: "{val}", selected: *plans == Some(val), "{val}" }
+                        option { value: "{val}", selected: *plans == Some(val),
+                            "{val}"
+                            if val != EFP::NotSureYet {
+                                if let Some(true) = dcx.rw.read().has_children {
+                                    " more"
+                                }
+                                " children"
+                            }
+                        }
                     }
 
                 }
             }
         } else {
             if let Some(wants) = &dcx.ro.read().family_plans {
-                li { "🍼 {wants}" }
+                li {
+                    "🍼 {wants}"
+                    if *plans != Some(EFP::NotSureYet) {
+                        if let Some(true) = dcx.ro.read().has_children {
+                            " more"
+                        }
+                        " children"
+                    }
+                }
             }
         }
     }

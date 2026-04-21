@@ -17,9 +17,9 @@ pub(super) fn HasChildren() -> Element {
                     value,
                     onchange: move |evt| dcx.rw.write().has_children = evt.value().parse::<bool>().ok(),
 
-                    option { value: "", "Any kids?" }
-                    option { value: false, "I don't have kids" }
-                    option { value: true, "I have kids" }
+                    option { value: "", "Any children?" }
+                    option { value: false, selected: value == Some(false), "I don't have children" }
+                    option { value: true, selected: value == Some(true), "I have children" }
                 }
             }
         } else {
