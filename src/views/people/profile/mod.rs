@@ -56,6 +56,10 @@ impl ResourceCtx {
     }
 
     pub fn await_op(&mut self) {
+        if !self.editing() {
+            return;
+        }
+
         let id = self.op_id;
 
         let returned = OPS.with(|ops| {
