@@ -26,6 +26,11 @@ pub(super) fn handle_details_update_res(
     }: DetailsUpateRes,
 ) {
     fn do_op(target: &mut Profile, source: Profile) {
+        target.name = source.name;
+        target.height = source.height;
+        target.gender = source.gender;
+        target.gender_identity = source.gender_identity;
+
         target.education = source.education;
         target.occupation = source.occupation;
         target.location = source.location;
