@@ -2,6 +2,7 @@ mod dropdowns;
 mod education;
 mod family_plans;
 mod gender;
+mod gender_identity;
 mod habits;
 mod has_children;
 mod hometown;
@@ -96,6 +97,7 @@ pub fn Details() -> Element {
                 }
 
                 gender::Gender {}
+                gender_identity::GenderIdentity {}
 
                 li { class: if rcx.editing() { immutables }, "📏 {pcx.read().height} cm" }
 
