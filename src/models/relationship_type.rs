@@ -22,7 +22,7 @@ impl RelationshipType {
     pub const fn parts(&self) -> (&str, &str) {
         match self {
             Self::Monogamy => ("💍", "Monogamy"),
-            Self::NonMonogamy => ("🌈", "Non-monogamy"),
+            Self::NonMonogamy => ("💞", "Non-monogamy"),
             Self::FiguringOutMyRelationshipType => ("🧭", "Figuring out my relationship type"),
         }
     }
