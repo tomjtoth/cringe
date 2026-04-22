@@ -15,6 +15,20 @@ use crate::models::{Decision, Profile};
 use crate::state::server::get_ctx;
 
 pub static ME: GlobalSignal<Me> = Signal::global(Me::default);
+pub trait TrMe {
+    fn mut_draft<F>(&self, f: F)
+    where
+        F: FnOnce(&mut Box<Profile>);
+}
+
+impl TrMe for GlobalSignal<Me> {
+    fn mut_draft<F>(&self, f: F)
+    where
+        F: FnOnce(&mut Box<Profile>),
+    {
+        f(self.write().draft.as_mut().unwrap())
+    }
+}
 
 /// Uses `$1` and needs the `session_id` as the 1st bound param
 pub const AUTH_CTE: &str = "\

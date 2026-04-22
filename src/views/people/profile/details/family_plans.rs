@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::FamilyPlans as EFP;
-use crate::state::ME;
+use crate::state::{TrMe, ME};
 use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
@@ -26,11 +26,7 @@ pub(super) fn FamilyPlans() -> Element {
                 "🍼"
                 select {
                     class: if plans.is_none() { "text-gray-500" },
-                    onchange: move |evt| {
-                        ME.with_mut(|me| {
-                            me.draft.as_mut().unwrap().family_plans = EFP::from_str(&evt.value());
-                        })
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| d.family_plans = EFP::from_str(&evt.value())),
 
                     option { value: "", "Family plans?" }
                     for val in EFP::iter() {

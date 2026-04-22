@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::{Frequency, Profile};
-use crate::state::ME;
+use crate::state::{TrMe, ME};
 use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
@@ -68,13 +68,7 @@ fn habit(
                 select {
                     class: if freq == None { "text-gray-500" },
 
-                    onchange: move |evt| {
-                        let v = evt.value();
-                        ME.with_mut(|me| {
-                            let freq = Frequency::from_str(&v);
-                            onchange(me.draft.as_mut().unwrap(), freq);
-                        })
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| onchange(d, Frequency::from_str(&evt.value()))),
 
                     option { value: "", "{question}?" }
 

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    state::ME,
+    state::{TrMe, ME},
     views::people::profile::{ProfileCtx, ResourceCtx},
 };
 
@@ -17,10 +17,13 @@ pub fn Name() -> Element {
                 value: ME.read().draft.as_ref().map(|p| p.name.clone()),
                 minlength: 2,
                 onchange: move |evt| {
-                    let name = evt.value();
-                    if name.len() > 1 {
-                        ME.with_mut(|me| me.draft.as_mut().unwrap().name = name);
-                    }
+                    ME
+                        .mut_draft(|d| {
+                        let name = evt.value();
+                        if name.len() > 1 {
+                            d.name = name;
+                        }
+                    })
                 },
             }
         } else {

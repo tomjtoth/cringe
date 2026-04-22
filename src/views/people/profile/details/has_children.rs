@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::ME;
+use crate::state::{TrMe, ME};
 use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
@@ -16,10 +16,7 @@ pub(super) fn HasChildren() -> Element {
                 "🧑‍🧒‍🧒"
                 select {
                     class: if value.is_none() { "text-gray-500" },
-                    onchange: move |evt| {
-                        let parsed = evt.value().parse::<bool>().ok();
-                        ME.with_mut(|me| me.draft.as_mut().unwrap().has_children = parsed)
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| d.has_children = evt.value().parse::<bool>().ok()),
 
                     option { value: "", "Any children?" }
                     option { value: false, selected: value == Some(false), "I don't have children" }

@@ -1,9 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::models::GenderIdentity as GI;
-use crate::state::ME;
-use crate::views::people::profile::ProfileCtx;
-use crate::views::people::profile::ResourceCtx;
+use crate::state::{TrMe, ME};
+use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn GenderIdentity() -> Element {
@@ -19,11 +18,7 @@ pub(super) fn GenderIdentity() -> Element {
                 "🏳️‍🌈"
                 select {
                     class: if gi.is_none() { "text-gray-500" },
-                    onchange: move |evt| {
-                        ME.with_mut(|me| {
-                            me.draft.as_mut().unwrap().gender_identity = GI::from_str(&evt.value());
-                        })
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| d.gender_identity = GI::from_str(&evt.value())),
 
                     option { value: "", "You identify as.." }
                     if let Some(g) = gender {

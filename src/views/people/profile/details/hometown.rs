@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::state::ME;
+use crate::state::{TrMe, ME};
 use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
@@ -15,16 +15,7 @@ pub(super) fn Hometown() -> Element {
                 input {
                     placeholder: "Hometown",
                     value: ME.with(|me| me.draft.as_ref().and_then(|p| p.hometown.clone())),
-                    onchange: move |evt| {
-                        let val = evt.value();
-                        ME.with_mut(|me| {
-                            me.draft.as_mut().unwrap().hometown = if val.len() > 0 {
-                                Some(val)
-                            } else {
-                                None
-                            };
-                        })
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| d.hometown = Some(evt.value()).filter(|s| s.len() > 0)),
                 }
             }
         } else {

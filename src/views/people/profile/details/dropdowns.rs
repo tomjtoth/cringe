@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
 use crate::models::{Profile, RelationshipType as ERT, Seeking as ES};
-use crate::state::ME;
+use crate::state::{TrMe, ME};
 use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
@@ -71,10 +71,7 @@ where
             div {
                 select {
                     class: if as_ref == None { "text-gray-500" },
-                    onchange: move |evt| {
-                        let v = evt.value();
-                        ME.with_mut(|me| onchange(me.draft.as_mut().unwrap(), v))
-                    },
+                    onchange: move |evt| ME.mut_draft(|d| onchange(d, evt.value())),
 
                     option { value: "", "{placeholder}" }
                     for val in map_these {
