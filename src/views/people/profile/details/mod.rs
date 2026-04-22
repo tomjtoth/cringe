@@ -7,7 +7,10 @@ mod habits;
 mod has_children;
 mod hometown;
 mod location;
+mod name;
 mod occupation;
+
+pub(super) use name::Name;
 
 use dioxus::prelude::*;
 

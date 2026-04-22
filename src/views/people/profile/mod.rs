@@ -134,13 +134,10 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
     rsx! {
         div {
-            class: format!(
-                "{} {}",
-                "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
-                "flex justify-between items-center",
-            ),
+            class: "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
+            class: "flex justify-between items-center",
 
-            span { class: "text-2xl", "{profile.read().name}" }
+            details::Name {}
 
             if olcx.is_none() {
                 a {
