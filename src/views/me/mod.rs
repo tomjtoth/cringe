@@ -3,13 +3,13 @@ use dioxus::prelude::*;
 use crate::{
     state::ME,
     views::{
-        me::basic::BasicMe,
+        me::core::CoreData,
         people::{listing::ListingCtx, profile::Profile},
         protector::NeedsLogin,
     },
 };
 
-mod basic;
+mod core;
 
 #[component]
 pub fn Me() -> Element {
@@ -22,7 +22,7 @@ pub fn Me() -> Element {
                     Profile { profile }
                 }
             } else {
-                BasicMe {}
+                CoreData {}
             }
         }
     }

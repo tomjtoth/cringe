@@ -2,12 +2,14 @@ use std::str::FromStr;
 
 use chrono::{Local, Months, NaiveDate};
 use dioxus::prelude::*;
+use strum::IntoEnumIterator;
 
 use crate::{
     models::{Gender, Profile},
     state::{AUTH_CTE, ME},
 };
 
+// TODO: move this into WS, so that we can notify users of a new profile
 #[post("/api/me")]
 async fn post_basics(
     name: String,
@@ -62,15 +64,21 @@ fn legal_dob() -> NaiveDate {
 }
 
 #[component]
-pub fn BasicMe() -> Element {
+pub fn CoreData() -> Element {
     let legal = legal_dob();
 
     let mut name = use_signal(String::new);
-    let mut gender = use_signal(String::new);
-    let mut bday = use_signal(|| legal.to_string());
+    let mut gender = use_signal(|| Gender::Male);
+    let mut birthday = use_signal(|| Some(legal));
     let mut height = use_signal(|| 180u8);
+    let mut age_confirmed = use_signal(|| false);
 
     let required = true;
+    let age = birthday.with(|opt| {
+        opt.map(|bd| legal.years_since(bd).map(|y| y + 18))
+            .flatten()
+    });
+    let too_young = age.filter(|age| *age >= 18).is_none();
 
     rsx! {
         form {
@@ -79,24 +87,21 @@ pub fn BasicMe() -> Element {
             onsubmit: move |evt| async move {
                 evt.prevent_default();
 
-                if let Some(sex) = Gender::from_label(&gender()) {
-                    if name.read().len() > 0 {
-                        if let Ok(dob) = NaiveDate::from_str(&bday.read()) {
-                            if let Ok(Some(my_profile)) = post_basics(name(), sex, dob, height())
-                                .await
-                            {
-                                ME.write().profile = Some(my_profile);
-                            }
+                if name.read().len() > 0 {
+                    if let Some(bd) = birthday() {
+                        if let Ok(Some(me)) = post_basics(name(), gender(), bd, height())
+                            .await
+                        {
+                            ME.write().profile = Some(me);
                         }
                     }
                 }
             },
 
-            h2 { "HEADS UP!!" }
-            p { class: "text-center", "These are not changeable later." }
+            h2 { "Your core data" }
 
             input {
-                placeholder: "Your Name Here",
+                placeholder: "Your firstname",
                 class: "placeholder:text-center w-40 text-center",
                 value: name,
                 minlength: 2,
@@ -107,20 +112,27 @@ pub fn BasicMe() -> Element {
 
             select {
                 required,
-                value: gender(),
-                onchange: move |evt| *gender.write() = evt.value(),
+                onchange: move |evt| {
+                    if let Some(g) = Gender::from_str(&evt.value()) {
+                        *gender.write() = g;
+                    }
+                },
 
                 option { value: "", disabled: true, "Your gender" }
-                option { value: "{Gender::Male}", "{Gender::Male}" }
-                option { value: "{Gender::Female}", "{Gender::Female}" }
+                for gender in Gender::iter() {
+                    option { value: "{gender}", "{gender}" }
+                }
             }
 
             input {
                 required,
                 r#type: "date",
-                value: bday,
+                value: birthday.with(|bd| bd.map(|bd| bd.to_string())),
                 max: legal.to_string(),
-                onchange: move |evt| *bday.write() = evt.value(),
+                onchange: move |evt| {
+                    *birthday.write() = NaiveDate::from_str(&evt.value()).ok();
+                    age_confirmed.set(false);
+                },
             }
 
             input {
@@ -139,7 +151,41 @@ pub fn BasicMe() -> Element {
                 },
             }
 
-            button { "💾 Save" }
+            p { class: "text-center",
+                "These must be always defined, "
+                "you can change them later, "
+                "with the exception of your "
+                b { "date of birth" }
+                ", which you "
+                b { "cannot change, ever!" }
+            }
+
+            label { class: "flex items-center gap-2 text-center",
+
+                if let Some(age) = age {
+                    if age < 18 {
+                        "I'm too young for this.."
+                    } else {
+                        "I am {age} years old"
+                    }
+                } else {
+                    "I don't remember when I was born"
+                }
+
+                input {
+                    r#type: "checkbox",
+                    hidden: too_young,
+                    disabled: too_young,
+                    required,
+                    checked: age_confirmed(),
+                }
+            }
+
+            button {
+                class: if too_young { "text-gray-500 cursor-not-allowed!" },
+                disabled: too_young,
+                "💾 Save"
+            }
         }
     }
 }
