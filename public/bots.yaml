@@ -213,6 +213,56 @@
     - prompt: Bf got the man flu 🤒
       url: https://m.media-amazon.com/images/M/MV5BMTQ3Mjk4NzAxM15BMl5BanBnXkFtZTcwMzMyODgwNA@@._V1_.jpg
     - https://www.cheatsheet.com/wp-content/uploads/2019/10/Emma-Watson-Harry-Potter-Hermione-Granger-.jpg
+- name: Trinity
+  email: neo.soulmate@matrix.example
+  gender: female
+  born: 1967-08-21
+  height: 170
+  education: Systems & martial arts
+  occupation: Hacker / kinetic consultant
+
+  hometown: Real world
+  location: Rooftop with neon
+  gps:
+    lon: 151.2093
+    lat: -33.8688
+
+  has_children: false
+  family_plans: wants children
+
+  relationship_type: monogamy
+  seeking: long-term
+
+  drinking: rarely
+  smoking: never
+  marijuana: never
+  drugs: yes
+
+  prompts:
+    - title: My go-to karaoke song
+      body: >
+        Anything with a dramatic key change. I bring the pyrotechnics.
+
+    - title: My go-to karaoke song
+      body: >
+        Anything with a dramatic key change. I bring the pyrotechnics.
+    - title: Icebreaker
+      body: >
+        Tell me a conspiracy and I'll tell you a worse one.
+    - title: Night out
+      body: >
+        Rooftop hacking and late-night takeout.
+
+  images:
+    - https://preview.redd.it/trinity-was-stunning-in-the-first-matrix-and-very-capable-v0-acti8jpfsoqd1.png?auto=webp&s=150df1df49a297bde76fbe5eb2735398a28f7975
+    - https://i.ytimg.com/vi/bat8-rxEpdo/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAh-GVGH14MPd8iahAjj6UEgN2S7A
+    - prompt: Bonding with my man
+      url: https://i.pinimg.com/736x/d0/1e/c4/d01ec418dc268dcd286db224f68464d0.jpg
+    - prompt: I love recycling
+      url: https://static.wikia.nocookie.net/matrix/images/7/7b/Trinity-the-matrix-4387838-312-480.jpg/revision/latest?cb=20131115083131
+    - https://wallpapercat.com/w/full/e/a/1/459054-1775x2800-phone-hd-trinity-the-matrix-wallpaper.jpg
+    - prompt: Toilet seat DOWN!
+      url: https://image.guardian.co.uk/sys-images/Film/Pix/gallery/2003/05/20/carrie3.jpg
 - name: John
   email: john.rambo@firstblood.example
   gender: male
