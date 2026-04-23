@@ -47,7 +47,7 @@ pub(super) fn FamilyPlans() -> Element {
             if let Some(wants) = &pcx.read().family_plans {
                 li {
                     "🍼 {wants}"
-                    if plans != Some(EFP::NotSureYet) {
+                    if *wants != EFP::NotSureYet {
                         if let Some(true) = pcx.read().has_children {
                             " more"
                         }
