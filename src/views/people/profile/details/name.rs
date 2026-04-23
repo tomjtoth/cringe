@@ -12,6 +12,7 @@ pub fn Name() -> Element {
 
     rsx! {
         if rcx.editing() {
+
             input {
                 placeholder: "Your firstname",
                 value: ME.read().draft.as_ref().map(|p| p.name.clone()),
@@ -30,5 +31,20 @@ pub fn Name() -> Element {
             span { class: "text-2xl", "{pcx.read().name}" }
         }
 
+    }
+}
+
+#[component]
+pub fn NameInput(value: String, onchange: Callback<String>) -> Element {
+    rsx! {
+        input {
+            placeholder: "Your firstname",
+            class: "placeholder:text-center w-40 text-center",
+            minlength: 2,
+            required: true,
+
+            value,
+            onchange: move |evt| onchange(evt.value()),
+        }
     }
 }

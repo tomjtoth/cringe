@@ -5,12 +5,16 @@ mod gender;
 mod gender_identity;
 mod habits;
 mod has_children;
+mod height;
 mod hometown;
 mod location;
 mod name;
 mod occupation;
 
+pub(in crate::views) use gender::GenderSelect;
+pub(in crate::views) use height::HeightInput;
 pub(super) use name::Name;
+pub(in crate::views) use name::NameInput;
 
 use dioxus::prelude::*;
 
@@ -102,7 +106,7 @@ pub fn Details() -> Element {
                 gender::Gender {}
                 gender_identity::GenderIdentity {}
 
-                li { class: if rcx.editing() { immutables }, "📏 {pcx.read().height} cm" }
+                height::Height {}
 
                 location::Location {}
 
@@ -113,7 +117,9 @@ pub fn Details() -> Element {
                 // 0 - Doesn't have
                 //
                 if let Some(sign) = pcx.read().zodiac_sign() {
-                    li { class: if rcx.editing() { "cursor-not-allowed" }, "{sign}" }
+                    li { class: if rcx.editing() { "cursor-not-allowed text-gray-500" },
+                        "{sign}"
+                    }
                 }
 
                 habits::Habits {}

@@ -16,7 +16,7 @@ use crate::{
 
 mod button;
 mod container;
-mod details;
+pub(in crate::views) mod details;
 mod image;
 mod prompt;
 mod utils;
