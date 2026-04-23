@@ -26,7 +26,9 @@ impl TrMe for GlobalSignal<Me> {
     where
         F: FnOnce(&mut Box<Profile>),
     {
-        f(self.write().draft.as_mut().unwrap())
+        if let Some(draft) = self.write().draft.as_mut() {
+            f(draft)
+        }
     }
 }
 
