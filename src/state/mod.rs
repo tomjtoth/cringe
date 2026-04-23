@@ -10,9 +10,12 @@ pub mod websocket;
 use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::models::{Decision, Profile};
 #[cfg(feature = "server")]
 use crate::state::server::get_ctx;
+use crate::{
+    models::{Decision, Profile},
+    state::websocket::use_ws,
+};
 
 pub static ME: GlobalSignal<Me> = Signal::global(Me::default);
 pub trait TrMe {
@@ -160,6 +163,7 @@ pub fn init_client() -> Result<(), RenderError> {
     }
 
     // use_gps_watch();
+    use_ws();
 
     Ok(())
 }

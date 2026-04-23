@@ -2,13 +2,11 @@ use dioxus::prelude::*;
 
 use crate::{
     navbar::Navbar,
-    state::websocket::WsProvider,
     views::{about::About, login::Login, me::Me, people::listing::*},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
-    #[layout(WsProvider)]
     #[layout(Navbar)]
     #[route("/about")]
     About {},

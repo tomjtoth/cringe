@@ -15,14 +15,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     models::{Image, Profile, Prompt},
-    router::Route,
     state::{
         details::{handle_details_update_res, DetailsUpateRes},
         image::{
             handle_conversion_res, handle_image_crud_res, ImageConversionResult, ImageOpResult,
         },
         prompt::{handle_prompt_crud_res, PromptOpResult},
-        AUTH_CTE, ME,
+        AUTH_CTE,
     },
     utils::sleep,
 };
@@ -197,40 +196,8 @@ impl WsCtx {
     }
 }
 
-/// The sole purpose of this component is the re-creation of the WS connection
-#[component]
-pub fn WsProvider() -> Element {
-    let state = use_signal(|| 0u8);
-
-    rsx! {
-        if state() % 2 == 0 {
-            Even { state, Outlet::<Route> {} }
-        } else {
-            Odd { state, Outlet::<Route> {} }
-        }
-    }
-}
-
-#[component]
-fn Even(state: Signal<u8>, children: Element) -> Element {
-    use_ws(state);
-    rsx! {
-        {children}
-    }
-}
-
-#[component]
-fn Odd(state: Signal<u8>, children: Element) -> Element {
-    use_ws(state);
-    rsx! {
-        {children}
-    }
-}
-
-fn use_ws(mut state: Signal<u8>) {
+pub(super) fn use_ws() {
     let socket = use_websocket(|| ws_endpoint(WebSocketOptions::new().with_automatic_reconnect()));
-
-    info!("WS connection #{}: {:?}", state(), socket.status());
 
     let mut ws = use_context_provider(|| WsCtx(socket));
 
@@ -255,11 +222,14 @@ fn use_ws(mut state: Signal<u8>) {
             }
         }
 
-        if ME.read().authenticated {
-            info!("WS connection #{} failed, reconnecting...", state());
+        #[cfg(all(not(debug_assertions), target_arch = "wasm32"))]
+        if super::ME.read().authenticated {
+            info!("WS connection failed, reconnecting in a sec...");
 
             sleep(1).await;
-            state.with_mut(|s| *s = s.wrapping_add(1));
+            if let Some(window) = web_sys::window() {
+                _ = window.location().reload();
+            }
         }
     });
 }
