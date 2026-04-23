@@ -263,6 +263,49 @@
     - https://wallpapercat.com/w/full/e/a/1/459054-1775x2800-phone-hd-trinity-the-matrix-wallpaper.jpg
     - prompt: Toilet seat DOWN!
       url: https://image.guardian.co.uk/sys-images/Film/Pix/gallery/2003/05/20/carrie3.jpg
+
+- name: Diana
+  email: truth.lasso@themyscira.example
+  gender: female
+  born: 1985-04-30
+  height: 178
+  education: Amazonian diplomacy
+  occupation: Ambassador / amazonian workout coach
+
+  hometown: Themyscira
+  location: Mediterranean
+  gps:
+    lon: 34.8878
+    lat: 32.1004
+
+  has_children: false
+  family_plans: not sure yet
+
+  seeking: long-term
+  relationship_type: monogamy
+
+  drinking: rarely
+  smoking: never
+  marijuana: never
+  drugs: never
+
+  prompts:
+    - title: Low-key flex
+      body: >
+        I can deflect insults and bullets with a smile.
+    - title: Favourite workout
+      body: >
+        Amazonian HIIT: push, pull, diplomacy.
+    - title: Date vibe
+      body: >
+        Ancient ruins by day, modern art by night.
+
+  images:
+    - https://cdng.europosters.eu/pod_public/1300/114433.jpg
+    - https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fwww.denverpost.com%2F2017%2F05%2F31%2Fmovie-review-wonder-woman%2F&ved=0CBYQjRxqFwoTCJiNzszfhJQDFQAAAAAdAAAAABB_&opi=89978449
+    - prompt: WW2 ✅
+      url: https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/1493E/production/_96268248_2ca421dc-198a-4888-aeb3-db18c3fba916.jpg
+
 - name: John
   email: john.rambo@firstblood.example
   gender: male
