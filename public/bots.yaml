@@ -166,6 +166,53 @@
     - prompt: The moment I knew there is no fate...
       url: https://www.slashfilm.com/img/gallery/the-terminators-sarah-connor-was-indirectly-inspired-by-another-legendary-sci-fi-hero/intro-1735083299.jpg
 
+- name: Hermione Granger
+  email: clever.books@hogwarts.example
+  gender: female
+  born: 1990-04-15
+  height: 165
+  education: Top of her class at wizarding school
+  occupation: Spell consultant / trivia champion
+
+  hometown: England
+  location: Library corner
+  gps:
+    lon: -1.2577
+    lat: 51.7520
+
+  has_children: true
+
+  relationship_type: monogamy
+
+  drinking: rarely
+  smoking: never
+  marijuana: often
+  drugs: often
+
+  prompts:
+    - title: My simple pleasure
+      body: >
+        Correcting your Latin in front of your friends (in a kind way).
+
+    - title: My simple pleasure
+      body: >
+        Correcting your Latin in front of your friends (in a kind way).
+    - title: Ideal date
+      body: >
+        A bookshop scavenger hunt followed by tea and earnest conversation.
+    - title: Pet peeve
+      body: >
+        People who don't return library books on time.
+
+  images:
+    - prompt: Undercover as a muggle
+      url: https://www.cheatsheet.com/wp-content/uploads/2019/11/Emma-Watson-Harry-Potter-Hermione-Granger-what-movies-changed-.jpg?w=717&h=1024&strip=all&quality=89
+    - https://images2.alphacoders.com/923/thumb-1920-923453.jpg
+    - prompt: Hiking in the friend-zone 🥾
+      url: https://assets.vogue.com/photos/5891f2329c1609bf7a72eda4/master/pass/img-harry-potter_190633726133.jpg
+    - prompt: Bf got the man flu 🤒
+      url: https://m.media-amazon.com/images/M/MV5BMTQ3Mjk4NzAxM15BMl5BanBnXkFtZTcwMzMyODgwNA@@._V1_.jpg
+    - https://www.cheatsheet.com/wp-content/uploads/2019/10/Emma-Watson-Harry-Potter-Hermione-Granger-.jpg
 - name: John
   email: john.rambo@firstblood.example
   gender: male
