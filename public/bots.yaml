@@ -92,6 +92,121 @@
     - prompt: A fan of mine drew this 🫶
       url: https://preview.redd.it/fan-art-of-andy-dufresne-from-the-shawshank-redemption-1994-v0-z32rxqoswnxe1.jpeg?auto=webp&s=219c3981514b38e0dce42f377eaabb11aeb31265
 
+- name: Ellen
+  email: ripley.safe.spots@weyland.example
+  gender: female
+  born: 1949-10-08
+  height: 180
+  education: Spaceflight survival school
+  occupation: Warrant officer / alien problem consultant
+
+  hometown: Earth
+  location: Spaceship hangar
+  gps:
+    lon: -74.0060
+    lat: 40.7128
+
+  drinking: rarely
+  drugs: rarely
+
+  prompts:
+    - title: Worst blind date
+      body: >
+        When they literally tried to eat the appetizers.
+    - title: Survival tip
+      body: >
+        Trust your gut, and bring a flamethrower only if necessary.
+    - title: Guilty pleasure
+      body: >
+        Repair manuals and a very well-made cup of coffee.
+
+  images:
+    - https://preview.redd.it/what-made-ellen-ripley-such-a-good-character-v0-npikhxcagfrd1.png?auto=webp&s=494f4e596d2c938b8aa9f7d8ac9e0c66c23865bd
+    - https://static.wikia.nocookie.net/avp/images/2/2f/Ellen_Ripley_badass.png/revision/latest?cb=20130410133950
+    - https://i0.wp.com/www.bulletproofaction.com/wp-content/uploads/2016/12/2.png
+    - https://www.avpgalaxy.net/wordpress/wp-content/uploads/2020/11/alien1-promo-020.jpg
+    - https://thedrunkenodyssey.com/wp-content/uploads/2013/09/screen-shot-2012-11-19-at-161230.jpg?w=640
+
+- name: Sarah
+  email: terminator.training@resistance.example
+  gender: female
+  born: 1956-09-26
+  height: 165
+  education: Survivalist certification
+  occupation: Protector / fitness enthusiast
+
+  hometown: California
+  location: Anywhere with warning signs
+  gps:
+    lon: -118.2437
+    lat: 34.0522
+
+  has_children: true
+  family_plans: doesn't want children
+
+  drinking: often
+  smoking: rarely
+  marijuana: rarely
+  drugs: rarely
+
+  prompts:
+    - title: Non-negotiable
+      body: >
+        You must be prepared to run at dawn and explain your emergency plan.
+    - title: Training regime
+      body: >
+        Early mornings, heavy lifting, and practicing evasive driving.
+    - title: Date idea
+      body: >
+        A shooting range followed by protein shakes and strategy talk.
+
+  images:
+    - https://static.wikia.nocookie.net/finalgirls/images/7/7c/Sarah_Connor.jpg/revision/latest?cb=20230323021303
+    - https://cdn.mos.cms.futurecdn.net/jjrLEts6A7Fw5Lii8fnhrS.jpg
+    - prompt: The moment I knew there is no fate...
+      url: https://www.slashfilm.com/img/gallery/the-terminators-sarah-connor-was-indirectly-inspired-by-another-legendary-sci-fi-hero/intro-1735083299.jpg
+
+- name: John
+  email: john.rambo@firstblood.example
+  gender: male
+  born: 1946-07-06
+  height: 177
+  education: Vietnam-era infantry / survival training
+  occupation: Veteran / drifter / survivalist
+
+  hometown: Hope, Washington
+  location: Wilderness / small towns
+  gps:
+    lon: -122.3007
+    lat: 47.3869
+
+  has_children: false
+  family_plans: doesn't want children
+
+  drinking: often
+  smoking: rarely
+  marijuana: never
+  drugs: never
+
+  prompts:
+    - title: What I'm looking for
+      body: >
+        Someone who understands quiet mornings, long drives, and complicated histories.
+
+    - title: Survival story
+      body: >
+        I once lived off the land for weeks; I make good coffee over a campfire.
+
+    - title: Dealbreaker
+      body: >
+        Can't handle loud cities or unnecessary small talk.
+
+  images:
+    - https://i.pinimg.com/474x/ce/59/9c/ce599c4a9731e454fb9fe4185fcec5ed.jpg
+    - https://images.bauerhosting.com/empire/2025/05/John-Rambo.jpg?ar=16%3A9&fit=crop&crop=top&auto=format&w=1440&q=80
+    - https://static.wikia.nocookie.net/branson-universe/images/a/ad/Rambo_1-rambo-tv-show.w529.h529.webp/revision/latest?cb=20230222062620
+    - https://www.fantastischefilmlocaties.nl/assets/files/first-blood-copyright-studiocanal-0-kopie.480x0.jpg
+
 - name: Anakin
   email: vader@definitely-not-a-sith.com
   gender: male
