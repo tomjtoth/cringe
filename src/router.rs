@@ -1,12 +1,14 @@
 use dioxus::prelude::*;
 
 use crate::{
+    modal::components::ModalRenderer,
     navbar::Navbar,
     views::{about::About, login::Login, me::Me, people::listing::*},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
+    #[layout(ModalRenderer)]
     #[layout(Navbar)]
     #[route("/about")]
     About {},

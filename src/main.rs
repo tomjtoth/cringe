@@ -5,6 +5,7 @@ use crate::state::init_client;
 #[cfg(feature = "server")]
 mod auth;
 
+mod modal;
 mod models;
 mod navbar;
 mod router;
