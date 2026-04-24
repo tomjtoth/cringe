@@ -213,6 +213,40 @@
     - prompt: Bf got the man flu 🤒
       url: https://m.media-amazon.com/images/M/MV5BMTQ3Mjk4NzAxM15BMl5BanBnXkFtZTcwMzMyODgwNA@@._V1_.jpg
     - https://www.cheatsheet.com/wp-content/uploads/2019/10/Emma-Watson-Harry-Potter-Hermione-Granger-.jpg
+
+- name: Katniss
+  email: girl.on.fire@district.12.example
+  gender: female
+  born: 1990-08-15
+  height: 175
+  education: Survival school of archery
+  occupation: Volunteer / reluctant hero
+
+  hometown: District 12
+  location: Woodland picnic spot
+  gps:
+    lon: -82.5185
+    lat: 37.4796
+
+  prompts:
+    - title: My greatest strength
+      body: >
+        I can make a mean campfire and a terrible small talk.
+    - title: Favourite hobby
+      body: >
+        Archery at dawn, for the cardio and the zen.
+    - title: Dealbreaker
+      body: >
+        Refuses to bring snacks to a picnic.
+
+  images:
+    - https://industrialscripts.com/wp-content/uploads/2024/01/jennifer-lawrence-hunger-games-060923-1deac39eed604acc9a8d43d42c4f8a4d.jpg
+    - https://www.heyuguys.com/images/2011/11/The-Hunger-Games-Katniss-Archer-Still-Jenna-Lawrence.jpg
+    - https://hips.hearstapps.com/hmg-prod/images/jennifer-lawrence-katniss-everdeen-the-hunger-games-mockingjay-6888da0fcd367.jpg
+    - https://zakiyanjamal.com/wp-content/uploads/2015/08/ka_1.jpg?w=640
+    - prompt: Gamer gurl off-duty
+      url: https://media.vanityfair.com/photos/5d02ab2776711f03ed7fe6a3/master/pass/jennifer-lawrence-relationship.jpg
+
 - name: Trinity
   email: neo.soulmate@matrix.example
   gender: female
