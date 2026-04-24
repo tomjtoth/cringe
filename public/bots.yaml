@@ -32,6 +32,11 @@
     - title: I'm weirdly good at
       body: >
         Arranging things so they'll never be found (in a good way).
+    - title: Do you agree, or disagree?
+      body: >
+        Body count is just a number.
+        Mine is somewhere between 144 and 156+ 🫣
+        I lost count, do you mind? 🫶
 
   images:
     - https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp/250px-Michael_C._Hall_as_Dexter_Morgan_publicity_photo%2C_2012.webp.png
@@ -62,13 +67,8 @@
     lon: -70.2553
     lat: 43.6615
 
-  has_children: false
-  family_plans: doesn't want children
-
   drinking: rarely
-  smoking: never
-  marijuana: never
-  drugs: never
+  smoking: rarely
 
   prompts:
     - title: Dream date
@@ -224,10 +224,6 @@
     - title: My simple pleasure
       body: >
         Correcting your Latin in front of your friends (in a kind way).
-
-    - title: My simple pleasure
-      body: >
-        Correcting your Latin in front of your friends (in a kind way).
     - title: Ideal date
       body: >
         A bookshop scavenger hunt followed by tea and earnest conversation.
@@ -304,10 +300,6 @@
   drugs: yes
 
   prompts:
-    - title: My go-to karaoke song
-      body: >
-        Anything with a dramatic key change. I bring the pyrotechnics.
-
     - title: My go-to karaoke song
       body: >
         Anything with a dramatic key change. I bring the pyrotechnics.
@@ -656,7 +648,7 @@
   born: 0280-01-01
   height: 160
   education: MBA in logistics, chimney systems specialization
-  occupation: Burglar
+  occupation: Professional home-enterer
   relationship_type: monogamy
 
   drinking: yes
