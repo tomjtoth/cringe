@@ -129,6 +129,51 @@
     - prompt: I tie up people
       url: https://d2thvodm3xyo6j.cloudfront.net/media/2020/04/ca9f6457ca170f0e-600x338.png
     - https://www.remindmagazine.com/wp-content/uploads/2023/05/the-good-the-bad-and-the-ugly-1014x570.jpg
+
+- name: James
+  email: shaken.not.stirred@007.example
+  gender: male
+  born: 1968-03-02
+  height: 178
+  education: Military prep, shaken cocktails 101
+  occupation: International professional (ahem) problem-solver
+
+  hometown: Scotland (ish)
+  location: London
+  gps:
+    lon: -0.1278
+    lat: 51.5074
+
+  has_children: false
+  family_plans: doesn't want children
+
+  seeking: short-term fun
+  relationship_type: non-monogamy
+
+  drinking: yes
+  smoking: rarely
+  marijuana: never
+  drugs: never
+
+  prompts:
+    - title: Best first date
+      body: >
+        Dinner, followed by a mild explosion and tasteful diplomacy.
+    - title: My standby
+      body: >
+        A tux, a dry martini, and surprisingly good small talk.
+    - title: What I bring to a relationship
+      body: >
+        Breath-taking views and occasional international incidents.
+
+  images:
+    - https://media.cnn.com/api/v1/images/stellar/prod/210916102519-daniel-craig-casino-royale-restricted.jpg?q=w_2000,c_fill
+    - prompt: I dress proper for my Queen
+      url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmLHmVTO9cKIcE8Iz2G57UrJaEJX9pB5BwOQ&s
+    - prompt: Martinis, anyone?
+      url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpXLyGTgbHb11GB9duWVCbHSgqmAUGh1eU0w&s
+    - https://cdn.mos.cms.futurecdn.net/k8oydnFsZpDoCfi5ksWg85.jpg
+    - https://i.pinimg.com/736x/dd/8d/5a/dd8d5a75fd35f03fbc342e76803e963a.jpgy
 - name: Ellen
   email: ripley.safe.spots@weyland.example
   gender: female
