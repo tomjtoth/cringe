@@ -14,7 +14,7 @@ pub struct ModalBuilder {
 
 #[allow(dead_code)]
 impl ModalBuilder {
-    pub fn btn(mut self, label: &'static str, callback: OptCb) -> Self {
+    pub fn button(mut self, label: &'static str, callback: OptCb) -> Self {
         self.buttons.push((label, callback));
         self
     }
@@ -45,9 +45,14 @@ impl ModalBuilder {
                         button {
                             onclick: move |evt| {
                                 if let Some(callback) = ocb {
-                                    callback(evt);
+                                    callback(evt.clone());
+                                    if evt.propagates() {
+                                        MODALS.pop();
+                                    }
                                 }
-                                MODALS.pop();
+                                else{
+                                    MODALS.pop();
+                                }
                             },
                             "{label}"
                         }
