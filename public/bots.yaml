@@ -166,6 +166,37 @@
     - prompt: The moment I knew there is no fate...
       url: https://www.slashfilm.com/img/gallery/the-terminators-sarah-connor-was-indirectly-inspired-by-another-legendary-sci-fi-hero/intro-1735083299.jpg
 
+- name: Beatrix
+  email: blackmamba.killbill@example
+  gender: female
+  born: 1970-04-29
+  height: 181
+  education: Martial arts, advanced swords
+  occupation: Bounty of feelings / highly motivated
+
+  hometown: Kyoto
+  location: On a quest
+  gps:
+    lon: 135.7681
+    lat: 35.0116
+
+  prompts:
+    - title: Worst idea I ever had
+      body: >
+        Challenging an army of henchmen before breakfast. Would not recommend.
+    - title: Favourite weapon
+      body: >
+        A very sharp friend that has saved me many times.
+    - title: Chill activity
+      body: >
+        Tea and a book — until obligations call.
+
+  images:
+    - https://www.writeups.org/wp-content/uploads/Bride-Beatrix-Kiddo-Kill-Bill-Thurman-b-big.jpg
+    - https://www.filmink.com.au/wp-content/uploads/2016/06/uma-thurman-quentin-tarantino-kill-bill-1024x768.jpg
+    - https://townsquare.media/site/442/files/2019/07/kill-bill-2.jpg
+    - https://www.1800getlens.com/eyetopics/wp-content/uploads/2024/04/Screenshot-2024-04-08-215021.png
+
 - name: Hermione Granger
   email: clever.books@hogwarts.example
   gender: female
