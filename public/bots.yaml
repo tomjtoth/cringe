@@ -174,6 +174,49 @@
       url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpXLyGTgbHb11GB9duWVCbHSgqmAUGh1eU0w&s
     - https://cdn.mos.cms.futurecdn.net/k8oydnFsZpDoCfi5ksWg85.jpg
     - https://i.pinimg.com/736x/dd/8d/5a/dd8d5a75fd35f03fbc342e76803e963a.jpgy
+
+- name: Bruce
+  email: billionaire.looking@wayne-enterprises.example
+  gender: male
+  born: 1974-01-30
+  height: 183
+  education: MBA, occasional nocturnal extracurriculars
+  occupation: CEO / urban vigilante
+
+  hometown: Gotham
+  location: City center
+  gps:
+    lon: -74.0060
+    lat: 40.7128
+
+  has_children: false
+  family_plans: not sure yet
+
+  drinking: rarely
+  smoking: never
+  marijuana: never
+  drugs: never
+
+  prompts:
+    - title: My go-to karaoke song
+      body: >
+        'Heroes' but I perform it from a rooftop.
+    - title: What I'm really into
+      body: >
+        Philanthropy, fast cars, and very tall buildings.
+    - title: Sunday plans
+      body: >
+        Board meetings, then rooftop training. Optional cape.
+
+  images:
+    - https://s.abcnews.com/images/Entertainment/GTY_christian_bale_batman_nt_130823.jpg
+    - prompt: Alter-ego revealed
+      url: https://images.immediate.co.uk/production/volatile/sites/3/2020/09/Christian-Bale-Dark-Knight-584cc7f-scaled.jpg?quality=90&resize=980,654
+    - https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRjb2OmAmU8RESU-Hs2ggFkBU0yVNKW8UQrQ&s
+    - https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRLKVHN6Auhn1hrF4PjYsVYly1zWxOLe1ayQ&s
+    - prompt: This could be you
+      url: https://www.bostonherald.com/wp-content/uploads/migration/2012/07/16/76bf9b_071312darkknight3.jpg?w=535
+
 - name: Ellen
   email: ripley.safe.spots@weyland.example
   gender: female
