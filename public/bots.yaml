@@ -92,6 +92,43 @@
     - prompt: A fan of mine drew this 🫶
       url: https://preview.redd.it/fan-art-of-andy-dufresne-from-the-shawshank-redemption-1994-v0-z32rxqoswnxe1.jpeg?auto=webp&s=219c3981514b38e0dce42f377eaabb11aeb31265
 
+- name: Blondie
+  email: the.man.with.no.name@westerns.example
+  gender: male
+  born: 1930-05-31
+  height: 193
+  education: School of hard stares
+  occupation: Drifter / occasional gunslinger
+
+  hometown: Unknown frontier
+  location: The sunset
+  gps:
+    lon: -2.4637
+    lat: 36.8340
+
+  drinking: often
+  smoking: yes
+  marijuana: never
+  drugs: never
+
+  prompts:
+    - title: Low-key flex
+      body: >
+        I once won a staring contest with a rattlesnake. It blinked first.
+    - title: Weekend mood
+      body: >
+        Riding into town, doing the right thing if you call it the right thing.
+    - title: Dealbreaker
+      body: >
+        Loud harmonicas. Very specific taste.
+
+  images:
+    - https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSMUDnZlk3bvoEsvN5v472tgxHrOW2vq_zmA&s
+    - https://i.pinimg.com/736x/80/1e/7e/801e7ea8899a485d10c30702a28c94d4.jpg
+    - https://m.media-amazon.com/images/M/MV5BMTY1Nzg0Nzg5Nl5BMl5BanBnXkFtZTcwNjc0Mzg4Mw@@._V1_.jpg
+    - prompt: I tie up people
+      url: https://d2thvodm3xyo6j.cloudfront.net/media/2020/04/ca9f6457ca170f0e-600x338.png
+    - https://www.remindmagazine.com/wp-content/uploads/2023/05/the-good-the-bad-and-the-ugly-1014x570.jpg
 - name: Ellen
   email: ripley.safe.spots@weyland.example
   gender: female
