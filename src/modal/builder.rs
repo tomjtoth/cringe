@@ -35,7 +35,7 @@ impl ModalBuilder {
         })
     }
 
-    pub fn code(self, text: &'static str) {
+    pub fn code(self, text: &String) {
         self.build(rsx! {
             pre {
                 code { "{text}" }

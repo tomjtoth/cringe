@@ -14,6 +14,7 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    modal::{TrModal, MODALS},
     models::{Image, Profile, Prompt},
     state::{
         details::{handle_details_update_res, DetailsUpateRes},
@@ -179,8 +180,19 @@ impl std::ops::Deref for WsCtx {
 
 impl WsCtx {
     pub async fn req(&self, request: WsRequest) -> Result<(), WebsocketError> {
+        let show_modal = !matches!(&request, &WsRequest::KeepAlive);
+
         self.send(request).await.map_err(|e| {
             error!("WS error: {e:?}");
+
+            if show_modal {
+                MODALS
+                    .build("z-10")
+                    .title("WS op failed")
+                    .button("Ok", None)
+                    .code(&format!("{:?}", e));
+            }
+
             e
         })
     }
