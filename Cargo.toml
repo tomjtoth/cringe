@@ -6,12 +6,6 @@ edition = "2021"
 
 # See more keys and their definit^ions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[workspace]
-members = ["."]
-
-[workspace.dependencies]
-oauth2 = "5.0.0"
-
 [features]
 default = ["web"]
 web = [
@@ -51,7 +45,7 @@ futures = "0.3.32"
 gloo-timers = { version = "0.4.0", optional = true, features = ["futures"] }
 image = { version = "0.25.10", optional = true }
 js-sys = { version = "0.3.94", optional = true }
-oauth2 = { workspace = true, optional = true }
+oauth2 = { version = "5.0.0", optional = true }
 once_cell = { version = "1.21", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.149"
@@ -79,6 +73,3 @@ web-sys = { version = "0.3.91", optional = true, features = [
     "Navigator",
     "Window",
 ] }
-
-[dev-dependencies]
-oauth2 = { workspace = true, features = ["reqwest-blocking"] }
