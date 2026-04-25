@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 
+use crate::modal::{TrModal, MODALS};
 use crate::models::Prompt;
 use crate::state::websocket::{WsCtx, WsRequest};
 use crate::views::people::profile::{
@@ -35,14 +36,29 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
         )
     });
 
+    let delete_cb = use_callback(move |_| {
+        spawn(async move {
+            _ = wscx.req(WsRequest::PromptOp(rcx.op_id, sig())).await;
+        });
+    });
+
     let onsubmit = use_callback(move |_: Event<FormData>| {
         if is_new && is_empty || !is_new && !has_changes {
             return rcx.toggle_editing();
         }
 
-        spawn(async move {
-            _ = wscx.req(WsRequest::PromptOp(rcx.op_id, sig())).await;
-        });
+        if !is_new && is_empty {
+            MODALS
+                .build("z-3")
+                .title("Deleting prompt")
+                .button("Yes", Some(delete_cb))
+                .button("No", None)
+                .p("Do you really want to delete this prompt?");
+        } else {
+            spawn(async move {
+                _ = wscx.req(WsRequest::PromptOp(rcx.op_id, sig())).await;
+            });
+        }
     });
 
     let disabled = !rcx.editing();
