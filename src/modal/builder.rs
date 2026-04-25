@@ -29,7 +29,21 @@ impl ModalBuilder {
         self
     }
 
-    pub fn message(self, p: &'static str) {
+    pub fn p(self, text: &'static str) {
+        self.build(rsx! {
+            p { "{text}" }
+        })
+    }
+
+    pub fn code(self, text: &'static str) {
+        self.build(rsx! {
+            pre {
+                code { "{text}" }
+            }
+        })
+    }
+
+    fn build(self, message: Element) {
         MODALS.new(
             self.class,
             self.animated,
@@ -38,7 +52,7 @@ impl ModalBuilder {
                     h2 { "{header}" }
                 }
 
-                p { "{p}" }
+                {message}
 
                 div { class: "mt-4 p-2 flex gap-2 justify-evenly",
                     for (label , ocb) in self.buttons {

@@ -60,7 +60,7 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
                 .button("Ok", Some(do_delete))
                 .button("Cancel", None)
                 .title("Confirm deletion")
-                .message("You are about to delete this image.");
+                .p("You are about to delete this image.");
         } else {
             spawn(async move {
                 _ = wscx.req(WsRequest::ImageOp(rcx.op_id, sig())).await;
