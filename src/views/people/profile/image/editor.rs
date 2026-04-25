@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
+    modal::{TrModal, MODALS},
     models::Image,
     state::websocket::{WsCtx, WsRequest},
     views::people::profile::{
@@ -42,14 +43,29 @@ pub fn ImageEditor(src: Option<Image>) -> Element {
         )
     });
 
-    let onsubmit = use_callback(move |_: Event<FormData>| {
+    let do_delete = use_callback(move |_| {
+        spawn(async move {
+            _ = wscx.req(WsRequest::ImageOp(rcx.op_id, sig())).await;
+        });
+    });
+
+    let onsubmit = use_callback(move |_| {
         if is_new && is_empty || !is_new && !has_changes {
             return rcx.toggle_editing();
         }
 
-        spawn(async move {
-            _ = wscx.req(WsRequest::ImageOp(rcx.op_id, sig())).await;
-        });
+        if !is_new && is_empty {
+            MODALS
+                .build("z-3")
+                .button("Ok", Some(do_delete))
+                .button("Cancel", None)
+                .title("Confirm deletion")
+                .message("You are about to delete this image.");
+        } else {
+            spawn(async move {
+                _ = wscx.req(WsRequest::ImageOp(rcx.op_id, sig())).await;
+            });
+        }
     });
 
     let class = container_class(is_empty, has_changes);
