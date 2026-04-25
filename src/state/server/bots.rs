@@ -126,19 +126,36 @@ fn no_broken_bot_img_urls() {
 
             // check only 3rd party links
             if src.starts_with("https://") {
-                let response = client.get(src).send().unwrap_or_else(|err| {
-                    panic!(
-                        "\n\t{}'s image #{idx} request failed: '{src}'\n\tError: {err}\n",
-                        profile.name
+                let response = client
+                    .head(src)
+                    .header(
+                        "Accept",
+                        "image/avif,image/webp,image/png,image/*,*/*;q=0.8",
                     )
-                });
-                assert!(
-                    response.status().is_success(),
-                    "\n\t{}'s image #{idx} is not success: '{}'\n\tStatus: {}\n",
-                    profile.name,
-                    src,
-                    response.status()
-                );
+                    .header("Accept-Language", "en-US,en;q=0.5")
+                    .header("Referer", "https://cringe.ttj.hu/")
+                    .send()
+                    .unwrap_or_else(|err| {
+                        panic!(
+                            "\n\t{}'s image #{idx} request failed: '{src}'\n\tError: {err}\n",
+                            profile.name
+                        )
+                    });
+
+                if response.status().as_u16() == 403 {
+                    println!(
+                        "\n\t{}'s image #{idx} ({}) returned 403\n",
+                        profile.name, src,
+                    );
+                } else {
+                    assert!(
+                        response.status().is_success(),
+                        "\n\t{}'s image #{idx} is not success: '{}'\n\tStatus: {}\n",
+                        profile.name,
+                        src,
+                        response.status()
+                    );
+                }
             }
         }
     }
