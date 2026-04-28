@@ -213,6 +213,15 @@ pub(super) fn use_ws() {
 
     let mut ws = use_context_provider(|| WsCtx(socket));
 
+    let _reload_now = use_callback(|evt: MouseEvent| {
+        evt.stop_propagation();
+
+        #[cfg(all(not(debug_assertions), target_arch = "wasm32"))]
+        if let Some(window) = web_sys::window() {
+            _ = window.location().reload();
+        }
+    });
+
     use_future(move || async move {
         ws.delayed_req(30, WsRequest::KeepAlive);
 
@@ -238,7 +247,13 @@ pub(super) fn use_ws() {
         if super::ME.read().authenticated {
             info!("WS connection failed, reconnecting in a sec...");
 
-            sleep(1).await;
+            MODALS
+                .build("z-100")
+                .title("WebSocket connection failed")
+                .button("Reload page now", Some(_reload_now))
+                .p("Reloading page in 3 seconds...");
+
+            sleep(3).await;
             if let Some(window) = web_sys::window() {
                 _ = window.location().reload();
             }
