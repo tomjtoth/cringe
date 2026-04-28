@@ -72,7 +72,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 class: "min-w-20 w-full",
                 placeholder: "Title",
                 disabled,
-                value: sig.read().title.as_ref(),
+                value: &sig.read().title,
                 oninput: move |evt| sig.write().title = evt.value(),
             }
 
@@ -98,7 +98,7 @@ pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {
                 class: "col-span-2 text-2xl",
                 placeholder: "Body",
                 disabled,
-                value: sig.read().body.as_ref(),
+                value: &sig.read().body,
                 oninput: move |evt| sig.write().body = evt.value(),
             }
 
