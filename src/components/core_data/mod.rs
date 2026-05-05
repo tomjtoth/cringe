@@ -4,7 +4,10 @@ use chrono::{Local, Months, NaiveDate};
 use dioxus::prelude::*;
 
 use crate::{
-    components::profile::details::{GenderSelect, HeightInput, NameInput},
+    components::{
+        profile::details::{GenderSelect, HeightInput, NameInput},
+        router::Route,
+    },
     models::{Gender, Profile},
     state::{AUTH_CTE, ME},
 };
@@ -69,6 +72,7 @@ const BOROMIR: Asset = asset!("./Boromir.jpg", ImageAssetOptions::new().with_avi
 pub fn CoreData() -> Element {
     let legal = legal_dob();
 
+    let navi = use_navigator();
     let mut name = use_signal(String::new);
     let mut gender = use_signal(|| Gender::Male);
     let mut birthday = use_signal(|| Some(legal));
@@ -106,6 +110,7 @@ pub fn CoreData() -> Element {
                                 .await
                             {
                                 ME.write().profile = Some(me);
+                                navi.replace(Route::Me {});
                             }
                         }
                     }
