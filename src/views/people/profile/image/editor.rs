@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    modal::{TrModal, MODALS},
+    components::modal::{TrModal, MODALS},
     models::Image,
     state::websocket::{WsCtx, WsRequest},
     views::people::profile::{

@@ -2,27 +2,19 @@ use dioxus::prelude::*;
 
 use crate::{
     state::ME,
-    views::{
-        me::core::CoreData,
-        people::{listing::ListingCtx, profile::Profile},
-        protector::NeedsLogin,
-    },
+    views::people::{listing::ListingCtx, profile::Profile},
 };
 
-mod core;
+pub mod core;
 
 #[component]
 pub fn Me() -> Element {
     use_context_provider(|| None::<ListingCtx>);
 
     rsx! {
-        NeedsLogin {
-            if let Some(profile) = ME().profile {
-                div { class: "relative h-full overflow-y-scroll px-2",
-                    Profile { profile }
-                }
-            } else {
-                CoreData {}
+        if let Some(profile) = ME().profile {
+            div { class: "relative h-full overflow-y-scroll px-2",
+                Profile { profile }
             }
         }
     }

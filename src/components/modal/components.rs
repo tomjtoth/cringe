@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
+use crate::components::{
     modal::{TrModal, MODALS},
     router::Route,
 };

@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::{
     models::{Decision, Profile},
     state::AUTH_CTE,
-    views::{people::profile::Profile as VPerson, protector::NeedsLoginAndProfile},
+    views::people::profile::Profile as VPerson,
 };
 
 #[get("/api/profiles?wants")]
@@ -88,21 +88,7 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
 }
 
 #[component]
-pub fn LikedProfiles() -> Element {
-    rsx! {
-        ListProfiles { wants: Decision::Like }
-    }
-}
-
-#[component]
-pub fn SkippedProfiles() -> Element {
-    rsx! {
-        ListProfiles { wants: Decision::Skip }
-    }
-}
-
-#[component]
-pub fn SwipeProfiles() -> Element {
+pub fn Cringe() -> Element {
     rsx! {
         ListProfiles {}
     }
@@ -125,23 +111,21 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
     use_context_provider(|| Some(wants));
 
     rsx! {
-        NeedsLoginAndProfile {
-            if OTHERS.read().len() > 0 {
-                ul {
-                    class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
+        if OTHERS.read().len() > 0 {
+            ul {
+                class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
 
-                    // we're swiping, hide everything but the 1st child
-                    class: if wants.is_none() { "[&_>_*+*]:hidden" },
+                // we're swiping, hide everything but the 1st child
+                class: if wants.is_none() { "[&_>_*+*]:hidden" },
 
-                    for profile in OTHERS().into_iter() {
-                        li { key: r#"{profile.id.expect("missing ID on profile")}"#,
-                            VPerson { profile }
-                        }
+                for profile in OTHERS().into_iter() {
+                    li { key: r#"{profile.id.expect("missing ID on profile")}"#,
+                        VPerson { profile }
                     }
                 }
-            } else {
-                p { class: "app-center", "Nobody here!" }
             }
+        } else {
+            p { class: "app-center", "Nobody here!" }
         }
     }
 }

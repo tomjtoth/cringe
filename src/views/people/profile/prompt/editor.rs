@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::modal::{TrModal, MODALS};
+use crate::components::modal::{TrModal, MODALS};
 use crate::models::Prompt;
 use crate::state::websocket::{WsCtx, WsRequest};
 use crate::views::people::profile::{

@@ -1,9 +1,10 @@
 mod builder;
-pub(super) mod components;
+mod components;
 
 use dioxus::prelude::*;
 
-use crate::modal::builder::ModalBuilder;
+use builder::ModalBuilder;
+pub(crate) use components::ModalRenderer;
 
 type GsModal = GlobalSignal<Vec<(u8, String, bool, Element)>>;
 pub static MODALS: GsModal = GlobalSignal::new(|| vec![]);

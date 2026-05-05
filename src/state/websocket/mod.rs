@@ -14,7 +14,7 @@ use dioxus::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    modal::{TrModal, MODALS},
+    components::modal::{TrModal, MODALS},
     models::{Image, Profile, Prompt},
     state::{
         details::{handle_details_update_res, DetailsUpateRes},

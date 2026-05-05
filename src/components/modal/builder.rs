@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::modal::{TrModal, MODALS};
+use super::{TrModal, MODALS};
 
 type OptCb = Option<Callback<MouseEvent>>;
 

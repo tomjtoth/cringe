@@ -1,14 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::state::init_client;
-
 #[cfg(feature = "server")]
 mod auth;
-
-mod modal;
+mod components;
 mod models;
-mod navbar;
-mod router;
 mod state;
 mod utils;
 mod views;
@@ -33,17 +28,15 @@ fn main() {
     })
 }
 
-// TODO: refactor components under src/ui/{router.rs,navbar.rs,views/{swipe/mod.rs,me/mod.rs}} etc.
-
 #[component]
 fn App() -> Element {
-    init_client()?;
+    state::init_client()?;
 
     rsx! {
         document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         document::Link { rel: "icon", href: "/icon.png" }
         document::Link { rel: "manifest", href: "/manifest.json" }
 
-        Router::<router::Route> {}
+        Router::<components::router::Route> {}
     }
 }
