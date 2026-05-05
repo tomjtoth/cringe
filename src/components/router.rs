@@ -1,12 +1,13 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{modal::ModalRenderer, protector::Protector},
+    components::{context_providers::ContextProviders, modal::ModalRenderer, protector::Protector},
     views::{listing::Listing, matches::Matches, me::Me},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 pub enum Route {
+    #[layout(ContextProviders)]
     #[layout(ModalRenderer)]
     #[layout(Protector)]
     #[route("/")]

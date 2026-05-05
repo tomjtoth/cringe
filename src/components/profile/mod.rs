@@ -123,7 +123,7 @@ impl ResourceCtx {
 
 #[component]
 pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
-    let olcx = use_context::<Option<ListingCtx>>();
+    let lcx = use_context::<ListingCtx>();
 
     use_context_provider(move || ProfileCtx { profile });
 
@@ -137,7 +137,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
             details::Name {}
 
-            if olcx.is_none() {
+            if lcx.read().is_none() {
                 a {
                     class: "border rounded p-2 cursor-pointer select-none",
                     href: "/logout",
@@ -170,7 +170,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
         }
 
-        if olcx.is_some() {
+        if lcx.read().is_some() {
             SkipButton {}
         }
 

@@ -1,17 +1,21 @@
+mod filters;
+
 use dioxus::prelude::*;
 
 use crate::{
-    components::profile::Profile as CProfile,
-    models::{Decision, Profile},
+    components::profile::Profile,
+    models::{Decision, Profile as MProfile},
     state::AUTH_CTE,
 };
 
+pub use filters::Filters;
+
 #[get("/api/profiles?wants")]
-async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
+async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
     let mut res = vec![];
 
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
-        res = sqlx::query_as::<_, Profile>(&format!(
+        res = sqlx::query_as::<_, MProfile>(&format!(
                 r#"
                 WITH {AUTH_CTE},
 
@@ -87,28 +91,23 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
     Ok(res)
 }
 
+pub static OTHERS: GlobalSignal<Vec<MProfile>> = GlobalSignal::new(|| vec![]);
+
+/// every other main view sets this to None
+pub type ListingCtx = Signal<Option<Option<Decision>>>;
+
 #[component]
 pub fn Listing() -> Element {
-    rsx! {
-        ListProfiles {}
-    }
-}
+    let mut lcx = use_context::<ListingCtx>();
+    use_effect(move || lcx.set(Some(None)));
 
-pub static OTHERS: GlobalSignal<Vec<Profile>> = GlobalSignal::new(|| vec![]);
-
-pub type ListingCtx = Option<Decision>;
-
-#[component]
-fn ListProfiles(wants: Option<Decision>) -> Element {
-    let from_server = use_server_future(move || async move { get_profiles(wants).await })?;
+    let from_server = use_resource(move || async move { get_profiles(lcx().flatten()).await });
 
     use_effect(move || {
-        if let Some(Ok(peeps)) = from_server().to_owned() {
-            *OTHERS.write() = peeps;
+        if let Some(Ok(profiles)) = from_server().to_owned() {
+            *OTHERS.write() = profiles;
         }
     });
-
-    use_context_provider(|| Some(wants));
 
     rsx! {
         if OTHERS.read().len() > 0 {
@@ -116,16 +115,21 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
                 class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
 
                 // we're swiping, hide everything but the 1st child
-                class: if wants.is_none() { "[&_>_*+*]:hidden" },
+                class: if lcx.read().flatten().is_none() { "[&_>_*+*]:hidden" },
 
                 for profile in OTHERS().into_iter() {
                     li { key: r#"{profile.id.expect("missing ID on profile")}"#,
-                        CProfile { profile }
+                        Profile { profile }
                     }
                 }
             }
         } else {
-            p { class: "app-center", "Nobody here!" }
+            div { class: "app-center text-center",
+
+                h3 { "You have seen everyone!" }
+
+                Filters {}
+            }
         }
     }
 }

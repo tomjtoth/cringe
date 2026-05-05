@@ -9,7 +9,7 @@ mod editor;
 
 #[component]
 pub fn Prompt(idx: usize) -> Element {
-    let olcx = use_context::<Option<ListingCtx>>();
+    let lcx = use_context::<ListingCtx>();
     let rcx = ResourceCtx::provide(1 + idx);
 
     let (src, show_adder) = {
@@ -32,7 +32,7 @@ pub fn Prompt(idx: usize) -> Element {
                 }
             }
         } else {
-            if olcx.is_none() && show_adder {
+            if lcx.read().is_none() && show_adder {
                 if rcx.editing() {
                     PromptEditor {}
                 } else {

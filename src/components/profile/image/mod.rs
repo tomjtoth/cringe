@@ -15,7 +15,7 @@ mod ribbon;
 
 #[component]
 pub fn Image(idx: usize) -> Element {
-    let olcx = use_context::<Option<ListingCtx>>();
+    let lcx = use_context::<ListingCtx>();
     let rcx = ResourceCtx::provide(1 + 6 + idx);
 
     let (src, show_adder) = {
@@ -57,20 +57,20 @@ pub fn Image(idx: usize) -> Element {
                                 class: "object-cover w-full",
                                 src: image.src(),
                             }
-                            if olcx.is_none() {
+                            if lcx.read().is_none() {
                                 Ribbon { to_be_profile_pic: idx == 0 }
                             }
                         }
                     } else {
                         img { class: "object-cover w-full", src: image.src() }
-                        if olcx.is_none() {
+                        if lcx.read().is_none() {
                             Ribbon { to_be_profile_pic: idx == 0 }
                         }
                     }
                 }
             }
         } else {
-            if olcx.is_none() && show_adder {
+            if lcx.read().is_none() && show_adder {
                 if rcx.editing() {
                     ImageEditor {}
                 } else {
