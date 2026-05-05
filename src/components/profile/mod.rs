@@ -3,20 +3,18 @@ use std::ops::Deref;
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::{button::SkipButton, details::Details},
     models::Profile as MPerson,
     state::{
         websocket::ops::{OpState, OPS},
         ME,
     },
-    views::people::{
-        listing::ListingCtx,
-        profile::{button::SkipButton, details::Details},
-    },
+    views::listing::ListingCtx,
 };
 
 mod button;
 mod container;
-pub(in crate::views) mod details;
+pub(super) mod details;
 mod image;
 mod prompt;
 mod utils;

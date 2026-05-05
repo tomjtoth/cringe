@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::models::{Frequency, Profile};
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Habits() -> Element {

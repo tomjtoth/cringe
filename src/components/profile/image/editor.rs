@@ -2,14 +2,14 @@ use dioxus::prelude::*;
 
 use crate::{
     components::modal::{TrModal, MODALS},
-    models::Image,
-    state::websocket::{WsCtx, WsRequest},
-    views::people::profile::{
+    components::profile::{
         container::Container,
         image::{masterpiece::Masterpiece, ribbon::Ribbon},
         utils::{container_class, get_max_pos_and_user_id, ButtonOverride},
         ResourceCtx,
     },
+    models::Image,
+    state::websocket::{WsCtx, WsRequest},
 };
 
 #[component]

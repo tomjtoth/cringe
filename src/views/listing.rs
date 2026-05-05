@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::Profile as CProfile,
     models::{Decision, Profile},
     state::AUTH_CTE,
-    views::people::profile::Profile as VPerson,
 };
 
 #[get("/api/profiles?wants")]
@@ -88,7 +88,7 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<Profile>> {
 }
 
 #[component]
-pub fn Cringe() -> Element {
+pub fn Listing() -> Element {
     rsx! {
         ListProfiles {}
     }
@@ -120,7 +120,7 @@ fn ListProfiles(wants: Option<Decision>) -> Element {
 
                 for profile in OTHERS().into_iter() {
                     li { key: r#"{profile.id.expect("missing ID on profile")}"#,
-                        VPerson { profile }
+                        CProfile { profile }
                     }
                 }
             }

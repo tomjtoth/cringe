@@ -11,23 +11,21 @@ mod location;
 mod name;
 mod occupation;
 
-pub(in crate::views) use gender::GenderSelect;
-pub(in crate::views) use height::HeightInput;
+pub(crate) use gender::GenderSelect;
+pub(in crate::components) use height::HeightInput;
 pub(super) use name::Name;
-pub(in crate::views) use name::NameInput;
+pub(crate) use name::NameInput;
 
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::{container::Container, ProfileCtx, ResourceCtx},
     models::Profile,
     state::{
         websocket::{WsCtx, WsRequest},
         ME,
     },
-    views::people::{
-        listing::ListingCtx,
-        profile::{container::Container, ProfileCtx, ResourceCtx},
-    },
+    views::listing::ListingCtx,
 };
 
 #[component]

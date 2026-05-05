@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
 
-use crate::views::people::{
-    listing::ListingCtx,
-    profile::{
+use crate::{
+    components::profile::{
         container::Container,
         image::{editor::ImageEditor, ribbon::Ribbon},
         ProfileCtx, ResourceCtx,
     },
+    views::listing::ListingCtx,
 };
 
 mod editor;

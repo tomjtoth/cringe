@@ -1,14 +1,14 @@
 use dioxus::prelude::*;
 
 use crate::components::modal::{TrModal, MODALS};
-use crate::models::Prompt;
-use crate::state::websocket::{WsCtx, WsRequest};
-use crate::views::people::profile::{
+use crate::components::profile::{
     container::Container,
     utils::get_max_pos_and_user_id,
     utils::{container_class, ButtonOverride},
     ResourceCtx,
 };
+use crate::models::Prompt;
+use crate::state::websocket::{WsCtx, WsRequest};
 
 #[component]
 pub(super) fn PromptEditor(src: Option<Prompt>) -> Element {

@@ -1,12 +1,10 @@
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::{ProfileCtx, ResourceCtx},
     models::Decision,
     state::decide,
-    views::people::{
-        listing::{ListingCtx, OTHERS},
-        profile::{ProfileCtx, ResourceCtx},
-    },
+    views::listing::{ListingCtx, OTHERS},
 };
 
 #[component]

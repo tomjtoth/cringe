@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::models::Gender as EGender;
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Gender() -> Element {
@@ -38,10 +38,7 @@ pub(super) fn Gender() -> Element {
 }
 
 #[component]
-pub(in crate::views) fn GenderSelect(
-    value: Option<EGender>,
-    onchange: Callback<String>,
-) -> Element {
+pub(crate) fn GenderSelect(value: Option<EGender>, onchange: Callback<String>) -> Element {
     rsx! {
         select { required: true, onchange: move |evt| onchange(evt.value()),
 

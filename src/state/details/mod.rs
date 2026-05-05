@@ -9,7 +9,7 @@ use crate::{
         websocket::ops::{OpState, OPS},
         ME,
     },
-    views::people::listing::OTHERS,
+    views::listing::OTHERS,
 };
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

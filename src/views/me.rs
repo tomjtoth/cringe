@@ -1,11 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    state::ME,
-    views::people::{listing::ListingCtx, profile::Profile},
-};
-
-pub mod core;
+use crate::{components::profile::Profile, state::ME, views::listing::ListingCtx};
 
 #[component]
 pub fn Me() -> Element {

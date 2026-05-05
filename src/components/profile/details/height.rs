@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn Height() -> Element {
@@ -29,7 +29,7 @@ pub(super) fn Height() -> Element {
 }
 
 #[component]
-pub(in crate::views) fn HeightInput(value: Option<u8>, onchange: Callback<String>) -> Element {
+pub(in crate::components) fn HeightInput(value: Option<u8>, onchange: Callback<String>) -> Element {
     rsx! {
         input {
             required: true,

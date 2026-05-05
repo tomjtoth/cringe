@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{modal::ModalRenderer, protector::Protector},
-    views::{matches::Matches, me::Me, people::listing::Cringe},
+    views::{listing::Listing, matches::Matches, me::Me},
 };
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -10,7 +10,7 @@ pub enum Route {
     #[layout(ModalRenderer)]
     #[layout(Protector)]
     #[route("/")]
-    Cringe {},
+    Listing {},
 
     #[route("/matches")]
     Matches {},
@@ -24,5 +24,5 @@ pub enum Route {
 
 #[component]
 fn CatchAll(segments: Vec<String>) -> Element {
-    Cringe()
+    Listing()
 }

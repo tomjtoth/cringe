@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::views::people::listing::ListingCtx;
-use crate::views::people::profile::{
+use crate::components::profile::{
     container::Container, prompt::editor::PromptEditor, ProfileCtx, ResourceCtx,
 };
+use crate::views::listing::ListingCtx;
 
 mod editor;
 

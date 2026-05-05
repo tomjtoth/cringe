@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::{ProfileCtx, ResourceCtx},
     state::{TrMe, ME},
-    views::people::profile::{ProfileCtx, ResourceCtx},
 };
 
 #[component]

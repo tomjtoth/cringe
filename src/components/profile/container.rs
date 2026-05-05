@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::views::people::profile::button::LikeButton;
+use super::button::LikeButton;
 
 #[component]
 pub fn Container(

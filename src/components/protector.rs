@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{navbar::Navbar, router::Route},
+    components::{core_data::CoreData, navbar::Navbar, router::Route},
     state::ME,
-    views::{me::core::CoreData, showcase::Showcase},
+    views::showcase::Showcase,
 };
 
 #[component]

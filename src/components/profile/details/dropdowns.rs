@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 use strum::IntoEnumIterator;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::models::{Profile, RelationshipType as ERT, Seeking as ES};
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn RelationshipType() -> Element {

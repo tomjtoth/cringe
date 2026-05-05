@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::models::GenderIdentity as GI;
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn GenderIdentity() -> Element {

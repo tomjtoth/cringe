@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
+use crate::components::profile::{ProfileCtx, ResourceCtx};
 use crate::state::{TrMe, ME};
-use crate::views::people::profile::{ProfileCtx, ResourceCtx};
 
 #[component]
 pub(super) fn HasChildren() -> Element {

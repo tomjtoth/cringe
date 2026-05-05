@@ -11,7 +11,7 @@ pub fn Navbar() -> Element {
                      [&_a]:flex [&_a]:flex-col text-center",
 
             li {
-                Link { to: Route::Cringe {},
+                Link { to: Route::Listing {},
                     "😬"
                     span { "cringe" }
                 }

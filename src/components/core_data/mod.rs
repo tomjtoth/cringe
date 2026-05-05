@@ -4,9 +4,9 @@ use chrono::{Local, Months, NaiveDate};
 use dioxus::prelude::*;
 
 use crate::{
+    components::profile::details::{GenderSelect, HeightInput, NameInput},
     models::{Gender, Profile},
     state::{AUTH_CTE, ME},
-    views::people::profile::details::{GenderSelect, HeightInput, NameInput},
 };
 
 // TODO: move this into WS, so that we can notify users of a new profile
