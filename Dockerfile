@@ -1,4 +1,4 @@
-FROM lewimbes/dioxus:0.7.6 AS builder
+FROM lewimbes/dioxus:0.7.7 AS builder
 WORKDIR /app
 
 COPY . .
