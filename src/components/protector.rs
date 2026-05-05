@@ -1,7 +1,13 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{core_data::CoreData, navbar::Navbar, router::Route},
+    components::{
+        core_data::CoreData,
+        login::Login,
+        modal::{TrModal, MODALS},
+        navbar::Navbar,
+        router::Route,
+    },
     state::ME,
     views::showcase::Showcase,
 };
@@ -14,10 +20,34 @@ pub fn Protector() -> Element {
                 div { class: "grow overflow-hidden", Outlet::<Route> {} }
                 Navbar {}
             } else {
-                CoreData {}
+                Showcase { CoreData {} }
             }
         } else {
-            Showcase {}
+            Showcase {
+                button {
+                    class: "absolute top-2 right-2 text-lg",
+                    onclick: move |_| MODALS.new("z-10", true, rsx! {
+                        Login {}
+                    }),
+
+                    "Login ➜]"
+                }
+
+                p { class: "app-center text-center p-2",
+                    "This is a "
+                    b { "Work-in-Progress" }
+                    " Hinge clone. "
+                    b { "Expect data loss" }
+                    " below version 1.0.0! Check out the source code "
+                    a {
+                        class: "pre-preflight",
+                        href: "https://github.com/tomjtoth/cringe",
+                        target: "_blank",
+                        "here"
+                    }
+                    "."
+                }
+            }
         }
 
     }

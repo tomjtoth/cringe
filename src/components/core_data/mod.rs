@@ -97,81 +97,79 @@ pub fn CoreData() -> Element {
     let span_cls = "absolute left-1/2 -translate-x-1/2";
 
     rsx! {
-        div { class: "relative h-full overflow-scroll",
-            form {
-                class: "app-center flex flex-col gap-2 items-center",
+        form {
+            class: "app-center flex flex-col gap-2 items-center",
 
-                onsubmit: move |evt| async move {
-                    evt.prevent_default();
+            onsubmit: move |evt| async move {
+                evt.prevent_default();
 
-                    if name.read().len() > 0 {
-                        if let (Some(bd), Some(h)) = (birthday(), height()) {
-                            if let Ok(Some(me)) = post_basics(name(), gender(), bd, h)
-                                .await
-                            {
-                                ME.write().profile = Some(me);
-                                navi.replace(Route::Me {});
-                            }
+                if name.read().len() > 0 {
+                    if let (Some(bd), Some(h)) = (birthday(), height()) {
+                        if let Ok(Some(me)) = post_basics(name(), gender(), bd, h)
+                            .await
+                        {
+                            ME.write().profile = Some(me);
+                            navi.replace(Route::Me {});
                         }
                     }
+                }
+            },
+
+            h2 { "Your core data" }
+
+            NameInput { value: name(), onchange: on_name_change }
+
+            GenderSelect { value: gender(), onchange: on_gender_change }
+
+            input {
+                required,
+                r#type: "date",
+                value: birthday.with(|bd| bd.map(|bd| bd.to_string())),
+                max: legal.to_string(),
+                onchange: move |evt| {
+                    birthday.set(NaiveDate::from_str(&evt.value()).ok());
+                    age_confirmed.set(false);
                 },
+            }
 
-                h2 { "Your core data" }
+            HeightInput { value: height(), onchange: on_height_change }
 
-                NameInput { value: name(), onchange: on_name_change }
+            p { class: "text-center",
+                "These must be always defined, "
+                "you can change them later, "
+                "with the exception of your "
+                b { "date of birth" }
+                ", which you "
+                b { "cannot change, ever!" }
+            }
 
-                GenderSelect { value: gender(), onchange: on_gender_change }
+            label { class: "flex items-center gap-2 text-center",
+
+                if let Some(age) = age {
+                    if age < 18 {
+                        "I'm too young for this.."
+                    } else {
+                        "I am {age} years old"
+                    }
+                } else {
+                    div { class: "relative overflow-hidden uppercase text-nowrap text-sm sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl text-shadow-[0_0_1px,0_0_2px,0_0_3px,0_0_4px,0_0_5px] text-amber-100 text-shadow-amber-900 max-sm:tracking-tighter max-md:tracking-tight",
+                        img { class: "min-w-50 object-cover", src: BOROMIR }
+                        span { class: "{span_cls} top-1/30", "one does not simply" }
+                        span { class: "{span_cls} bottom-1/30", "cringe without a birthday" }
+                    }
+                }
 
                 input {
+                    r#type: "checkbox",
+                    hidden: too_young,
+                    disabled: too_young,
                     required,
-                    r#type: "date",
-                    value: birthday.with(|bd| bd.map(|bd| bd.to_string())),
-                    max: legal.to_string(),
-                    onchange: move |evt| {
-                        birthday.set(NaiveDate::from_str(&evt.value()).ok());
-                        age_confirmed.set(false);
-                    },
+                    checked: age_confirmed(),
+                    onchange: move |evt| age_confirmed.set(evt.checked()),
                 }
-
-                HeightInput { value: height(), onchange: on_height_change }
-
-                p { class: "text-center",
-                    "These must be always defined, "
-                    "you can change them later, "
-                    "with the exception of your "
-                    b { "date of birth" }
-                    ", which you "
-                    b { "cannot change, ever!" }
-                }
-
-                label { class: "flex items-center gap-2 text-center",
-
-                    if let Some(age) = age {
-                        if age < 18 {
-                            "I'm too young for this.."
-                        } else {
-                            "I am {age} years old"
-                        }
-                    } else {
-                        div { class: "relative overflow-hidden uppercase text-nowrap text-sm sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl 3xl:text-6xl text-shadow-[0_0_1px,0_0_2px,0_0_3px,0_0_4px,0_0_5px] text-amber-100 text-shadow-amber-900 max-sm:tracking-tighter max-md:tracking-tight",
-                            img { class: "min-w-50 object-cover", src: BOROMIR }
-                            span { class: "{span_cls} top-1/30", "one does not simply" }
-                            span { class: "{span_cls} bottom-1/30", "cringe without a birthday" }
-                        }
-                    }
-
-                    input {
-                        r#type: "checkbox",
-                        hidden: too_young,
-                        disabled: too_young,
-                        required,
-                        checked: age_confirmed(),
-                        onchange: move |evt| age_confirmed.set(evt.checked()),
-                    }
-                }
-
-                button { class: if too_young { "text-gray-500 cursor-not-allowed!" }, "💾 Save" }
             }
+
+            button { class: if too_young { "text-gray-500 cursor-not-allowed!" }, "💾 Save" }
         }
     }
 }
