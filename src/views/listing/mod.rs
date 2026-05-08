@@ -110,24 +110,25 @@ pub fn Listing() -> Element {
 
     rsx! {
         if OTHERS.read().len() > 0 {
-            ul {
-                class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
+            div { class: "p-2 pt-0 h-full overflow-y-scroll",
+                div {
+                    class: "sm:columns-2 lg:columns-3",
 
-                // we're swiping, hide everything but the 1st child
-                class: if LCX.read().flatten().is_none() { "[&_>_*+*]:hidden" },
+                    // we're swiping, hide everything but the 1st child
+                    class: if LCX.read().flatten().is_none() { "[&_>_*+*]:hidden" },
 
-                for profile in OTHERS().into_iter() {
-                    li { key: r#"{profile.id.expect("missing ID on profile")}"#,
-                        Profile { profile }
+                    for profile in OTHERS().into_iter() {
+                        Profile {
+                            key: r#"{profile.id.expect("missing ID on profile")}"#,
+                            profile,
+                        }
                     }
                 }
             }
         } else {
             div { class: "app-center text-center",
-
                 h3 { "You have seen everyone!" }
-
-                Filters {}
+                p { "Adjust your filters in the bottom left corner." }
             }
         }
     }
