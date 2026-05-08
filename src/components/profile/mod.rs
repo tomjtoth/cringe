@@ -3,7 +3,7 @@ use std::ops::Deref;
 use dioxus::prelude::*;
 
 use crate::{
-    components::profile::{button::SkipButton, details::Details},
+    components::profile::{button::SkipButton, details::Details, image::masterpiece::Masterpiece},
     models::Profile as MPerson,
     state::{
         websocket::ops::{OpState, OPS},
@@ -124,6 +124,8 @@ impl ResourceCtx {
 #[component]
 pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
     let lcx = use_context::<ListingCtx>();
+    let mut collapsed = use_signal(|| lcx.read().flatten().is_some());
+    let collapsible = lcx.with(|lcx| lcx.is_some() && lcx != &Some(None));
 
     use_context_provider(move || ProfileCtx { profile });
 
@@ -132,49 +134,85 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
     rsx! {
         div {
-            class: "m-0! mr-0 p-2 sticky z-2 top-0 bg-background",
-            class: "flex justify-between items-center",
+            class: "relative break-inside-avoid",
+            style: if !collapsed() { "column-span: all;" },
 
-            details::Name {}
+            div {
+                class: "m-0! mr-0 p-2 bg-background",
+                class: "flex justify-between items-center",
+                class: if collapsible { "cursor-pointer" },
+                class: if !collapsed() { "sticky z-2 top-0" },
 
-            if lcx.read().is_none() {
-                a {
-                    class: "border rounded p-2 cursor-pointer select-none",
-                    href: "/logout",
-                    "logout [➜"
+                onclick: move |_| {
+                    if collapsible {
+                        collapsed.toggle()
+                    }
+                },
+
+                div { class: "text-2xl",
+                    "{profile.read().name}"
+
+                    if collapsible {
+                        if let Some(age) = profile.read().age().map(|n| n.to_string()).filter(|_| collapsed()) {
+                            ", {age}"
+                        }
+
+                        div {
+                            class: "ml-2 inline-block font-bold transition duration-200",
+                            class: if collapsed() { "-rotate-90" } else { "rotate-90" },
+                            "<"
+                        }
+                    }
+                }
+
+                if lcx.read().is_none() {
+                    a {
+                        class: "border rounded p-2 cursor-pointer select-none",
+                        href: "/logout",
+                        "logout [➜"
+                    }
                 }
             }
-        }
 
-        div { class: "relative md:columns-2 lg:columns-3 *:mb-2 text-lg",
+            if collapsed() {
+                // images[0]
+                div { class: "relative overflow-hidden border rounded-2xl",
+                    if let Some(img) = profile.read().images.get(0) {
+                        img { class: "object-cover w-full", src: img.src() }
+                    } else {
+                        Masterpiece {}
+                    }
+                }
+            } else {
+                div {
+                    style: "column-span: all;",
+                    class: "relative sm:columns-2 lg:columns-3 *:mb-2 text-lg",
 
-            Image { idx: 0 }
-            Prompt { idx: 0 }
+                    Image { idx: 0 }
+                    Prompt { idx: 0 }
 
-            Details {}
+                    Details {}
 
-            Image { idx: 1 }
-            Prompt { idx: 1 }
+                    Image { idx: 1 }
+                    Prompt { idx: 1 }
 
-            Image { idx: 2 }
-            Prompt { idx: 2 }
+                    Image { idx: 2 }
+                    Prompt { idx: 2 }
 
-            Image { idx: 3 }
-            Prompt { idx: 3 }
+                    Image { idx: 3 }
+                    Prompt { idx: 3 }
 
-            Image { idx: 4 }
-            Prompt { idx: 4 }
+                    Image { idx: 4 }
+                    Prompt { idx: 4 }
 
-            Image { idx: 5 }
-            Prompt { idx: 5 }
-
-        }
+                    Image { idx: 5 }
+                    Prompt { idx: 5 }
+                }
 
                 if lcx.read().is_some() {
                     div { class: "sticky h-0 bottom-0 overflow-visible", SkipButton {} }
                 }
             }
         }
-
     }
 }

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 #[component]
-pub(super) fn Masterpiece() -> Element {
+pub(in super::super) fn Masterpiece() -> Element {
     let a = "absolute";
 
     rsx! {

@@ -10,7 +10,7 @@ use crate::{
 };
 
 mod editor;
-mod masterpiece;
+pub(super) mod masterpiece;
 mod ribbon;
 
 #[component]
