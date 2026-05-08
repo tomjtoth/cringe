@@ -170,8 +170,10 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
         }
 
-        if lcx.read().is_some() {
-            SkipButton {}
+                if lcx.read().is_some() {
+                    div { class: "sticky h-0 bottom-0 overflow-visible", SkipButton {} }
+                }
+            }
         }
 
     }

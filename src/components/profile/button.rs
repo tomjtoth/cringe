@@ -28,11 +28,11 @@ fn Button(decision: Option<Decision>) -> Element {
     let mut rcx = use_context::<ResourceCtx>();
 
     let class = format!(
-        "{} z-1 bottom-5 border-2! bg-background select-none",
+        "{} z-1 absolute bottom-5 border-2! bg-background select-none",
         if decision == Some(Decision::Skip) {
-            "sticky mt-2 left-5 rounded-full!"
+            "left-5 rounded-full!"
         } else {
-            "absolute right-5" // Like & Edit buttons
+            "right-5" // Like & Edit buttons
         }
     );
 
