@@ -173,7 +173,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
                 }
             }
 
-            if collapsed() {
+            if LCX.read().is_some() && collapsed() {
                 // images[0]
                 div { class: "relative overflow-hidden border rounded-2xl",
                     if let Some(img) = profile.read().images.get(0) {
