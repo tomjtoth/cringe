@@ -25,5 +25,11 @@ pub enum Route {
 
 #[component]
 fn CatchAll(segments: Vec<String>) -> Element {
-    Listing()
+    let navi = use_navigator();
+
+    navi.replace(Route::Listing {});
+
+    rsx! {
+        h1 { "Redirecting..." }
+    }
 }
