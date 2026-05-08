@@ -16,7 +16,7 @@ pub fn Showcase(children: Element) -> Element {
 
     rsx! {
         h1 {
-            "Cringe "
+            "😬 Cringe "
             sup { "{semver}" }
         }
 
