@@ -133,6 +133,16 @@ button {
     @apply absolute top-1/2 left-1/2 -translate-1/2;
   }
 
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
+
   a.pre-preflight {
     @apply text-blue-700 dark:text-blue-300;
 
