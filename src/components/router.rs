@@ -10,6 +10,7 @@ pub enum Route {
     #[layout(ContextProviders)]
     #[layout(ModalRenderer)]
     #[layout(Protector)]
+    #[redirect("/:.._path", |_path: Vec<String>| Route::Listing {})]
     #[route("/")]
     Listing {},
 
@@ -18,18 +19,4 @@ pub enum Route {
 
     #[route("/me")]
     Me {},
-
-    #[route("/:..segments")]
-    CatchAll { segments: Vec<String> },
-}
-
-#[component]
-fn CatchAll(segments: Vec<String>) -> Element {
-    let navi = use_navigator();
-
-    navi.replace(Route::Listing {});
-
-    rsx! {
-        h1 { "Redirecting..." }
-    }
 }
