@@ -4,7 +4,7 @@ use crate::{
     components::profile::{ProfileCtx, ResourceCtx},
     models::Decision,
     state::decide,
-    views::listing::{ListingCtx, OTHERS},
+    views::listing::{LCX, OTHERS},
 };
 
 #[component]
@@ -24,7 +24,6 @@ pub fn SkipButton() -> Element {
 #[component]
 fn Button(decision: Option<Decision>) -> Element {
     let pcx = use_context::<ProfileCtx>();
-    let lcx = use_context::<ListingCtx>();
     let mut rcx = use_context::<ResourceCtx>();
 
     let class = format!(
@@ -40,7 +39,7 @@ fn Button(decision: Option<Decision>) -> Element {
         // we're on a listing, but the profile is:
         // - either Skipped and this is a Like button
         // - or Liked and this is a Skip button
-        if let Some(listing_wants) = lcx() {
+        if let Some(listing_wants) = LCX() {
             if decision != listing_wants {
                 if let Some(id) = pcx.profile.read().id {
                     button {

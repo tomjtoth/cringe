@@ -6,7 +6,7 @@ use crate::{
         image::{editor::ImageEditor, ribbon::Ribbon},
         ProfileCtx, ResourceCtx,
     },
-    views::listing::ListingCtx,
+    views::listing::LCX,
 };
 
 mod editor;
@@ -15,7 +15,6 @@ mod ribbon;
 
 #[component]
 pub fn Image(idx: usize) -> Element {
-    let lcx = use_context::<ListingCtx>();
     let rcx = ResourceCtx::provide(1 + 6 + idx);
 
     let (src, show_adder) = {
@@ -57,20 +56,20 @@ pub fn Image(idx: usize) -> Element {
                                 class: "object-cover w-full",
                                 src: image.src(),
                             }
-                            if lcx.read().is_none() {
+                            if LCX.read().is_none() {
                                 Ribbon { to_be_profile_pic: idx == 0 }
                             }
                         }
                     } else {
                         img { class: "object-cover w-full", src: image.src() }
-                        if lcx.read().is_none() {
+                        if LCX.read().is_none() {
                             Ribbon { to_be_profile_pic: idx == 0 }
                         }
                     }
                 }
             }
         } else {
-            if lcx.read().is_none() && show_adder {
+            if LCX.read().is_none() && show_adder {
                 if rcx.editing() {
                     ImageEditor {}
                 } else {

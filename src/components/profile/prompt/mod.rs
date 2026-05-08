@@ -3,13 +3,12 @@ use dioxus::prelude::*;
 use crate::components::profile::{
     container::Container, prompt::editor::PromptEditor, ProfileCtx, ResourceCtx,
 };
-use crate::views::listing::ListingCtx;
+use crate::views::listing::LCX;
 
 mod editor;
 
 #[component]
 pub fn Prompt(idx: usize) -> Element {
-    let lcx = use_context::<ListingCtx>();
     let rcx = ResourceCtx::provide(1 + idx);
 
     let (src, show_adder) = {
@@ -32,7 +31,7 @@ pub fn Prompt(idx: usize) -> Element {
                 }
             }
         } else {
-            if lcx.read().is_none() && show_adder {
+            if LCX.read().is_none() && show_adder {
                 if rcx.editing() {
                     PromptEditor {}
                 } else {

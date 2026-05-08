@@ -24,12 +24,11 @@ use crate::{
         websocket::{WsCtx, WsRequest},
         ME,
     },
-    views::listing::ListingCtx,
+    views::listing::LCX,
 };
 
 #[component]
 pub fn Details() -> Element {
-    let lcx = use_context::<ListingCtx>();
     let pcx = use_context::<ProfileCtx>();
     let mut rcx = use_context::<ResourceCtx>();
     let wscx = use_context::<WsCtx>();
@@ -66,7 +65,7 @@ pub fn Details() -> Element {
         } else {
             ""
         },
-        if lcx.read().is_none() && values_under_ul == 0 {
+        if LCX.read().is_none() && values_under_ul == 0 {
             // the edit button has bottom-5 and its top border is not even visible,
             // overriding from here to complicate things less (?)
             " [&>button]:nth-2:bottom-2!"
@@ -79,7 +78,7 @@ pub fn Details() -> Element {
         "p-2 flex overflow-x-scroll text-nowrap {} {}{}",
         "[&>*+*]:ml-2 [&>*+*]:border-l *:p-2",
         "[&>li]:flex [&>li]:gap-2 [&>li]:items-center",
-        if lcx.read().is_none() && !rcx.editing() && values_under_ul < 2 {
+        if LCX.read().is_none() && !rcx.editing() && values_under_ul < 2 {
             " [&>li:last-child]:mr-15"
         } else {
             ""
@@ -91,7 +90,7 @@ pub fn Details() -> Element {
     rsx! {
         Container {
             class: class_container,
-            wo_button: lcx.read().is_some(),
+            wo_button: LCX.read().is_some(),
             onsubmit,
 
             ul { class: class_ul,

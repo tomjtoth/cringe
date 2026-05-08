@@ -93,15 +93,14 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
 
 pub static OTHERS: GlobalSignal<Vec<MProfile>> = GlobalSignal::new(|| vec![]);
 
-/// every other main view sets this to None
-pub type ListingCtx = Signal<Option<Option<Decision>>>;
+/// ### ListingContext
+pub(crate) const LCX: GlobalSignal<Option<Option<Decision>>> = GlobalSignal::new(|| None);
 
 #[component]
 pub fn Listing() -> Element {
-    let mut lcx = use_context::<ListingCtx>();
-    use_effect(move || lcx.set(Some(None)));
+    use_effect(|| LCX.with_mut(|lcx| *lcx = Some(None)));
 
-    let from_server = use_resource(move || async move { get_profiles(lcx().flatten()).await });
+    let from_server = use_resource(move || async move { get_profiles(LCX().flatten()).await });
 
     use_effect(move || {
         if let Some(Ok(profiles)) = from_server().to_owned() {
@@ -115,7 +114,7 @@ pub fn Listing() -> Element {
                 class: "h-full overflow-y-scroll px-2 [&_>_*+*]:mt-2",
 
                 // we're swiping, hide everything but the 1st child
-                class: if lcx.read().flatten().is_none() { "[&_>_*+*]:hidden" },
+                class: if LCX.read().flatten().is_none() { "[&_>_*+*]:hidden" },
 
                 for profile in OTHERS().into_iter() {
                     li { key: r#"{profile.id.expect("missing ID on profile")}"#,

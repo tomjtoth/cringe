@@ -1,4 +1,3 @@
-pub mod context_providers;
 pub mod core_data;
 pub mod login;
 pub mod modal;

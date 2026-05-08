@@ -1,11 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::views::listing::ListingCtx;
+use crate::views::listing::LCX;
 
 #[component]
 pub fn Matches() -> Element {
-    let mut lcx = use_context::<ListingCtx>();
-    use_effect(move || lcx.set(None));
+    use_effect(move || LCX.with_mut(|cx| *cx = None));
 
     rsx! {
         div { class: "app-center",

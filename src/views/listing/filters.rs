@@ -1,11 +1,10 @@
 use dioxus::prelude::*;
 
-use crate::{models::Decision, views::listing::ListingCtx};
+use crate::{models::Decision, views::listing::LCX};
 
 #[component]
 pub fn Filters() -> Element {
-    let mut lcx = use_context::<ListingCtx>();
-    let wants = lcx.read().flatten();
+    let wants = LCX.read().flatten();
 
     rsx! {
         form { class: "flex flex-col items-center gap-2",
@@ -28,7 +27,7 @@ pub fn Filters() -> Element {
                         name: "wants",
                         class: "border-none! appearance-none checked:text-sha",
                         checked,
-                        onclick: move |_| { lcx.set(Some(val)) },
+                        onclick: move |_| { LCX.with_mut(|cx| *cx = Some(val)) },
                     }
                     span { class: if checked { "text-shadow-[0_0_1px,0_0_2px,0_0_3px,0_0_4px,0_0_5px] {shadow}" },
                         "{ico}"

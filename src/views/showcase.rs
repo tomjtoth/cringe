@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::views::listing::ListingCtx;
+use crate::views::listing::LCX;
 
 #[get("/api/showcase")]
 async fn get_bot_pics() -> Result<()> {
@@ -9,8 +9,7 @@ async fn get_bot_pics() -> Result<()> {
 
 #[component]
 pub fn Showcase(children: Element) -> Element {
-    let mut lcx = use_context::<ListingCtx>();
-    use_effect(move || lcx.set(None));
+    use_effect(move || LCX.with_mut(|cx| *cx = None));
 
     let semver = env!("CARGO_PKG_VERSION");
 

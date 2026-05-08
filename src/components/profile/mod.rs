@@ -9,7 +9,7 @@ use crate::{
         websocket::ops::{OpState, OPS},
         ME,
     },
-    views::listing::ListingCtx,
+    views::listing::LCX,
 };
 
 mod button;
@@ -123,9 +123,8 @@ impl ResourceCtx {
 
 #[component]
 pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
-    let lcx = use_context::<ListingCtx>();
-    let mut collapsed = use_signal(|| lcx.read().flatten().is_some());
-    let collapsible = lcx.with(|lcx| lcx.is_some() && lcx != &Some(None));
+    let mut collapsed = use_signal(|| LCX.read().flatten().is_some());
+    let collapsible = LCX.with(|lcx| lcx.is_some() && lcx != &Some(None));
 
     use_context_provider(move || ProfileCtx { profile });
 
@@ -165,7 +164,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
                     }
                 }
 
-                if lcx.read().is_none() {
+                if LCX.read().is_none() {
                     a {
                         class: "border rounded p-2 cursor-pointer select-none",
                         href: "/logout",
@@ -209,7 +208,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
                     Prompt { idx: 5 }
                 }
 
-                if lcx.read().is_some() {
+                if LCX.read().is_some() {
                     div { class: "sticky h-0 bottom-0 overflow-visible", SkipButton {} }
                 }
             }
