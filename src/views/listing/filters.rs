@@ -1,10 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::{
-    components::modal::{TrModal, MODALS},
-    models::Decision,
-    views::listing::ListingCtx,
-};
+use crate::{models::Decision, views::listing::ListingCtx};
 
 #[component]
 pub fn Filters() -> Element {
@@ -12,64 +8,35 @@ pub fn Filters() -> Element {
     let wants = lcx.read().flatten();
 
     rsx! {
-        div { class: "flex flex-col gap-2",
+        form { class: "flex flex-col items-center gap-2",
 
-            label { class: "flex items-center p-2 text-nowrap",
-                "Show me "
+            h3 { "Filter profiles" }
 
-                select {
-                    class: "border-none! appearance-none px-0",
-                    value: match wants {
-                        Some(Decision::Like) => "like",
-                        Some(Decision::Skip) => "skip",
-                        _ => "",
-                    },
-                    onchange: move |evt| {
-                        let new = match evt.value().as_str() {
-                            "like" => Some(Decision::Like),
-                            "skip" => Some(Decision::Skip),
-                            _ => None,
-                        };
-
-                        lcx.set(Some(new));
-
-                        MODALS.pop();
-                    },
-
-                    option { value: "", selected: wants == None, "something cringe 😬" }
-                    option {
-                        value: "like",
-                        selected: wants == Some(Decision::Like),
-                        "profiles I liked ✅"
+            for (val , (ico , msg) , shadow , checked) in [
+                (Some(Decision::Skip), "🚫 skipped", "text-shadow-red-500"),
+                (None, "😬 cringe", "text-shadow-yellow-500"),
+                (Some(Decision::Like), "✅ liked", "text-shadow-green-500"),
+            ]
+                .map(|(a, b, c)| (a, b.split_once(" ").unwrap(), c, a == wants))
+            {
+                label {
+                    class: "cursor-pointer",
+                    class: if !checked { "text-gray-500" },
+                    input {
+                        tabindex: -1,
+                        r#type: "radio",
+                        name: "wants",
+                        class: "border-none! appearance-none checked:text-sha",
+                        checked,
+                        onclick: move |_| { lcx.set(Some(val)) },
                     }
-                    option {
-                        value: "skip",
-                        selected: wants == Some(Decision::Skip),
-                        "profiles I skipped 🚫"
+                    span { class: if checked { "text-shadow-[0_0_1px,0_0_2px,0_0_3px,0_0_4px,0_0_5px] {shadow}" },
+                        "{ico}"
                     }
+                    " {msg}"
                 }
             }
 
-            div { class: "border rounded [&_input]:w-15",
-                h3 { "age" }
-
-                div { class: "flex gap-2 p-2",
-                    label {
-                        "min:"
-                        input { r#type: "number" }
-                    }
-
-                    label {
-                        "max:"
-                        input { r#type: "number" }
-                    }
-
-                }
-            }
-
-            label { "min height" }
-            label { "max height" }
         }
-
     }
 }
