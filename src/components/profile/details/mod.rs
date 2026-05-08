@@ -13,7 +13,6 @@ mod occupation;
 
 pub(crate) use gender::GenderSelect;
 pub(in crate::components) use height::HeightInput;
-pub(super) use name::Name;
 pub(crate) use name::NameInput;
 
 use dioxus::prelude::*;
@@ -94,6 +93,7 @@ pub fn Details() -> Element {
             class: class_container,
             wo_button: lcx.read().is_some(),
             onsubmit,
+
             ul { class: class_ul,
 
                 if let Some(age) = &pcx.read().age() {
@@ -125,6 +125,8 @@ pub fn Details() -> Element {
 
                 habits::Habits {}
             }
+
+            name::Name {}
 
             occupation::Occupation {}
 
