@@ -47,7 +47,12 @@ pub(super) fn handle_image_crud_res(
         profile.images.sort_by_key(|img| *img.pos());
 
         if let Some(pos) = image.pos() {
-            profile.images.insert(*pos as usize, image);
+            // when client only has the 1st img of someone else, simply push
+            if *pos > profile.images.len() as i16 {
+                profile.images.push(image);
+            } else {
+                profile.images.insert(*pos as usize, image);
+            }
         }
     }
     ME.with_mut(|me| {

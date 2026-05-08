@@ -15,6 +15,8 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
     let mut res = vec![];
 
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
+        let decision_operator = if wants.is_some() { " = $2" } else { "IS NULL" };
+
         res = sqlx::query_as::<_, MProfile>(&format!(
                 r#"
                 WITH {AUTH_CTE},
@@ -57,30 +59,52 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
 
                     (
                         SELECT coalesce(
-                            json_agg(row_to_json(pp) ORDER BY pp.position),
-                            '[]'
+                            jsonb_agg(row_to_json(pp) ORDER BY pp.position),
+                            '[]'::jsonb
                         )
                         FROM user_prompts pp
                         WHERE pp.user_id = u.id
                     ) as prompts,
 
                     (
-                        SELECT coalesce(
-                            json_agg(row_to_json(ui) ORDER BY ui.position),
-                            '[]'
+                        WITH ui AS (
+                            SELECT
+                                ui.id,
+                                ui.user_id,
+                                ui.position,
+                                ui.prompt,
+                                ui.url,
+
+                                CASE
+                                    WHEN $2 IN ('like', 'skip')
+                                    AND ui.position > 0
+                                    THEN NULL
+                                    ELSE ui.bytes
+                                END AS bytes
+
+                            FROM user_images ui
+                            WHERE ui.user_id = u.id
                         )
-                        FROM user_images ui
-                        WHERE ui.user_id = u.id
+
+                        SELECT coalesce(
+                            jsonb_agg(
+                                row_to_json(ui)
+                                ORDER BY position
+                            ),
+                            '[]'::jsonb
+                        )
+                        FROM ui
                     ) AS images
 
                 FROM users u
                 CROSS JOIN me
-                LEFT JOIN user_decisions d ON d.actor_user_id = me.id AND d.target_user_id = u.id
+                LEFT JOIN user_decisions d 
+                    ON d.actor_user_id = me.id 
+                AND d.target_user_id = u.id
                 WHERE u.id <> me.id
-                AND d.decision {}
+                AND d.decision {decision_operator}
                 ORDER BY distance
                 "#,
-                if wants.is_some() { " = $2" } else { "IS NULL" }
             ))
             .bind(&sess_id)
             .bind(&wants)
