@@ -14,26 +14,25 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
         let decision_operator = if wants.is_some() { " = $2" } else { "IS NULL" };
 
         res = sqlx::query_as::<_, MProfile>(&format!(
-                r#"
-                WITH {AUTH_CTE},
+            r#"
+            WITH {AUTH_CTE},
 
-                me AS (
-                    SELECT
-                        u.id, gps_lon, gps_lat
-                        -- TODO: expand later with other filters, such as distance, age_min, age_max, gender
-                    FROM auth a
-                    JOIN users u on a.email = u.email
-                )
+            me AS (
+                SELECT u.id, gps_lon, gps_lat
+                FROM auth a
+                JOIN users u on a.email = u.email
+            ),
 
+            partially_filtered AS (
                 SELECT
                     u.id,
-                    name,
-                    gender,
-                    height,
-                    education,
-                    occupation,
-                    location,
-                    hometown,
+                    u.name,
+                    u.gender,
+                    u.height,
+                    u.education,
+                    u.occupation,
+                    u.location,
+                    u.hometown,
 
                     age_from_dob(born) as age,
                     zodiac_sign_from_dob(born) as zodiac_sign,
@@ -42,16 +41,16 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
                         me.gps_lat, me.gps_lon
                     ) as distance,
 
-                    seeking,
-                    relationship_type,
+                    u.seeking,
+                    u.relationship_type,
 
-                    has_children,
-                    family_plans,
+                    u.has_children,
+                    u.family_plans,
 
-                    drinking,
-                    smoking,
-                    marijuana,
-                    drugs,
+                    u.drinking,
+                    u.smoking,
+                    u.marijuana,
+                    u.drugs,
 
                     (
                         SELECT coalesce(
@@ -94,18 +93,50 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
 
                 FROM users u
                 CROSS JOIN me
-                LEFT JOIN user_decisions d 
-                    ON d.actor_user_id = me.id 
-                AND d.target_user_id = u.id
+                LEFT JOIN user_decisions d
+                    ON d.actor_user_id = me.id
+                    AND d.target_user_id = u.id
+                LEFT JOIN filters f ON f.user_id = me.id
                 WHERE u.id <> me.id
                 AND d.decision {decision_operator}
-                ORDER BY distance
-                "#,
-            ))
-            .bind(&sess_id)
-            .bind(&wants)
-            .fetch_all(&pool)
-            .await?;
+
+                AND (f.gender IS NULL OR u.gender = ANY(f.gender))
+                AND (f.gender_identity IS NULL OR u.gender_identity = ANY(f.gender_identity))
+
+                AND (f.height_min IS NULL OR u.height >= f.height_min)
+                AND (f.height_max IS NULL OR u.height <= f.height_max)
+
+                AND (f.seeking IS NULL OR u.seeking = ANY(f.seeking))
+                AND (f.relationship_type IS NULL OR u.relationship_type = ANY(f.relationship_type))
+
+                AND (f.has_children IS NULL OR u.has_children = f.has_children)
+                AND (f.family_plans IS NULL OR u.family_plans = ANY(f.family_plans))
+
+                AND (f.drinking IS NULL OR u.drinking = ANY(f.drinking))
+                AND (f.smoking IS NULL OR u.smoking = ANY(f.smoking))
+                AND (f.marijuana IS NULL OR u.marijuana = ANY(f.marijuana))
+                AND (f.drugs IS NULL OR u.drugs = ANY(f.drugs))
+            )
+
+            SELECT pf.*
+            FROM partially_filtered pf
+            CROSS JOIN me
+            LEFT JOIN filters f ON f.user_id = me.id
+
+            -- additional filtering on computed columns
+            WHERE (f.age_min IS NULL OR pf.age >= f.age_min)
+            AND (f.age_max IS NULL OR pf.age <= f.age_max)
+            AND (f.distance IS NULL OR pf.distance <= f.distance)
+            AND (f.zodiac_sign IS NULL OR pf.zodiac_sign = ANY(f.zodiac_sign))
+            AND (f.image_count_min IS NULL OR jsonb_array_length(pf.images) >= f.image_count_min)
+
+            ORDER BY pf.distance
+            "#,
+        ))
+        .bind(&sess_id)
+        .bind(&wants)
+        .fetch_all(&pool)
+        .await?;
     }
 
     Ok(res)

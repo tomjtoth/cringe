@@ -2,7 +2,8 @@ use chrono::{NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::models::{
-    FamilyPlans, Frequency, Gender, GenderIdentity, Image, RelationshipType, Seeking, ZodiacSign,
+    FamilyPlans, Filters, Frequency, Gender, GenderIdentity, Image, RelationshipType, Seeking,
+    ZodiacSign,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -76,6 +77,8 @@ pub struct Profile {
     pub prompts: Vec<Prompt>,
     #[serde(default)]
     pub images: Vec<Image>,
+
+    pub filters: Option<Filters>,
 }
 
 #[cfg(feature = "server")]
@@ -142,6 +145,8 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
             Err(e) => return Err(e),
         };
 
+        let filters = try_opt!(Json<Filters>, "filters").map(|ff| ff.0);
+
         Ok(Profile {
             id,
             name,
@@ -171,6 +176,8 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
 
             prompts,
             images,
+
+            filters,
         })
     }
 }

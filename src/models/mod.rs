@@ -1,4 +1,5 @@
 mod family_plans;
+mod filters;
 mod frequency;
 mod gender;
 mod image;
@@ -8,6 +9,7 @@ mod seeking;
 mod zodiac_sign;
 
 pub use family_plans::*;
+pub use filters::*;
 pub use frequency::*;
 pub use gender::*;
 pub use image::*;

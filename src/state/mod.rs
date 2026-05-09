@@ -60,25 +60,26 @@ async fn get_me() -> Result<Me> {
             profile AS (
                 SELECT
                     id,
-                    name,
-                    gender,
+                    u.name,
+                    u.gender,
+                    u.gender_identity,
                     born,
-                    height,
-                    education,
-                    occupation,
-                    location,
-                    hometown,
+                    u.height,
+                    u.education,
+                    u.occupation,
+                    u.location,
+                    u.hometown,
 
-                    seeking,
-                    relationship_type,
+                    u.seeking,
+                    u.relationship_type,
 
-                    has_children,
-                    family_plans,
+                    u.has_children,
+                    u.family_plans,
 
-                    drinking,
-                    smoking,
-                    marijuana,
-                    drugs,
+                    u.drinking,
+                    u.smoking,
+                    u.marijuana,
+                    u.drugs,
 
                     (
                         SELECT coalesce(
@@ -96,15 +97,18 @@ async fn get_me() -> Result<Me> {
                         )
                         FROM user_images ui
                         WHERE ui.user_id = u.id
-                    ) AS images
+                    ) AS images,
+
+                    to_jsonb(f) AS filters
 
                 FROM auth a
                 JOIN users u ON a.email = u.email
+                LEFT JOIN filters f ON f.user_id = u.id
             )
 
             SELECT jsonb_build_object(
                 'authenticated', (SELECT count(*) > 0 FROM auth),
-                'profile', (SELECT row_to_json(p) FROM profile AS p)
+                'profile', (SELECT to_jsonb(p) FROM profile AS p)
             )
             "#
         ))
