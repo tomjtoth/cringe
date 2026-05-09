@@ -1,5 +1,5 @@
 CREATE TABLE filters (
-    user_id INTEGER PRIMARY KEY REFERENCES users(id) 
+    user_id INTEGER PRIMARY KEY REFERENCES users(id)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
     gender gender[],
@@ -7,7 +7,7 @@ CREATE TABLE filters (
 
     age_min INTEGER CHECK (age_min >= 18),
     age_max INTEGER CHECK (age_max >= 18 AND (
-        age_min IS NULL 
+        age_min IS NULL
         OR age_max IS NULL
         OR age_max >= age_min
     )),
@@ -31,4 +31,3 @@ CREATE TABLE filters (
 
     image_count_min SMALLINT CHECK (image_count_min BETWEEN 0 AND 6)
 );
-
