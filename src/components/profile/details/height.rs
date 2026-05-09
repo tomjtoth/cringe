@@ -17,6 +17,7 @@ pub(super) fn Height() -> Element {
     rsx! {
         if rcx.editing() {
             li {
+                "📏"
                 HeightInput {
                     value: ME.read().draft.as_ref().map(|d| d.height),
                     onchange,
@@ -34,7 +35,7 @@ pub(in crate::components) fn HeightInput(value: Option<u8>, onchange: Callback<S
         input {
             required: true,
             r#type: "number",
-            placeholder: "📏 height",
+            placeholder: "Height",
             class: "w-30",
             min: u8::MIN,
             max: u8::MAX,
