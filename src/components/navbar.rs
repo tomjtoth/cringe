@@ -25,7 +25,9 @@ pub fn Navbar() -> Element {
                     div {
                         class: "border-none! cursor-pointer",
                         onclick: move |_| {
-                            MODALS.new("z-5", true, Filters());
+                            MODALS.new("z-5", true, rsx! {
+                                Filters {}
+                            });
                         },
 
                         span {
