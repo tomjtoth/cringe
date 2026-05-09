@@ -88,7 +88,7 @@ jobs:
           retention-days: 30
 
   build-arm64:
-    name: Generate Docker image for arm64
+    name: Build arm64 image
     runs-on: ubuntu-24.04-arm
 
     needs:
@@ -117,7 +117,7 @@ jobs:
             ${{ needs.gen-tags.outputs.tags }}
 
   build-amd64:
-    name: Generate Docker image for amd64
+    name: Build amd64 image
     runs-on: ubuntu-24.04
 
     needs:
