@@ -1,7 +1,10 @@
+use std::collections::HashMap;
 use std::ops::Deref;
 
 use dioxus::prelude::*;
 
+use crate::state::AUTH_CTE;
+use crate::views::listing::OTHERS;
 use crate::{
     components::profile::{button::SkipButton, details::Details, image::masterpiece::Masterpiece},
     models::Profile as MPerson,
@@ -121,12 +124,67 @@ impl ResourceCtx {
     }
 }
 
+type ImagesRetVal = (i32, Vec<u8>);
+
+#[get("/api/images?ids")]
+async fn get_images(ids: Option<Vec<i32>>) -> Result<Vec<ImagesRetVal>> {
+    let mut res = vec![];
+
+    if let (Some(ids), (Some(sess_id), pool)) = (ids, crate::state::server::get_ctx().await) {
+        res = sqlx::query_as::<_, ImagesRetVal>(&format!(
+            "
+            WITH {AUTH_CTE}
+
+            SELECT ui.id, bytes
+            FROM user_images ui
+            CROSS JOIN auth
+            WHERE ui.id = ANY($2) AND bytes IS NOT NULL
+            "
+        ))
+        .bind(&sess_id)
+        .bind(&ids)
+        .fetch_all(&pool)
+        .await?;
+    }
+
+    Ok(res)
+}
+
 #[component]
 pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
     let mut collapsed = use_signal(|| LCX.read().flatten().is_some());
     let collapsible = LCX.with(|lcx| lcx.is_some() && lcx != &Some(None));
 
     use_context_provider(move || ProfileCtx { profile });
+
+    use_effect(move || {
+        if collapsible && !collapsed() {
+            let ids: Vec<i32> = profile
+                .read()
+                .images
+                .iter()
+                .filter_map(|i| i.id().filter(|_| !i.has_bytes() && !i.has_url()))
+                .collect();
+
+            spawn(async move {
+                if let Ok(pairs) = get_images(Some(ids)).await {
+                    let bytes: HashMap<i32, Vec<u8>> = pairs.into_iter().collect();
+
+                    OTHERS.with_mut(|ppp| {
+                        if let Some(p) = ppp.iter_mut().find(|p| p.id == profile.read().id) {
+                            for i in p.images.iter_mut() {
+                                if let Some(id) = i.id() {
+                                    if let Some(bytes) = bytes.get(id) {
+                                        i.set_bytes(bytes.clone());
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    });
 
     // for the SkipButton and Details
     ResourceCtx::provide(0);
