@@ -17,28 +17,28 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
                 height = $3,
                 gender = $4,
                 gender_identity = $5,
-                education = $6, 
-                occupation = $7, 
-                location = $8, 
-                hometown = $9, 
-                seeking = $10, 
-                relationship_type = $11, 
-                has_children = $12, 
-                family_plans = $13, 
-                drinking = $14, 
+                education = $6,
+                occupation = $7,
+                location = $8,
+                hometown = $9,
+                seeking = $10,
+                relationship_type = $11,
+                has_children = $12,
+                family_plans = $13,
+                drinking = $14,
                 smoking = $15,
                 marijuana = $16,
                 drugs = $17
             FROM auth a
             WHERE a.email = u.email
-            RETURNING 
+            RETURNING
                 id,
                 name,
                 height,
 
                 gender,
                 gender_identity,
-                
+
                 education,
                 occupation,
                 location,
@@ -59,7 +59,7 @@ pub async fn update_details(ctx: &ServerCtx, details: Profile) -> anyhow::Result
             'authorized', (SELECT count(*) > 0 FROM auth),
             'profile', (SELECT coalesce(
                 (SELECT to_jsonb(u) FROM updated u),
-                
+
                 -- falling back to a dummy
                 (SELECT jsonb_build_object(
                     'name', '',
