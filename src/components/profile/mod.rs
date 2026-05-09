@@ -152,7 +152,7 @@ async fn get_images(ids: Option<Vec<i32>>) -> Result<Vec<ImagesRetVal>> {
 
 #[component]
 pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
-    let mut div = use_signal(|| None::<std::rc::Rc<MountedData>>);
+    let mut div_ref = use_signal(|| None::<std::rc::Rc<MountedData>>);
     let mut collapsed = use_signal(|| LCX.read().flatten().is_some());
     let collapsible = LCX.with(|lcx| lcx.is_some() && lcx != &Some(None));
 
@@ -168,7 +168,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
                 .collect();
 
             spawn(async move {
-                if let Some(r) = div() {
+                if let Some(r) = div_ref() {
                     _ = r.scroll_to(ScrollBehavior::Smooth).await;
                 }
 
@@ -198,7 +198,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
         div {
             class: "relative break-inside-avoid",
             style: if !collapsed() { "column-span: all;" },
-            onmounted: move |evt| div.set(Some(evt.data())),
+            onmounted: move |evt| div_ref.set(Some(evt.data())),
 
             div {
                 class: "m-0! mr-0 p-2 bg-background",

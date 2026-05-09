@@ -1,4 +1,4 @@
-use dioxus::prelude::*;
+use dioxus::{html::geometry::euclid::Vector2D, prelude::*};
 
 use crate::{
     components::profile::Profile,
@@ -122,15 +122,31 @@ pub fn Listing() -> Element {
 
     let from_server = use_resource(move || async move { get_profiles(LCX().flatten()).await });
 
+    let mut ul_ref = use_signal(|| None::<std::rc::Rc<MountedData>>);
+
+    let ul_len = use_memo(|| OTHERS.read().len());
+
     use_effect(move || {
         if let Some(Ok(profiles)) = from_server().to_owned() {
             *OTHERS.write() = profiles;
         }
     });
 
+    use_effect(move || {
+        let _subscribe_here = ul_len();
+
+        if let Some(ul) = ul_ref() {
+            spawn(async move {
+                _ = ul.scroll(Vector2D::new(0.0, 0.0), ScrollBehavior::Smooth);
+            });
+        }
+    });
+
     rsx! {
         if OTHERS.read().len() > 0 {
-            div { class: "p-2 pt-0 h-full overflow-y-scroll",
+            div {
+                class: "p-2 pt-0 h-full overflow-y-scroll",
+                onmounted: move |cx| ul_ref.set(Some(cx.data())),
                 div {
                     class: "sm:columns-2 lg:columns-3",
 
