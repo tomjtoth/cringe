@@ -2,11 +2,11 @@ use dioxus::prelude::*;
 
 use crate::{
     components::{
+        filters::Filters,
         modal::{TrModal, MODALS},
         router::Route,
     },
     state::ME,
-    views::listing::Filters,
 };
 
 #[component]
@@ -25,9 +25,7 @@ pub fn Navbar() -> Element {
                     div {
                         class: "border-none! cursor-pointer",
                         onclick: move |_| {
-                            MODALS.new("z-5", true, rsx! {
-                                Filters {}
-                            });
+                            MODALS.new("z-5", true, Filters());
                         },
 
                         span {

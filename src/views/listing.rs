@@ -1,5 +1,3 @@
-mod filters;
-
 use dioxus::prelude::*;
 
 use crate::{
@@ -7,8 +5,6 @@ use crate::{
     models::{Decision, Profile as MProfile},
     state::AUTH_CTE,
 };
-
-pub use filters::Filters;
 
 #[get("/api/profiles?wants")]
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
