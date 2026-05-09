@@ -1,5 +1,6 @@
 mod crud_query;
 pub mod details;
+pub(crate) mod filters;
 mod gps;
 mod image;
 mod prompt;
