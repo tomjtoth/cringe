@@ -44,4 +44,25 @@ caddy reverse-proxy --disable-redirects \
     --from https://127.0.0.1:8080 --to http://127.0.0.1:3000
 ```
 
-Visit the app [login view](https://127.0.0.1:8080/login).
+Navigate to the [login view](https://127.0.0.1:8080/login).
+
+## Roadmap
+
+Tagged commits are also built as Docker images ([tomjtoth/cringe:\<VERSION\>](https://hub.docker.com/r/tomjtoth/cringe/tags)). Minor releases equal _approximately_ to the following milestones:
+
+- [`0.1`](https://github.com/tomjtoth/cringe/releases/tag/v0.1.5) static website installable as PWA
+- [`0.2`](https://github.com/tomjtoth/cringe/releases/tag/v0.2.20) + backend
+- [`0.3`](https://github.com/tomjtoth/cringe/releases/tag/v0.3.1) + authentication
+- [`0.4`](https://github.com/tomjtoth/cringe/releases/tag/v0.4.3) + prompt editor
+- [`0.5`](https://github.com/tomjtoth/cringe/releases/tag/v0.5.4) + details editor
+- [`0.6`](https://github.com/tomjtoth/cringe/releases/tag/v0.6.10) + image editor
+- [`0.7`](https://github.com/tomjtoth/cringe/releases/tag/v0.7.13) + live profile updates
+- [`0.8`](https://github.com/tomjtoth/cringe/releases/tag/v0.8.0) + profile filtering
+
+TODO:
+
+- `0.9` + showcase **bots'** profiles w/o login, tinder.com style
+- `0.10` + matching, messaging & un-matching
+- `0.11` + display humans' shared skips/likes of bots' profiles
+
+- `1.0` code cleanup
