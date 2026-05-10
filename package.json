@@ -4,7 +4,7 @@
   "private": true,
   "description": "only used for E2E testing",
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test --project=firefox"
   },
   "author": "Tamás Tóth <tomjtoth@gmail.com>",
   "devDependencies": {
