@@ -196,7 +196,7 @@ pub fn Profile(profile: ReadSignal<MPerson>) -> Element {
 
     rsx! {
         div {
-            class: "relative break-inside-avoid",
+            class: "relative break-inside-avoid overflow-clip",
             style: if !collapsed() { "column-span: all;" },
             onmounted: move |evt| div_ref.set(Some(evt.data())),
 
