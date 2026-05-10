@@ -4,7 +4,9 @@ Just a Hinge clone with additional fictional characters, deployed [here](https:/
 
 ## Development
 
-This app is built with Dioxus - [install its cli tool and deps](https://dioxuslabs.com/learn/0.7/getting_started); relies on OAuth for authentication - define both `AUTH_<PROVIDER>_{ID,CLIENT}` environment variables for each [provider](./src/auth/providers.rs#L18-L48); and uses postgres for storage - also define `DATABASE_URL=postgres:// ...`. I recommend creating a `.env` file.
+This app is built with Dioxus - [install its cli tool and deps](https://dioxuslabs.com/learn/0.7/getting_started); relies on OAuth for authentication - define both `AUTH_<PROVIDER>_{ID,CLIENT}` environment variables for each [provider](./src/auth/providers.rs#L18-L48); and uses postgres for storage - also define `DATABASE_URL=postgres:// ...`
+
+I recommend creating `.env` in the project root.
 
 Start postgres in a dedicated terminal and pass env vars you used for building the DATABASE_URL:
 
