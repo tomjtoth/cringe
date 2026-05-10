@@ -1,13 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::{
-    components::{
-        core_data::CoreData,
-        login::Login,
-        modal::{TrModal, MODALS},
-        navbar::Navbar,
-        router::Route,
-    },
+    components::{core_data::CoreData, navbar::Navbar, router::Route},
     state::ME,
     views::showcase::Showcase,
 };
@@ -20,34 +14,27 @@ pub fn Protector() -> Element {
                 div { class: "grow overflow-hidden", Outlet::<Route> {} }
                 Navbar {}
             } else {
-                Showcase { CoreData {} }
+                Showcase { hide_login: true, CoreData {} }
             }
         } else {
             Showcase {
-                button {
-                    class: "absolute top-2 right-2 text-lg",
-                    onclick: move |_| MODALS.new("z-10", true, rsx! {
-                        Login {}
-                    }),
+                div { class: "app-center text-center",
 
-                    "Login ➜]"
-                }
+                    p {
+                        class: "text-nowrap text-3xl lg:text-6xl 2xl:text-9xl",
+                        class: "mb-4 lg:mb-8 2xl:mb-12",
 
-                div { class: "app-center text-center p-2",
+                        b { "Cringe much" }
 
-                    p { class: "text-xl md:text-6xl xl:text-9xl mb-4",
-                        "Cringe well"
-                        s {
-                            sup { "TM" }
+                        sup { class: "text-[0.9em]",
+                            s { "TM" }
                         }
                     }
 
+                    p { "Just a Hinge clone with additional fictional characters." }
+
                     p {
-                        "This is a "
-                        b { "Work-in-Progress" }
-                        " Hinge clone. "
-                        b { "Expect data loss" }
-                        " below version 1.0.0! Check out the source code "
+                        "Check out the source code "
                         a {
                             class: "pre-preflight",
                             href: "https://github.com/tomjtoth/cringe",

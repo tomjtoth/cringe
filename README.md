@@ -1,6 +1,6 @@
 # Cringe
 
-Just a Hinge clone with the additional movie stars deployed [here](https://cringe.ttj.hu).
+Just a Hinge clone with additional fictional characters, deployed [here](https://cringe.ttj.hu).
 
 ## Development
 
