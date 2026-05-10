@@ -26,7 +26,7 @@ pub fn Protector() -> Element {
 
                         b { "Cringe much" }
 
-                        sup { class: "text-[0.9em]",
+                        sup { class: "text-[0.5em] relative -top-[1em]",
                             s { "TM" }
                         }
                     }
