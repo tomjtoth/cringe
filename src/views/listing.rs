@@ -6,12 +6,31 @@ use crate::{
     state::AUTH_CTE,
 };
 
+fn strict_multi(col: &str) -> String {
+    format!(
+        "AND (
+            f.{col} IS NULL
+            OR u.{col} = ANY(f.{col})
+            OR (NOT f.strict_mode AND u.{col} IS NULL)
+        )"
+    )
+}
+
 #[get("/api/profiles?wants")]
 async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
     let mut res = vec![];
 
     if let (Some(sess_id), pool) = crate::state::server::get_ctx().await {
         let decision_operator = if wants.is_some() { " = $2" } else { "IS NULL" };
+        let gender_identity = strict_multi("gender_identity");
+        let seeking = strict_multi("seeking");
+        let relationship_type = strict_multi("relationship_type");
+        let family_plans = strict_multi("family_plans");
+
+        let drinking = strict_multi("drinking");
+        let smoking = strict_multi("smoking");
+        let marijuana = strict_multi("marijuana");
+        let drugs = strict_multi("drugs");
 
         res = sqlx::query_as::<_, MProfile>(&format!(
             r#"
@@ -101,21 +120,21 @@ async fn get_profiles(wants: Option<Decision>) -> Result<Vec<MProfile>> {
                 AND d.decision {decision_operator}
 
                 AND (f.gender IS NULL OR u.gender = ANY(f.gender))
-                AND (f.gender_identity IS NULL OR u.gender_identity = ANY(f.gender_identity))
+                {gender_identity}
 
                 AND (f.height_min IS NULL OR u.height >= f.height_min)
                 AND (f.height_max IS NULL OR u.height <= f.height_max)
 
-                AND (f.seeking IS NULL OR u.seeking = ANY(f.seeking))
-                AND (f.relationship_type IS NULL OR u.relationship_type = ANY(f.relationship_type))
+                {seeking}
+                {relationship_type}
 
                 AND (f.has_children IS NULL OR u.has_children = f.has_children)
-                AND (f.family_plans IS NULL OR u.family_plans = ANY(f.family_plans))
+                {family_plans}
 
-                AND (f.drinking IS NULL OR u.drinking = ANY(f.drinking))
-                AND (f.smoking IS NULL OR u.smoking = ANY(f.smoking))
-                AND (f.marijuana IS NULL OR u.marijuana = ANY(f.marijuana))
-                AND (f.drugs IS NULL OR u.drugs = ANY(f.drugs))
+                {drinking}
+                {smoking}
+                {marijuana}
+                {drugs}
             )
 
             SELECT pf.*

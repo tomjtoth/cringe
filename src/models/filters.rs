@@ -6,6 +6,7 @@ use crate::models::{
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone, PartialEq)]
 pub struct Filters {
+    pub strict_mode: bool,
     #[serde(deserialize_with = "null_as_empty_vec")]
     pub gender: Vec<Gender>,
     #[serde(deserialize_with = "null_as_empty_vec")]

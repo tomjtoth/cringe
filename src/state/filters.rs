@@ -35,7 +35,8 @@ pub(crate) async fn update_filters(filters: Filters) -> Result<bool> {
                 smoking,
                 marijuana,
                 drugs,
-                image_count_min
+                image_count_min,
+                strict_mode
             )
             SELECT
                 me.id,
@@ -55,7 +56,8 @@ pub(crate) async fn update_filters(filters: Filters) -> Result<bool> {
                 NULLIF($15, '{{}}'::frequency[]),
                 NULLIF($16, '{{}}'::frequency[]),
                 NULLIF($17, '{{}}'::frequency[]),
-                $18
+                $18,
+                $19
             FROM me
             ON CONFLICT (user_id)
             DO UPDATE SET
@@ -75,7 +77,8 @@ pub(crate) async fn update_filters(filters: Filters) -> Result<bool> {
                 smoking = EXCLUDED.smoking,
                 marijuana = EXCLUDED.marijuana,
                 drugs = EXCLUDED.drugs,
-                image_count_min = EXCLUDED.image_count_min;
+                image_count_min = EXCLUDED.image_count_min,
+                strict_mode = EXCLUDED.strict_mode;
             ",
         ))
         .bind(&sess_id)
@@ -96,6 +99,7 @@ pub(crate) async fn update_filters(filters: Filters) -> Result<bool> {
         .bind(&filters.marijuana)
         .bind(&filters.drugs)
         .bind(&filters.image_count_min.map(|n| n as i16))
+        .bind(&filters.strict_mode)
         .execute(&pool)
         .await?;
 
