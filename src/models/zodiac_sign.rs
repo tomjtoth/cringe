@@ -1,7 +1,8 @@
 use chrono::{Datelike, NaiveDate};
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Display)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(
@@ -9,17 +10,40 @@ use serde::{Deserialize, Serialize};
     sqlx(type_name = "zodiac_sign", rename_all = "lowercase")
 )]
 pub enum ZodiacSign {
+    #[strum(to_string = "♈ Aries")]
     Aries,
+
+    #[strum(to_string = "♉ Taurus")]
     Taurus,
+
+    #[strum(to_string = "♊ Gemini")]
     Gemini,
+
+    #[strum(to_string = "♋ Cancer")]
     Cancer,
+
+    #[strum(to_string = "♌ Leo")]
     Leo,
+
+    #[strum(to_string = "♍ Virgo")]
     Virgo,
+
+    #[strum(to_string = "♎ Libra")]
     Libra,
+
+    #[strum(to_string = "♏ Scorpio")]
     Scorpio,
+
+    #[strum(to_string = "♐ Sagittarius")]
     Sagittarius,
+
+    #[strum(to_string = "♑ Capricorn")]
     Capricorn,
+
+    #[strum(to_string = "♒ Aquarius")]
     Aquarius,
+
+    #[strum(to_string = "♓ Pisces")]
     Pisces,
 }
 
@@ -43,26 +67,5 @@ impl ZodiacSign {
             (2, 19..) | (3, ..=20) => Self::Pisces,
             _ => unreachable!("NaiveDate always has a valid month/day"),
         }
-    }
-}
-
-impl std::fmt::Display for ZodiacSign {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let label = match self {
-            Self::Aries => "♈ Aries",
-            Self::Taurus => "♉ Taurus",
-            Self::Gemini => "♊ Gemini",
-            Self::Cancer => "♋ Cancer",
-            Self::Leo => "♌ Leo",
-            Self::Virgo => "♍ Virgo",
-            Self::Libra => "♎ Libra",
-            Self::Scorpio => "♏ Scorpio",
-            Self::Sagittarius => "♐ Sagittarius",
-            Self::Capricorn => "♑ Capricorn",
-            Self::Aquarius => "♒ Aquarius",
-            Self::Pisces => "♓ Pisces",
-        };
-
-        f.write_str(label)
     }
 }
