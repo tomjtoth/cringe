@@ -11,7 +11,6 @@ pub(super) fn RelationshipType() -> Element {
         "👩‍❤️‍👨 Your relationship type...",
         |p| p.relationship_type.as_ref(),
         |p, s| p.relationship_type = ERT::from_str(&s),
-        |x| x.parts(),
         ERT::iter().collect(),
     )
 }
@@ -22,7 +21,6 @@ pub(super) fn Seeking() -> Element {
         "🕵️ You're seeking...",
         |p| p.seeking.as_ref(),
         |p, s| p.seeking = ES::from_str(&s),
-        |x| x.parts(),
         ES::iter().collect(),
     )
 }
@@ -31,7 +29,6 @@ fn helper_wo_cx<T>(
     placeholder: &str,
     selector: fn(&Profile) -> Option<&T>,
     onchange: fn(&mut Profile, String),
-    parts_mapper: fn(&T) -> (&str, &str),
     map_these: Vec<T>,
 ) -> Element
 where
@@ -40,15 +37,7 @@ where
     let pcx = use_context::<ProfileCtx>();
     let rcx = use_context::<ResourceCtx>();
 
-    helper(
-        placeholder,
-        &pcx,
-        &rcx,
-        selector,
-        onchange,
-        parts_mapper,
-        map_these,
-    )
+    helper(placeholder, &pcx, &rcx, selector, onchange, map_these)
 }
 
 fn helper<T>(
@@ -57,7 +46,6 @@ fn helper<T>(
     rcx: &ResourceCtx,
     selector: fn(&Profile) -> Option<&T>,
     onchange: fn(&mut Profile, String),
-    parts_mapper: fn(&T) -> (&str, &str),
     map_these: Vec<T>,
 ) -> Element
 where
@@ -81,10 +69,12 @@ where
                 }
             }
         } else {
-            if let Some((emoji, text)) = selector(&pcx.read()).map(parts_mapper) {
-                div {
-                    "{emoji}"
-                    div { "{text}" }
+            if let Some(as_str) = selector(&pcx.read()).map(|x| x.to_string()) {
+                if let Some((emoji, text)) = as_str.split_once(" ") {
+                    div {
+                        "{emoji}"
+                        div { "{text}" }
+                    }
                 }
             }
         }
