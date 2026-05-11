@@ -2,9 +2,11 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter};
+use strum_macros::{Display, EnumIter, EnumProperty};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, EnumIter, Display)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Serialize, Deserialize, EnumIter, EnumProperty, Display,
+)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(
@@ -12,13 +14,13 @@ use strum_macros::{Display, EnumIter};
     sqlx(type_name = "gender", rename_all = "lowercase")
 )]
 pub enum Gender {
-    #[strum(to_string = "♂️ Man")]
+    #[strum(to_string = "♂️ Man", props(glow = "text-shadow-teal-500"))]
     Male,
 
-    #[strum(to_string = "♀️ Woman")]
+    #[strum(to_string = "♀️ Woman", props(glow = "text-shadow-fuchsia-500"))]
     Female,
 
-    #[strum(to_string = "🌈 Non-binary")]
+    #[strum(to_string = "🌈 Non-binary", props(glow = "text-shadow-pink-500"))]
     #[serde(rename = "non-binary")]
     #[cfg_attr(feature = "server", sqlx(rename = "non-binary"))]
     NonBinary,

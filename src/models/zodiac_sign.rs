@@ -1,8 +1,10 @@
 use chrono::{Datelike, NaiveDate};
 use serde::{Deserialize, Serialize};
-use strum_macros::Display;
+use strum_macros::{Display, EnumIter, EnumProperty};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Display)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Display, EnumIter, EnumProperty,
+)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(
@@ -10,40 +12,40 @@ use strum_macros::Display;
     sqlx(type_name = "zodiac_sign", rename_all = "lowercase")
 )]
 pub enum ZodiacSign {
-    #[strum(to_string = "♈ Aries")]
+    #[strum(to_string = "♈ Aries", props(glow = "text-shadow-red-500"))]
     Aries,
 
-    #[strum(to_string = "♉ Taurus")]
+    #[strum(to_string = "♉ Taurus", props(glow = "text-shadow-orange-500"))]
     Taurus,
 
-    #[strum(to_string = "♊ Gemini")]
+    #[strum(to_string = "♊ Gemini", props(glow = "text-shadow-amber-500"))]
     Gemini,
 
-    #[strum(to_string = "♋ Cancer")]
+    #[strum(to_string = "♋ Cancer", props(glow = "text-shadow-yellow-500"))]
     Cancer,
 
-    #[strum(to_string = "♌ Leo")]
+    #[strum(to_string = "♌ Leo", props(glow = "text-shadow-yellow-300"))]
     Leo,
 
-    #[strum(to_string = "♍ Virgo")]
+    #[strum(to_string = "♍ Virgo", props(glow = "text-shadow-green-300"))]
     Virgo,
 
-    #[strum(to_string = "♎ Libra")]
+    #[strum(to_string = "♎ Libra", props(glow = "text-shadow-emerald-500"))]
     Libra,
 
-    #[strum(to_string = "♏ Scorpio")]
+    #[strum(to_string = "♏ Scorpio", props(glow = "text-shadow-teal-500"))]
     Scorpio,
 
-    #[strum(to_string = "♐ Sagittarius")]
+    #[strum(to_string = "♐ Sagittarius", props(glow = "text-shadow-blue-500"))]
     Sagittarius,
 
-    #[strum(to_string = "♑ Capricorn")]
+    #[strum(to_string = "♑ Capricorn", props(glow = "text-shadow-purple-500"))]
     Capricorn,
 
-    #[strum(to_string = "♒ Aquarius")]
+    #[strum(to_string = "♒ Aquarius", props(glow = "text-shadow-fuchsia-500"))]
     Aquarius,
 
-    #[strum(to_string = "♓ Pisces")]
+    #[strum(to_string = "♓ Pisces", props(glow = "text-shadow-rose-500"))]
     Pisces,
 }
 
