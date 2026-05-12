@@ -6,22 +6,20 @@ pub(super) fn Height() -> Element {
 
     rsx! {
         div {
-            "height:"
+            "Height:"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
                 placeholder: "min",
                 min: u8::MIN,
                 max: u8::MAX,
                 value: fcx.read().height_min,
-                onchange: move |evt| fcx.write().height_min = evt.value().parse().ok(),
+                oninput: move |evt| fcx.write().height_min = evt.value().parse().ok(),
             }
 
             "-"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
                 placeholder: "max",
                 min: u8::MIN,

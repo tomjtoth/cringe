@@ -7,17 +7,18 @@ pub(super) fn Distance() -> Element {
     rsx! {
 
         div {
-            "distance [km]:"
+            "Distance:"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
                 placeholder: "max",
                 min: u8::MIN,
                 max: u8::MAX,
                 value: fcx.read().distance,
-                onchange: move |evt| fcx.write().distance = evt.value().parse().ok(),
+                oninput: move |evt| fcx.write().distance = evt.value().parse().ok(),
             }
+
+            "km"
         }
     }
 }

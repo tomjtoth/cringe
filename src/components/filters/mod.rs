@@ -12,7 +12,7 @@ use dioxus::prelude::*;
 
 use crate::{
     components::modal::{TrModal, MODALS},
-    models::{Decision, Filters as MFilters},
+    models::Filters as MFilters,
     state::{filters::update_filters, ME},
     views::listing::LCX,
 };
@@ -21,9 +21,9 @@ type FiltersCtx = Signal<MFilters>;
 
 #[component]
 pub fn Filters() -> Element {
-    let mut wants = use_signal(|| LCX.read().flatten());
+    let wants = use_signal(|| LCX.read().flatten());
 
-    let fcx = use_signal(|| {
+    let mut fcx = use_signal(|| {
         ME.with(|me| {
             me.profile
                 .as_ref()
@@ -34,13 +34,13 @@ pub fn Filters() -> Element {
 
     use_context_provider(|| fcx);
 
-    // Macros inlined below; removed macro_rules definitions.
-
     rsx! {
         form {
-            class: "flex flex-col items-center gap-2",
-            class: "[&>div]:p-2 [&>div]:flex [&>div]:items-center [&>div]:gap-2",
-            class: "[&>div_input[type=number]]:w-15",
+            class: "h-full overflow-y-scroll flex flex-col items-center gap-2",
+            class: "[&_div]:p-2 [&_div]:flex [&_div]:items-center [&_div]:gap-2",
+            class: "[&_input[type=number]]:no-spinner [&_input[type=number]]:w-15",
+            class: "[&_input[type=checkbox]]:hidden",
+            class: "[&_label]:cursor-pointer [&_hr]:w-full",
 
             onsubmit: move |evt| async move {
                 evt.prevent_default();

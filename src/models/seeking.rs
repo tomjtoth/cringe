@@ -10,7 +10,7 @@ use strum_macros::{Display, EnumIter, EnumProperty};
 pub enum Seeking {
     #[strum(
         to_string = "🎉 Short-term fun",
-        props(glow = "text-shadow-xxxxxx-500")
+        props(glow = "text-shadow-violet-500")
     )]
     #[serde(rename = "short-term fun")]
     #[cfg_attr(feature = "server", sqlx(rename = "short-term fun"))]

@@ -6,16 +6,17 @@ pub(super) fn ImageCount() -> Element {
 
     rsx! {
         div {
-            "images:"
+            "Image count:"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
-                placeholder: "min",
-                min: u8::MIN,
+                placeholder: "min #",
+                min: 0,
                 max: 6,
                 value: fcx.read().image_count_min,
-                onchange: move |evt| fcx.write().image_count_min = evt.value().parse().ok(),
+                oninput: move |evt| {
+                    fcx.write().image_count_min = evt.value().parse().ok().filter(|n| *n <= 6);
+                },
             }
         }
     }

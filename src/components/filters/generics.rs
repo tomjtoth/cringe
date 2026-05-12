@@ -121,13 +121,18 @@ pub(super) fn RelationshipType() -> Element {
 #[component]
 pub(super) fn ZodiacSign() -> Element {
     let mut fcx = use_context::<super::FiltersCtx>();
-    multi_rsx!(EZS, zodiac_sign, fcx, "grid! grid-rows-6 grid-flow-col")
+    multi_rsx!(
+        EZS,
+        zodiac_sign,
+        fcx,
+        "flex-wrap justify-around lg:max-w-135"
+    )
 }
 
 #[component]
 pub(super) fn FamilyPlans() -> Element {
     let mut fcx = use_context::<super::FiltersCtx>();
-    multi_rsx!(EFP, family_plans, fcx, "")
+    multi_rsx!(EFP, family_plans, fcx, "self-stretch justify-around")
 }
 
 #[component]

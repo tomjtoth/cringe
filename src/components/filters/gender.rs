@@ -1,26 +1,27 @@
 use dioxus::prelude::*;
-use strum::IntoEnumIterator;
+use strum::{EnumProperty, IntoEnumIterator};
 
-use crate::models::Gender as EGender;
+use crate::{
+    components::modal::{TrModal, MODALS},
+    models::Gender as EGender,
+};
 
 #[component]
 pub(super) fn Gender() -> Element {
     let mut fcx = use_context::<super::FiltersCtx>();
 
     rsx! {
-
-        div { class: "flex-col",
-            "Gender:"
-
-            div { class: "flex gap-2 text-nowrap",
-
-                for val in EGender::iter() {
+        div { class: "flex-col items-start!",
+            for (val , glow , checked) in EGender::iter()
+                .map(|e| (e, e.get_str("glow").unwrap(), fcx.read().gender.contains(&e)))
+            {
+                if let Some((ico, txt)) = val.to_string().split_once(" ") {
                     label {
                         input {
                             r#type: "checkbox",
                             name: "gender",
                             value: "{val}",
-                            checked: fcx.read().gender.contains(&val),
+                            checked,
                             onclick: move |evt| {
                                 fcx
                                     .with_mut(|ff| {
@@ -42,7 +43,14 @@ pub(super) fn Gender() -> Element {
                                 })
                             },
                         }
-                        " {val}"
+
+                        span { class: if checked { "text-shadow-[0_0_1px,0_0_2px,0_0_3px,0_0_4px,0_0_5px] {glow}" },
+                            "{ico}"
+                        }
+
+                        span { class: if checked { "text-shadow-[0_0_2px]" } else { "text-gray-500" },
+                            " {txt}"
+                        }
                     }
                 }
             }

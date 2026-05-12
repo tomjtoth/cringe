@@ -16,7 +16,6 @@ pub fn ListingSelector(mut wants: Signal<Option<Decision>>) -> Element {
             {
                 label {
                     input {
-                        tabindex: -1,
                         r#type: "radio",
                         required: true,
                         name: "wants",

@@ -6,10 +6,9 @@ pub(super) fn Age() -> Element {
 
     rsx! {
         div {
-            "age:"
+            "Age:"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
                 placeholder: "min",
                 min: 18,
@@ -21,7 +20,6 @@ pub(super) fn Age() -> Element {
             "-"
 
             input {
-                class: "no-spinner",
                 r#type: "number",
                 placeholder: "max",
                 min: 18,

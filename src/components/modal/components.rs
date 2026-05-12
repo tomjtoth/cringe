@@ -25,7 +25,6 @@ fn Modal(class: String, animated: bool, children: Element) -> Element {
                 {children}
             }
         }
-
     }
 }
 
