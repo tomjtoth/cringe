@@ -5,6 +5,13 @@
   --foreground: #111;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111;
+    --foreground: #eee;
+  }
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -68,13 +75,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #111;
-    --foreground: #eee;
-  }
-}
-
 body {
   @apply text-foreground bg-background;
 }
@@ -128,21 +128,21 @@ button {
   }
 }
 
-@layer components {
-  .app-center {
-    @apply absolute top-1/2 left-1/2 -translate-1/2;
-  }
+@utility no-spinner {
+  -moz-appearance: textfield;
 
-  .no-spinner::-webkit-outer-spin-button,
-  .no-spinner::-webkit-inner-spin-button {
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
+}
 
-  .no-spinner {
-    -moz-appearance: textfield;
-  }
+@utility app-center {
+  @apply absolute top-1/2 left-1/2 -translate-1/2;
+}
 
+@layer components {
   a.pre-preflight {
     @apply text-blue-700 dark:text-blue-300;
 
