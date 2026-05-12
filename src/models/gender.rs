@@ -70,7 +70,9 @@ impl Gender {
     feature = "server",
     sqlx(type_name = "gender_identity", rename_all = "lowercase")
 )]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumIter)]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Display, EnumIter, EnumProperty,
+)]
 pub enum GenderIdentity {
     #[serde(rename = "agender")]
     Agender,

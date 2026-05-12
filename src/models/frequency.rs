@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter};
+use strum_macros::{Display, EnumIter, EnumProperty};
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, EnumIter, Display)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Serialize, Deserialize, EnumIter, Display, EnumProperty,
+)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(

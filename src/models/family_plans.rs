@@ -1,13 +1,15 @@
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter};
+use strum_macros::{Display, EnumIter, EnumProperty};
 
 #[cfg_attr(feature = "server", derive(sqlx::Type))]
 #[cfg_attr(
     feature = "server",
     sqlx(type_name = "family_plans", rename_all = "lowercase")
 )]
-#[derive(Clone, PartialEq, Serialize, Deserialize, Debug, Display, EnumIter)]
+#[derive(
+    Clone, Copy, PartialEq, Serialize, Deserialize, Debug, Display, EnumIter, EnumProperty,
+)]
 pub enum FamilyPlans {
     #[cfg_attr(feature = "server", sqlx(rename = "wants children"))]
     #[serde(rename = "wants children")]
