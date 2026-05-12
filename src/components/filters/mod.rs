@@ -5,6 +5,8 @@ mod gender;
 mod generics;
 mod height;
 mod image_count;
+mod listing_selector;
+mod mode_selector;
 
 use dioxus::prelude::*;
 
@@ -60,6 +62,25 @@ pub fn Filters() -> Element {
 
             },
 
+            div { class: "w-full sticky top-0 bg-background justify-between",
+                span { class: "text-xl", "Filter profiles" }
+                mode_selector::ModeSelector {}
+                button {
+                    onclick: move |evt| {
+                        evt.prevent_default();
+                        fcx.set(MFilters::default());
+                    },
+
+                    "🗘 Reset"
+
+                }
+                button { "💾 Save" }
+            }
+
+            div { class: "justify-between",
+                gender::Gender {}
+                listing_selector::ListingSelector { wants }
+            }
             hr {}
             generics::GenderIdentity {}
             hr {}
