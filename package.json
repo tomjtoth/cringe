@@ -1,6 +1,6 @@
 {
   "name": "cringe",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "description": "only used for E2E testing",
   "scripts": {

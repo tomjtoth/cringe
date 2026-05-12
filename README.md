@@ -59,7 +59,7 @@ Tagged commits are also built as Docker images ([tomjtoth/cringe:\<VERSION\>](ht
 - [`0.5`](https://github.com/tomjtoth/cringe/releases/tag/v0.5.4) + details editor
 - [`0.6`](https://github.com/tomjtoth/cringe/releases/tag/v0.6.10) + image editor
 - [`0.7`](https://github.com/tomjtoth/cringe/releases/tag/v0.7.13) + live profile updates
-- [`0.8`](https://github.com/tomjtoth/cringe/releases/tag/v0.8.0) + profile filtering
+- [`0.8`](https://github.com/tomjtoth/cringe/releases/tag/v0.8.1) + profile filtering
 
 TODO:
 
