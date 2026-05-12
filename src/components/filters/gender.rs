@@ -31,6 +31,13 @@ pub(super) fn Gender() -> Element {
                                     } else {
                                         evt.prevent_default();
                                         ff.gender.clear();
+                                        MODALS
+                                            .build("z-10")
+                                            .button("Ok", None)
+                                            .title("Filtering genders")
+                                            .p(
+                                                "Since gender is always defined for every profile, filtering to all equals to having no filter at all.",
+                                            );
                                     }
                                 })
                             },
