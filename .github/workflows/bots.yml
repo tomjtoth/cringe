@@ -57,7 +57,7 @@ jobs:
         run: npx playwright install firefox --with-deps
 
       - name: Run test
-        run: npx playwright test tests/bots.spec.ts --browser=firefox
+        run: npx playwright test tests/bots.spec.ts --project=firefox
 
       - name: Update success timestamp
         if: success()
