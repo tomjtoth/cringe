@@ -30,6 +30,7 @@ jobs:
           git fetch --tags || true
 
           TAG=$(cargo pkgid | cut -d "#" -f2)
+          echo "tag0=$TAG" >> $GITHUB_OUTPUT
 
           if ! git tag --list | grep -qx "v$TAG"; then
             # publish all semvers "X.Y.Z" + "X.Y" + "X"
@@ -119,7 +120,7 @@ jobs:
         with:
           push: true
           context: .
-          tags: tomjtoth/cringe:${{ github.sha }}-arm64
+          tags: ${{ needs.gen-tags.outputs.tag0 }}-arm64
 
   build-amd64:
     name: Build amd64 image
@@ -147,7 +148,7 @@ jobs:
         with:
           push: true
           context: .
-          tags: tomjtoth/cringe:${{ github.sha }}-amd64
+          tags: ${{ needs.gen-tags.outputs.tag0 }}-amd64
 
   create-manifest:
     name: Create multi-arch manifest
@@ -171,7 +172,6 @@ jobs:
 
       - name: Create multi-arch manifest
         run: |
-          SHA=${{ github.sha }}
           TAGS=(${{ needs.gen-tags.outputs.tags }})
 
           docker buildx imagetools create \
@@ -179,16 +179,15 @@ jobs:
             -t ${TAGS[1]} \
             -t ${TAGS[2]} \
             -t ${TAGS[3]} \
-            tomjtoth/cringe:${SHA}-amd64 \
-            tomjtoth/cringe:${SHA}-arm64
+            ${TAGS[0]}-amd64 \
+            ${TAGS[0]}-arm64
 
   gitops:
     name: Kustomize cluster
     runs-on: ubuntu-latest
     needs:
       - gen-tags
-      - build-arm64
-      - build-amd64
+      - create-manifest
     steps:
       - name: GitOps in repo `kubernetes`
         run: |
