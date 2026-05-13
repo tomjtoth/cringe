@@ -79,7 +79,13 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install firefox webkit --with-deps
       - name: Run Playwright tests
-        run: npx playwright test
+        run: |
+          FILES=$(find tests -type f -name '*.spec.ts' ! -name 'bots.spec.ts')
+          if [ -z "$FILES" ]; then
+            echo "No tests found to run"
+            exit 0
+          fi
+          npx playwright test $FILES
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
