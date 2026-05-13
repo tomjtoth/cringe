@@ -62,6 +62,6 @@ jobs:
       - name: Update success timestamp
         if: success()
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CRINGE_BOTS }}
         run: |
           gh variable set LAST_BOTS_SUCCESS --body "$(date +%s)"
