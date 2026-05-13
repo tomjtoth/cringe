@@ -1,0 +1,67 @@
+name: Check images of bots
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      run_bots: ${{ steps.check.outputs.run_bots }}
+
+    steps:
+      - id: check
+        env:
+          LAST_SUCCESS: ${{ vars.LAST_BOTS_SUCCESS }}
+        run: |
+          set -e
+
+          NOW=$(date +%s)
+          RUN="true"
+
+          if [ -n "$LAST_SUCCESS" ]; then
+            AGE=$((NOW - LAST_SUCCESS))
+            DAY=$((24 * 60 * 60))
+
+            echo "Last success age: $AGE"
+
+            if [ "$AGE" -lt "$DAY" ]; then
+              RUN="false"
+            fi
+          fi
+
+          echo "run_bots=$RUN" >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: decide
+    if: needs.decide.outputs.run_bots == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install firefox for Playwright
+        run: npx playwright install firefox --with-deps
+
+      - name: Run test
+        run: npx playwright test tests/bots.spec.ts --browser=firefox
+
+      - name: Update success timestamp
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh variable set LAST_BOTS_SUCCESS --body "$(date +%s)"
