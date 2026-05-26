@@ -1,7 +1,7 @@
 
 - name: Dexter
   ai_personality: ""
-  email: serially.single@dexter-noted.com
+  email: Michael C. Hall from Dexter
   gender: male
   born: 1971-02-01
   height: 178
@@ -56,7 +56,7 @@
 
 - name: Andy Dufresne
   ai_personality: ""
-  email: andy@shawshank.legal
+  email: Tim Robbins from The Shawshank Redemption
   gender: male
   born: 1958-10-16
   height: 196
@@ -96,7 +96,7 @@
 
 - name: Blondie
   ai_personality: ""
-  email: the.man.with.no.name@westerns.example
+  email: Clint Eastwood from The Good, the Bad and the Ugly
   gender: male
   born: 1930-05-31
   height: 193
@@ -135,7 +135,7 @@
 
 - name: James
   ai_personality: ""
-  email: shaken.not.stirred@007.example
+  email: Daniel Craig from Casino Royale
   gender: male
   born: 1968-03-02
   height: 178
@@ -178,10 +178,12 @@
       url: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpXLyGTgbHb11GB9duWVCbHSgqmAUGh1eU0w&s
     - https://cdn.mos.cms.futurecdn.net/k8oydnFsZpDoCfi5ksWg85.jpg
     - https://i.pinimg.com/736x/dd/8d/5a/dd8d5a75fd35f03fbc342e76803e963a.jpg
+    - prompt: in 2025
+      url: https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Daniel_Craig_TIFF_2025_Red_Carpet_%28cropped%29.jpg/500px-Daniel_Craig_TIFF_2025_Red_Carpet_%28cropped%29.jpg
 
 - name: Bruce
   ai_personality: ""
-  email: billionaire.looking@wayne-enterprises.example
+  email: Christian Bale from The Dark Knight
   gender: male
   born: 1974-01-30
   height: 183
@@ -224,7 +226,7 @@
 
 - name: Ellen
   ai_personality: ""
-  email: ripley.safe.spots@weyland.example
+  email: Sigourney Weaver from the Alien
   gender: female
   born: 1949-10-08
   height: 180
@@ -260,7 +262,7 @@
 
 - name: Sarah
   ai_personality: ""
-  email: terminator.training@resistance.example
+  email: John's mom from Terminator 2
   gender: female
   born: 1956-09-26
   height: 165
@@ -300,7 +302,7 @@
 
 - name: Beatrix
   ai_personality: ""
-  email: blackmamba.killbill@example
+  email: Uma Thurman from Kill Bill
   gender: female
   born: 1970-04-29
   height: 181
@@ -332,7 +334,7 @@
 
 - name: Hermione
   ai_personality: ""
-  email: clever.books@hogwarts.example
+  email: Hermione from Harry Potter
   gender: female
   born: 1990-04-15
   height: 165
@@ -377,7 +379,7 @@
 
 - name: Katniss
   ai_personality: ""
-  email: girl.on.fire@district.12.example
+  email: Jennifer Lawrence from the Hunger Games
   gender: female
   born: 1990-08-15
   height: 175
@@ -411,7 +413,7 @@
 
 - name: Trinity
   ai_personality: ""
-  email: neo.soulmate@matrix.example
+  email: Carrie-Anne Moss from The Matrix
   gender: female
   born: 1967-08-21
   height: 170
@@ -459,7 +461,7 @@
 
 - name: Diana
   ai_personality: ""
-  email: truth.lasso@themyscira.example
+  email: Gal Gadot from Wonder woman
   gender: female
   born: 1985-04-30
   height: 178
@@ -502,7 +504,7 @@
 
 - name: John
   ai_personality: ""
-  email: john.rambo@firstblood.example
+  email: Sylvester Stallone from Rambo
   gender: male
   born: 1946-07-06
   height: 177
@@ -544,7 +546,7 @@
 
 - name: Anakin
   ai_personality: ""
-  email: vader@definitely-not-a-sith.com
+  email: Darth Vader from Star Wars
   gender: male
   born: 1935-07-01
   height: 198
@@ -605,7 +607,7 @@
 
 - name: Tom ... noo, I mean Dickie!
   ai_personality: ""
-  email: tom.ripley@totally-myself.com
+  email: Matt Damon from The Talented Mr. Ripley
   gender: male
   born: 1970-10-08
   height: 178
@@ -637,7 +639,7 @@
 
 - name: Thor
   ai_personality: ""
-  email: thor.odinson@asgard-singles.com
+  email: Chris Hemsworth from Thor
   gender: male
   born: 1983-08-11
   height: 191
@@ -700,7 +702,7 @@
 
 - name: Han Solo
   ai_personality: ""
-  email: han@kessel-run-record-holder.com
+  email: Harrison Ford from Star Wars
   gender: male
   born: 1942-07-13
   height: 185
@@ -738,7 +740,7 @@
 
 - name: Leia
   ai_personality: ""
-  email: leia@notarebel.io
+  email: Carrie Fisher from Star Wars
   gender: female
   born: 1956-10-21
   height: 155
@@ -791,7 +793,7 @@
 
 - name: Santa 🎅
   ai_personality: ""
-  email: santa@real-human-bean.com
+  email: Santa Claus
   gender: male
   born: 0280-01-01
   height: 160
@@ -830,9 +832,9 @@
     - https://cdn2.psychologytoday.com/assets/styles/manual_crop_1_1_1200x1200/public/field_blog_entry_teaser_image/2021-10/8479cdc2ae06a65f3218ce179ab6-1611309.jpg?itok=um5T3MJC
     - https://www.hollywoodreporter.com/wp-content/uploads/2022/11/163413_4279r_9caf121d-copy.jpg?w=1000&h=667&crop=1
 
-- name: Magic Mike
+- name: Mike
   ai_personality: ""
-  email: mike@magic.com
+  email: Channing Tatum from Magic Mike
   gender: male
   born: 1980-04-26
   height: 185
@@ -869,9 +871,9 @@
     - prompt: This could be you
       url: mike/this-could-be-you.jpg
 
-- name: C. J. Parker
+- name: C. J.
   ai_personality: ""
-  email: c.j.parker@bay.watch
+  email: Pamela Anderson from Baywatch
   gender: female
   born: 1967-07-01
   height: 170
