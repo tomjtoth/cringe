@@ -18,31 +18,29 @@ pub fn Protector() -> Element {
             }
         } else {
             Showcase {
-                div { class: "app-center text-center",
 
-                    p {
-                        class: "text-nowrap text-3xl lg:text-6xl 2xl:text-9xl",
-                        class: "mb-4 lg:mb-8 2xl:mb-12",
+                p {
+                    class: "text-nowrap text-3xl lg:text-6xl 2xl:text-9xl",
+                    class: "mb-4 lg:mb-8 2xl:mb-12",
 
-                        b { "Cringe much" }
+                    b { "Cringe much" }
 
-                        sup { class: "text-[0.5em] relative -top-[1em]",
-                            s { "TM" }
-                        }
+                    sup { class: "text-[0.5em] relative -top-[1em]",
+                        s { "TM" }
                     }
+                }
 
-                    p { "Just a Hinge clone with additional fictional characters." }
+                p { "Just a Hinge clone with additional fictional characters." }
 
-                    p {
-                        "Check out the source code "
-                        a {
-                            class: "pre-preflight",
-                            href: "https://github.com/tomjtoth/cringe",
-                            target: "_blank",
-                            "here"
-                        }
-                        "."
+                p {
+                    "Check out the source code "
+                    a {
+                        class: "pre-preflight",
+                        href: "https://github.com/tomjtoth/cringe",
+                        target: "_blank",
+                        "here"
                     }
+                    "."
                 }
             }
         }

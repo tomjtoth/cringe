@@ -98,7 +98,7 @@ pub fn CoreData() -> Element {
 
     rsx! {
         form {
-            class: "app-center flex flex-col gap-2 items-center",
+            class: "flex flex-col gap-2 items-center",
 
             onsubmit: move |evt| async move {
                 evt.prevent_default();

@@ -5,6 +5,7 @@ use crate::{
         login::Login,
         modal::{TrModal, MODALS},
     },
+    models::Profile,
     views::listing::LCX,
 };
 
@@ -37,13 +38,17 @@ pub fn Showcase(children: Element, hide_login: Option<bool>) -> Element {
 
     let semver = env!("CARGO_PKG_VERSION");
 
+    let bots = use_server_future(get_bots)?;
+
+    let shadows = "text-shadow-background text-shadow-[0_0_5px,0_0_4px,0_0_3px,0_0_2px,0_0_1px]/90";
+
     rsx! {
         div {
-            class: "flex justify-between items-center",
+            class: "flex justify-between items-center relative",
             class: "p-2 lg:p-6 2xl:p-10",
             class: "text-xl lg:text-2xl 2xl:text-3xl",
 
-            span {
+            span { class: "z-1 {shadows}",
                 "😬 Cringe "
                 sup { "{semver}" }
             }
@@ -51,16 +56,45 @@ pub fn Showcase(children: Element, hide_login: Option<bool>) -> Element {
             if hide_login != Some(true) {
 
                 button {
-                    class: "text-[0.6em]",
+                    class: "z-1 text-[0.6em] bg-background",
                     onclick: move |_| MODALS.new("z-10", true, rsx! {
                         Login {}
                     }),
 
-                    "Login ➜]"
+                    b { "Login ➜]" }
+                }
+            }
+
+            if let Some(Ok(bots)) = bots() {
+                div {
+                    class: "absolute top-0 left-0 h-full {shadows}",
+                    class: "w-16/10 transform-[rotate(20deg)_translate(3%,-50%)]",
+                    class: "lg:w-12/10 lg:transform-[rotate(20deg)_translate(0%,-200%)]",
+
+                    ul {
+                        class: "columns-3 lg:columns-4 2xl:columns-5",
+                        class: "[&>*:not(:first-child)]:mt-4 select-none",
+
+                        for bot in bots {
+                            if let Some(img) = bot.images.get(0) {
+                                li { class: "border rounded-2xl overflow-hidden relative",
+                                    img {
+                                        class: "select-none object-cover",
+                                        src: img.src(),
+                                    }
+
+                                    span { class: "absolute bottom-2 left-2",
+                                        b { "{bot.name}" }
+                                        span { class: "text-[0.8em]", " {bot.age.unwrap()}" }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        {children}
+        div { class: "app-center z-1 text-center {shadows} text-[1.5em]", {children} }
     }
 }
