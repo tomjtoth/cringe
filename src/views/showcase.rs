@@ -9,8 +9,26 @@ use crate::{
 };
 
 #[get("/api/showcase")]
-async fn get_bot_pics() -> Result<()> {
-    Ok(())
+async fn get_bots() -> Result<Vec<Profile>> {
+    let (_, pool) = crate::state::server::get_ctx().await;
+    let res: Vec<Profile> = sqlx::query_as(
+        "SELECT
+            u.id,
+            u.name,
+            u.gender,
+            u.height,
+            age_from_dob(u.born) as age,
+            jsonb_build_array(to_jsonb(ui)) AS images
+        FROM users u
+        INNER JOIN user_images ui ON ui.user_id = u.id
+        WHERE ai_personality IS NOT NULL
+        AND ui.position = 0
+        ",
+    )
+    .fetch_all(&pool)
+    .await?;
+
+    Ok(res)
 }
 
 #[component]
