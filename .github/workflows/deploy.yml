@@ -31,7 +31,7 @@ jobs:
           git fetch --tags || true
 
           TAG=$(cargo pkgid | cut -d "#" -f2)
-          echo "tag0=$TAG" >> $GITHUB_OUTPUT
+          echo "tag0=tomjtoth/cringe:$TAG" >> $GITHUB_OUTPUT
 
           if ! git tag --list | grep -qx "v$TAG"; then
             # publish all semvers "X.Y.Z" + "X.Y" + "X"
