@@ -73,13 +73,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Install Playwright Browsers
-        run: npx playwright install firefox webkit --with-deps
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install firefox webkit
+
       - name: Run Playwright tests
         run: |
           FILES=$(find tests -type f -name '*.spec.ts' ! -name 'bots.spec.ts')
@@ -88,6 +103,7 @@ jobs:
             exit 0
           fi
           npx playwright test $FILES
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
