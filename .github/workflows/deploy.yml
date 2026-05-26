@@ -14,7 +14,7 @@ jobs:
     name: Generate tags
     runs-on: ubuntu-latest
     outputs:
-      tag0: ${{ steps.set_tags.outputs.tags }}
+      tag0: ${{ steps.set_tags.outputs.tag0 }}
       tags: ${{ steps.set_tags.outputs.tags }}
 
     if: >
