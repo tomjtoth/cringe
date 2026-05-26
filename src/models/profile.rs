@@ -39,6 +39,7 @@ pub struct Gps {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Profile {
     pub id: Option<i32>,
+    pub ai_personality: Option<String>,
     pub name: String,
     pub email: Option<String>,
     pub gender: Gender,
@@ -108,6 +109,8 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
         let height: i16 = row.try_get("height")?;
         let height = height as u8;
 
+        let ai_personality = try_opt!(String, "ai_personality");
+
         let education = try_opt!(String, "education");
         let occupation = try_opt!(String, "occupation");
 
@@ -149,6 +152,7 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Profile {
 
         Ok(Profile {
             id,
+            ai_personality,
             name,
             email,
             gender,

@@ -1,5 +1,6 @@
 
 - name: Dexter
+  ai_personality: ""
   email: serially.single@dexter-noted.com
   gender: male
   born: 1971-02-01
@@ -54,6 +55,7 @@
     - https://www.telegraph.co.uk/multimedia/archive/02182/dexter_2182960b.jpg
 
 - name: Andy Dufresne
+  ai_personality: ""
   email: andy@shawshank.legal
   gender: male
   born: 1958-10-16
@@ -93,6 +95,7 @@
       url: https://preview.redd.it/fan-art-of-andy-dufresne-from-the-shawshank-redemption-1994-v0-z32rxqoswnxe1.jpeg?auto=webp&s=219c3981514b38e0dce42f377eaabb11aeb31265
 
 - name: Blondie
+  ai_personality: ""
   email: the.man.with.no.name@westerns.example
   gender: male
   born: 1930-05-31
@@ -131,6 +134,7 @@
     - https://www.remindmagazine.com/wp-content/uploads/2023/05/the-good-the-bad-and-the-ugly-1014x570.jpg
 
 - name: James
+  ai_personality: ""
   email: shaken.not.stirred@007.example
   gender: male
   born: 1968-03-02
@@ -176,6 +180,7 @@
     - https://i.pinimg.com/736x/dd/8d/5a/dd8d5a75fd35f03fbc342e76803e963a.jpg
 
 - name: Bruce
+  ai_personality: ""
   email: billionaire.looking@wayne-enterprises.example
   gender: male
   born: 1974-01-30
@@ -218,6 +223,7 @@
       url: https://www.bostonherald.com/wp-content/uploads/migration/2012/07/16/76bf9b_071312darkknight3.jpg?w=535
 
 - name: Ellen
+  ai_personality: ""
   email: ripley.safe.spots@weyland.example
   gender: female
   born: 1949-10-08
@@ -253,6 +259,7 @@
     - https://thedrunkenodyssey.com/wp-content/uploads/2013/09/screen-shot-2012-11-19-at-161230.jpg?w=640
 
 - name: Sarah
+  ai_personality: ""
   email: terminator.training@resistance.example
   gender: female
   born: 1956-09-26
@@ -292,6 +299,7 @@
       url: https://www.slashfilm.com/img/gallery/the-terminators-sarah-connor-was-indirectly-inspired-by-another-legendary-sci-fi-hero/intro-1735083299.jpg
 
 - name: Beatrix
+  ai_personality: ""
   email: blackmamba.killbill@example
   gender: female
   born: 1970-04-29
@@ -322,7 +330,8 @@
     - https://townsquare.media/site/442/files/2019/07/kill-bill-2.jpg
     - https://www.1800getlens.com/eyetopics/wp-content/uploads/2024/04/Screenshot-2024-04-08-215021.png
 
-- name: Hermione Granger
+- name: Hermione
+  ai_personality: ""
   email: clever.books@hogwarts.example
   gender: female
   born: 1990-04-15
@@ -367,6 +376,7 @@
     - https://www.cheatsheet.com/wp-content/uploads/2019/10/Emma-Watson-Harry-Potter-Hermione-Granger-.jpg
 
 - name: Katniss
+  ai_personality: ""
   email: girl.on.fire@district.12.example
   gender: female
   born: 1990-08-15
@@ -400,6 +410,7 @@
       url: https://media.vanityfair.com/photos/5d02ab2776711f03ed7fe6a3/master/pass/jennifer-lawrence-relationship.jpg
 
 - name: Trinity
+  ai_personality: ""
   email: neo.soulmate@matrix.example
   gender: female
   born: 1967-08-21
@@ -447,6 +458,7 @@
       url: https://image.guardian.co.uk/sys-images/Film/Pix/gallery/2003/05/20/carrie3.jpg
 
 - name: Diana
+  ai_personality: ""
   email: truth.lasso@themyscira.example
   gender: female
   born: 1985-04-30
@@ -489,6 +501,7 @@
       url: https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/1493E/production/_96268248_2ca421dc-198a-4888-aeb3-db18c3fba916.jpg
 
 - name: John
+  ai_personality: ""
   email: john.rambo@firstblood.example
   gender: male
   born: 1946-07-06
@@ -530,6 +543,7 @@
     - https://www.fantastischefilmlocaties.nl/assets/files/first-blood-copyright-studiocanal-0-kopie.480x0.jpg
 
 - name: Anakin
+  ai_personality: ""
   email: vader@definitely-not-a-sith.com
   gender: male
   born: 1935-07-01
@@ -590,6 +604,7 @@
       url: https://www.looper.com/img/gallery/heres-who-played-darth-vader-without-his-helmet/intro-1566225818.jpg
 
 - name: Tom ... noo, I mean Dickie!
+  ai_personality: ""
   email: tom.ripley@totally-myself.com
   gender: male
   born: 1970-10-08
@@ -621,6 +636,7 @@
     - https://ichef.bbci.co.uk/images/ic/1024xn/p07xkps4.jpg.webp
 
 - name: Thor
+  ai_personality: ""
   email: thor.odinson@asgard-singles.com
   gender: male
   born: 1983-08-11
@@ -683,6 +699,7 @@
       url: https://media.wired.com/photos/59330ed94cd5ce6f96c0c2c5/3:2/w_2560%2Cc_limit/gallery3.jpg
 
 - name: Han Solo
+  ai_personality: ""
   email: han@kessel-run-record-holder.com
   gender: male
   born: 1942-07-13
@@ -720,6 +737,7 @@
     - https://i.etsystatic.com/17350622/r/il/e2f58e/5552510342/il_fullxfull.5552510342_of11.jpg
 
 - name: Leia
+  ai_personality: ""
   email: leia@notarebel.io
   gender: female
   born: 1956-10-21
@@ -772,6 +790,7 @@
     - https://i.guim.co.uk/img/media/35b5b0444e45c050e7247d3950b81f4e01d3a0a1/0_0_2062_1237/master/2062.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=658c66facb1b40eb5abd91a84226d144
 
 - name: Santa 🎅
+  ai_personality: ""
   email: santa@real-human-bean.com
   gender: male
   born: 0280-01-01
@@ -812,6 +831,7 @@
     - https://www.hollywoodreporter.com/wp-content/uploads/2022/11/163413_4279r_9caf121d-copy.jpg?w=1000&h=667&crop=1
 
 - name: Magic Mike
+  ai_personality: ""
   email: mike@magic.com
   gender: male
   born: 1980-04-26
@@ -850,6 +870,7 @@
       url: mike/this-could-be-you.jpg
 
 - name: C. J. Parker
+  ai_personality: ""
   email: c.j.parker@bay.watch
   gender: female
   born: 1967-07-01
