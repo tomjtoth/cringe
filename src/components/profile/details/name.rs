@@ -39,7 +39,7 @@ pub fn NameInput(value: String, onchange: Callback<String>) -> Element {
     rsx! {
         input {
             placeholder: "Your firstname",
-            class: "placeholder:text-center w-40 text-center",
+            class: "placeholder:text-center w-50",
             minlength: 2,
             required: true,
 

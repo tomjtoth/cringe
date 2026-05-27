@@ -95,6 +95,8 @@ pub fn Showcase(children: Element, hide_login: Option<bool>) -> Element {
             }
         }
 
-        div { class: "app-center z-1 text-center {shadows} text-[1.5em]", {children} }
+        div { class: "app-center z-1 text-center max-h-4/5 max-w-9/10 overflow-y-scroll {shadows} text-[1.5em]",
+            {children}
+        }
     }
 }
