@@ -71,7 +71,7 @@ pub fn Filters() -> Element {
                         fcx.set(MFilters::default());
                     },
 
-                    "🗘 Reset"
+                    "🔁 Reset"
 
                 }
                 button { "💾 Save" }
