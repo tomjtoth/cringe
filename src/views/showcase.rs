@@ -79,7 +79,7 @@ pub fn Showcase(children: Element, hide_login: Option<bool>) -> Element {
                             if let Some(img) = bot.images.get(0) {
                                 li { class: "border rounded-2xl overflow-hidden relative",
                                     img {
-                                        class: "select-none object-cover",
+                                        class: "select-none object-cover w-full",
                                         src: img.src(),
                                     }
 
