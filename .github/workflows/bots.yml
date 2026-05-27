@@ -53,6 +53,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
       - name: Install firefox for Playwright
         run: npx playwright install firefox --with-deps
 
